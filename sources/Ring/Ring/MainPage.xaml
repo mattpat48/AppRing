@@ -1,7 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Ring.MainPage">
+             x:Class="Ring.MainPage"
+             xmlns:viewmodel="clr-namespace:Ring.ViewModel"
+             x:DataType="viewmodel:MainViewModel">
     <VerticalStackLayout>
 
         <Label
@@ -12,10 +14,11 @@
 
         <Button
             x:Name="msgButton"
-            Text="Open"
-            WidthRequest="100"
-            SemanticProperties.Hint="Send / Unsend a message"
-            Clicked="OnMessageClicked"
-            HorizontalOptions="Fill" />
+            Text="{Binding Text}"
+            IsEnabled="{Binding IsEnabled}"
+            Command="{Binding OpenCommand}"
+            SemanticProperties.Hint="Send or unsend a message"
+            HorizontalOptions="Center"
+            WidthRequest="100" />
     </VerticalStackLayout>
 </ContentPage>

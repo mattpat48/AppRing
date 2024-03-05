@@ -1,21 +1,13 @@
-﻿using MQTTnet;
-using MQTTnet.Server;
+﻿using Ring.ViewModel;
 
 namespace Ring
 {
     public partial class MainPage : ContentPage
     {
-
-        public MainPage()
+        public MainPage(MainViewModel viewModel)
         {
             InitializeComponent();
-        }
-
-        private void OnMessageClicked(object sender, EventArgs e)
-        {
-            msgButton.Text = "Opening";
-            msgButton.IsEnabled = false;
+            BindingContext = viewModel;
         }
     }
-
 }
