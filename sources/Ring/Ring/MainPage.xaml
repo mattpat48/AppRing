@@ -14,11 +14,23 @@
 
         <Button
             x:Name="msgButton"
-            Text="{Binding Text}"
-            IsEnabled="{Binding IsEnabled}"
+            Text="{Binding ButtonText}"
+            IsEnabled="{Binding ButtonIsEnabled}"
             Command="{Binding OpenCommand}"
             SemanticProperties.Hint="Send or unsend a message"
             HorizontalOptions="Center"
             WidthRequest="100" />
+
+        <Label
+            Text="{Binding ConnectionErrorText}"
+            Padding="20"
+            Style="{StaticResource SubHeadline}"
+            SemanticProperties.HeadingLevel="Level2" />
+
+        <Label
+            Text="{Binding MessageErrorText}"
+            Padding="20"
+            Style="{StaticResource SubHeadline}"
+            SemanticProperties.HeadingLevel="Level2" />
     </VerticalStackLayout>
 </ContentPage>
