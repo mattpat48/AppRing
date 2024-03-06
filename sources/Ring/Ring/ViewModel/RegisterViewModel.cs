@@ -39,7 +39,7 @@ public partial class RegisterViewModel : ObservableObject
                 await SecureStorage.SetAsync("PublicKey", Convert.ToBase64String(publicKey));
                 await SecureStorage.SetAsync("PhoneNumber", PhoneNumber);
 
-                await Shell.Current.GoToAsync("//MainPage");
+                await Shell.Current.Navigation.PopModalAsync();
             }
             else
             {

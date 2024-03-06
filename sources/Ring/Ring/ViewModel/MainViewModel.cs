@@ -84,11 +84,19 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public async Task Back()
+    public async Task Check()
     {
         IsLoading = true;
         var phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
-        if (string.IsNullOrEmpty(phoneNumber)) { await Shell.Current.GoToAsync(nameof(RegisterPage)); }
+        if (string.IsNullOrEmpty(phoneNumber))
+        {
+            IsContentVisible = false;
+            IsLoading = false;
+
+            var registerVm = new RegisterViewModel();
+            var registerPage = new RegisterPage(registerVm);
+            await Shell.Current.Navigation.PushModalAsync(registerPage);
+        }
         else { IsContentVisible = true; }
         IsLoading = false;
     }
@@ -134,7 +142,7 @@ public partial class MainViewModel : ObservableObject
     {
         SecureStorage.Remove("PhoneNumber");
         await mqttClient.DisconnectAsync();
-        await Back();
+        await Check();
     }
 
 }

@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Ring.MainPage"
              xmlns:viewmodel="clr-namespace:Ring.ViewModel"
-             x:DataType="viewmodel:MainViewModel">
+             x:DataType="viewmodel:MainViewModel"
+             Shell.NavBarIsVisible="False">
     <VerticalStackLayout>
 
         <ActivityIndicator
@@ -18,6 +19,7 @@
 
         <VerticalStackLayout
             IsVisible="{Binding IsContentVisible}">
+            
             <Label
                 Text="Ring"
                 Padding="20"
@@ -58,6 +60,9 @@
                 TextColor="{Binding TextColor}"
                 HorizontalOptions="Center"
                 SemanticProperties.HeadingLevel="Level2" />
+            
         </VerticalStackLayout>
+        
     </VerticalStackLayout>
+    
 </ContentPage>
