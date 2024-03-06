@@ -10,9 +10,14 @@ public partial class RegisterViewModel : ObservableObject
     [ObservableProperty]
     string phoneNumber;
 
+    // messaggio di errore
+    [ObservableProperty]
+    string errorText;
+
     // costruttore per il viewmodel
     public RegisterViewModel()
     {
+        ErrorText = string.Empty;
         PhoneNumber = string.Empty;
     }
 
@@ -21,8 +26,16 @@ public partial class RegisterViewModel : ObservableObject
     {
         if (!string.IsNullOrEmpty(PhoneNumber))
         {
-            await SecureStorage.SetAsync("PhoneNumber", PhoneNumber);
-            await Shell.Current.GoToAsync("//MainPage");
+            if (PhoneNumber.Length == 10)
+            {
+                ErrorText = string.Empty;
+                await SecureStorage.SetAsync("PhoneNumber", PhoneNumber);
+                await Shell.Current.GoToAsync("//MainPage");
+            }
+            else
+            {
+                ErrorText = "Numero di telefono non valido";
+            }
         }
     }
 }

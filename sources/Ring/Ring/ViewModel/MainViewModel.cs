@@ -11,8 +11,16 @@ namespace Ring.ViewModel;
 public partial class MainViewModel : ObservableObject
 {
 
+    // proprietà osservabile del caricamento
     [ObservableProperty]
-    bool buttonIsEnabled;
+    bool isLoading;
+    [ObservableProperty]
+    bool isContentVisible;
+
+    [ObservableProperty]
+    bool isOpenEnabled;
+    [ObservableProperty]
+    bool isRetryVisible;
 
     // proprietà osservabile del testo di errore
     [ObservableProperty]
@@ -21,6 +29,8 @@ public partial class MainViewModel : ObservableObject
     // proprietà osservabile del messaggio
     [ObservableProperty]
     string messageText;
+    [ObservableProperty]
+    string textColor;
 
 
     private MqttFactory mqttServer;
@@ -30,11 +40,16 @@ public partial class MainViewModel : ObservableObject
     // costruttore per il viewmodel
     public MainViewModel()
     {
-        ButtonIsEnabled = false;
+
+        IsLoading = true;
+        IsContentVisible = false;
+
+        IsOpenEnabled = false;
+        IsRetryVisible = false;
 
         ConnectionErrorText = string.Empty;
         MessageText = string.Empty;
-        MessageText = string.Empty;
+        TextColor = "White";
 
         // inizializzo il client e server mqtt
         mqttServer = new MqttFactory();
@@ -51,24 +66,36 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     public async Task Connect()
     {
+        IsLoading = true;
+        IsContentVisible = false;
         ConnectionErrorText = string.Empty;
+        MessageText = string.Empty;
+
         try
         {
-            await mqttClient.ConnectAsync(options, CancellationToken.None);
+            await mqttClient.ConnectAsync(options);
             await mqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("ringRequest/request").Build());
-            ButtonIsEnabled = true;
+            IsOpenEnabled = true;
+            IsRetryVisible = false;
         }
         catch (Exception ex)
         {
             ConnectionErrorText = ex.Message;
+            IsRetryVisible = true;
         }
+
+        IsLoading = false;
+        IsContentVisible = true;
     }
 
     [RelayCommand]
     public async Task Back()
     {
+        IsLoading = true;
         var phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
         if (string.IsNullOrEmpty(phoneNumber)) { await Shell.Current.GoToAsync(nameof(RegisterPage)); }
+        else { IsContentVisible = true; }
+        IsLoading = false;
     }
 
     [RelayCommand]
@@ -83,9 +110,10 @@ public partial class MainViewModel : ObservableObject
             lat = "Lat",
             language = "Lng",
             key = "Key",
+            phone = await SecureStorage.GetAsync("PhoneNumber")
         };
 
-        ButtonIsEnabled = false;
+        IsOpenEnabled = false;
 
         var message = new MqttApplicationMessageBuilder()
             .WithTopic("ringRequest/request")
@@ -94,20 +122,23 @@ public partial class MainViewModel : ObservableObject
         try
         {
             await mqttClient.PublishAsync(message);
+            TextColor = "Green";
             MessageText = "Message sent";
         }
         catch (Exception ex)
         {
+            TextColor = "Red";
             MessageText = ex.Message;
         }
 
-        ButtonIsEnabled = true;
+        IsOpenEnabled = true;
     }
 
     [RelayCommand]
     async Task RemoveNumber ()
     {
         SecureStorage.Remove("PhoneNumber");
+        await mqttClient.DisconnectAsync();
         await Back();
     }
 

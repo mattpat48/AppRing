@@ -6,40 +6,66 @@
              x:DataType="viewmodel:MainViewModel">
     <VerticalStackLayout>
 
-        <Label
-            Text="Ring"
-            Padding="20"
-            Style="{StaticResource Headline}"
-            SemanticProperties.HeadingLevel="Level1" />
-
-        <Button
-            x:Name="msgButton"
-            Text="Open"
-            Margin="5"
-            IsEnabled="{Binding ButtonIsEnabled}"
-            Command="{Binding OpenCommand}"
+        <ActivityIndicator
+            IsRunning="{Binding IsLoading}"
+            IsVisible="{Binding IsLoading}"
+            Color="White"
             WidthRequest="100"
-            SemanticProperties.Hint="Send or unsend a message"
-            HorizontalOptions="Center" />
+            HeightRequest="100"
+            HorizontalOptions="Center"
+            VerticalOptions="Center"
+            SemanticProperties.Hint="Activity indicator" />
 
-        <Button
-            x:Name="rmvButton"
-            Text="Remove Number"
-            Margin="5"
-            Command="{Binding RemoveNumberCommand}"
-            SemanticProperties.Hint="Remove the number (debug)"
-            HorizontalOptions="Center" />
+        <VerticalStackLayout
+            IsVisible="{Binding IsContentVisible}">
+            <Label
+                Text="Ring"
+                Padding="20"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1" />
 
-        <Label
-            Text="{Binding ConnectionErrorText}"
-            Padding="10"
-            Style="{StaticResource SubHeadline}"
-            SemanticProperties.HeadingLevel="Level2" />
+            <Button
+                x:Name="msgButton"
+                Text="Open"
+                Margin="5"
+                IsEnabled="{Binding IsOpenEnabled}"
+                Command="{Binding OpenCommand}"
+                WidthRequest="100"
+                SemanticProperties.Hint="Send or unsend a message"
+                HorizontalOptions="Center" />
 
-        <Label
-            Text="{Binding MessageText}"
-            Padding="10"
-            Style="{StaticResource SubHeadline}"
-            SemanticProperties.HeadingLevel="Level2" />
+            <Button
+                x:Name="rmvButton"
+                Text="Cancella Numero"
+                Margin="5"
+                Command="{Binding RemoveNumberCommand}"
+                SemanticProperties.Hint="Remove the number (debug)"
+                HorizontalOptions="Center" />
+
+            <Label
+                Text="{Binding ConnectionErrorText}"
+                Padding="10"
+                FontSize="20"
+                TextColor="Red"
+                HorizontalOptions="Center"
+                SemanticProperties.HeadingLevel="Level2" />
+
+            <Button
+                x:Name="retryButton"
+                Text="Riprova"
+                Margin="5"
+                Command="{Binding ConnectCommand}"
+                IsVisible="{Binding IsRetryVisible}"
+                SemanticProperties.Hint="Retry connecting to server"
+                HorizontalOptions="Center" />
+
+            <Label
+                Text="{Binding MessageText}"
+                Padding="10"
+                FontSize="20"
+                TextColor="{Binding TextColor}"
+                HorizontalOptions="Center"
+                SemanticProperties.HeadingLevel="Level2" />
+        </VerticalStackLayout>
     </VerticalStackLayout>
 </ContentPage>
