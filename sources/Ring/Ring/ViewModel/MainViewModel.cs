@@ -22,10 +22,6 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     bool isRetryVisible;
 
-    // proprietà osservabile del testo di errore
-    [ObservableProperty]
-    string connectionErrorText;
-
     // proprietà osservabile del messaggio
     [ObservableProperty]
     string messageText;
@@ -47,7 +43,6 @@ public partial class MainViewModel : ObservableObject
         IsOpenEnabled = false;
         IsRetryVisible = false;
 
-        ConnectionErrorText = string.Empty;
         MessageText = string.Empty;
         TextColor = "White";
 
@@ -68,7 +63,6 @@ public partial class MainViewModel : ObservableObject
     {
         IsLoading = true;
         IsContentVisible = false;
-        ConnectionErrorText = string.Empty;
         MessageText = string.Empty;
 
         try
@@ -80,7 +74,8 @@ public partial class MainViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            ConnectionErrorText = ex.Message;
+            MessageText = ex.Message;
+            TextColor = "Red";
             IsRetryVisible = true;
         }
 

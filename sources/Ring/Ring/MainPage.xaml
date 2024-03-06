@@ -42,14 +42,6 @@
                 SemanticProperties.Hint="Remove the number (debug)"
                 HorizontalOptions="Center" />
 
-            <Label
-                Text="{Binding ConnectionErrorText}"
-                Padding="10"
-                FontSize="20"
-                TextColor="Red"
-                HorizontalOptions="Center"
-                SemanticProperties.HeadingLevel="Level2" />
-
             <Button
                 x:Name="retryButton"
                 Text="Riprova"
