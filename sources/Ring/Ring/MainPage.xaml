@@ -14,22 +14,31 @@
 
         <Button
             x:Name="msgButton"
-            Text="{Binding ButtonText}"
+            Text="Open"
+            Margin="5"
             IsEnabled="{Binding ButtonIsEnabled}"
             Command="{Binding OpenCommand}"
+            WidthRequest="100"
             SemanticProperties.Hint="Send or unsend a message"
-            HorizontalOptions="Center"
-            WidthRequest="100" />
+            HorizontalOptions="Center" />
+
+        <Button
+            x:Name="rmvButton"
+            Text="Remove Number"
+            Margin="5"
+            Command="{Binding RemoveNumberCommand}"
+            SemanticProperties.Hint="Remove the number (debug)"
+            HorizontalOptions="Center" />
 
         <Label
             Text="{Binding ConnectionErrorText}"
-            Padding="20"
+            Padding="10"
             Style="{StaticResource SubHeadline}"
             SemanticProperties.HeadingLevel="Level2" />
 
         <Label
-            Text="{Binding MessageErrorText}"
-            Padding="20"
+            Text="{Binding MessageText}"
+            Padding="10"
             Style="{StaticResource SubHeadline}"
             SemanticProperties.HeadingLevel="Level2" />
     </VerticalStackLayout>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Ring.RegisterPage"
+             Title="Register"
+             xmlns:viewmodel="clr-namespace:Ring.ViewModel"
+             x:DataType="viewmodel:RegisterViewModel">
+    
+    <VerticalStackLayout>
+        <Label 
+            Text="Welcome to Ring!"
+            Style="{StaticResource Headline}"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center" />
+
+        <Label
+            Text="Please enter your phone number to register"
+            Style="{StaticResource SubHeadline}"
+            VerticalOptions="Center" 
+            HorizontalOptions="Center" />
+
+        <Entry
+            Placeholder="Numero di telefono"
+            x:Name="phoneNumberEntry"
+            Text="{Binding PhoneNumber}"
+            WidthRequest="250"
+            Keyboard="Telephone"
+            Margin="10" />
+
+        <Button
+            Text="Prosegui"
+            Command="{Binding RegisterCommand}"
+            SemanticProperties.Hint="Register your phone number"
+            WidthRequest="100"
+            Margin="10" />
+        
+    </VerticalStackLayout>
+</ContentPage>

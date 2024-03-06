@@ -3,23 +3,20 @@ using CommunityToolkit.Mvvm.Input;
 using MQTTnet;
 using MQTTnet.Client;
 using System.Text.Json;
+using Microsoft.Maui.Storage;
+using System.Runtime.InteropServices;
 
 namespace Ring.ViewModel;
 
 public partial class MainViewModel : ObservableObject
 {
 
-    // proprietà osservabili del bottone
-    [ObservableProperty]
-    string buttonText;
     [ObservableProperty]
     bool buttonIsEnabled;
 
     // proprietà osservabile del testo di errore
     [ObservableProperty]
     string connectionErrorText;
-    [ObservableProperty]
-    string messageErrorText;
 
     // proprietà osservabile del messaggio
     [ObservableProperty]
@@ -30,30 +27,15 @@ public partial class MainViewModel : ObservableObject
     private IMqttClient mqttClient;
     private MqttClientOptions options;
 
-    public async Task Connect()
-    {
-        ConnectionErrorText = "";
-        try
-        {
-            await mqttClient.ConnectAsync(options, CancellationToken.None);
-            await mqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("ringRequest/request").Build());
-        }
-        catch (Exception ex)
-        {
-            ConnectionErrorText = ex.Message;
-        }
-    }
-
     // costruttore per il viewmodel
     public MainViewModel()
     {
-        ButtonText = "Open";
-        ButtonIsEnabled = true;
+        ButtonIsEnabled = false;
 
-        ConnectionErrorText = "";
-        MessageErrorText = "";
-        MessageText = "";
-        
+        ConnectionErrorText = string.Empty;
+        MessageText = string.Empty;
+        MessageText = string.Empty;
+
         // inizializzo il client e server mqtt
         mqttServer = new MqttFactory();
         mqttClient = mqttServer.CreateMqttClient();
@@ -67,9 +49,32 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    public async Task Connect()
+    {
+        ConnectionErrorText = string.Empty;
+        try
+        {
+            await mqttClient.ConnectAsync(options, CancellationToken.None);
+            await mqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("ringRequest/request").Build());
+            ButtonIsEnabled = true;
+        }
+        catch (Exception ex)
+        {
+            ConnectionErrorText = ex.Message;
+        }
+    }
+
+    [RelayCommand]
+    public async Task Back()
+    {
+        var phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
+        if (string.IsNullOrEmpty(phoneNumber)) { await Shell.Current.GoToAsync(nameof(RegisterPage)); }
+    }
+
+    [RelayCommand]
     async Task Open()
     {
-        MessageErrorText = "";
+        MessageText = string.Empty;
 
         var toSend = new
         {
@@ -80,6 +85,8 @@ public partial class MainViewModel : ObservableObject
             key = "Key",
         };
 
+        ButtonIsEnabled = false;
+
         var message = new MqttApplicationMessageBuilder()
             .WithTopic("ringRequest/request")
             .WithPayload(toSend.ToString())
@@ -87,10 +94,21 @@ public partial class MainViewModel : ObservableObject
         try
         {
             await mqttClient.PublishAsync(message);
+            MessageText = "Message sent";
         }
         catch (Exception ex)
         {
-            MessageErrorText = ex.Message;
+            MessageText = ex.Message;
         }
+
+        ButtonIsEnabled = true;
     }
+
+    [RelayCommand]
+    async Task RemoveNumber ()
+    {
+        SecureStorage.Remove("PhoneNumber");
+        await Back();
+    }
+
 }

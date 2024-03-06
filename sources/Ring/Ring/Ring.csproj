@@ -64,4 +64,10 @@
 		<PackageReference Include="MQTTnet" Version="4.3.3.952" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <MauiXaml Update="RegisterPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	</ItemGroup>
+
 </Project>

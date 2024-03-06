@@ -16,10 +16,11 @@ namespace Ring
         {
             base.OnAppearing();
             var viewModel = BindingContext as MainViewModel;
-            if (viewModel != null)
-            {
-                await viewModel.Connect();
+            if (viewModel != null) {
+                await viewModel.Connect(); 
+                await viewModel.Back();
             }
+            
         }
     }
 }
