@@ -23,7 +23,7 @@ namespace RingServer.Controllers
         }
 
         [HttpGet]
-        [Route("getKey")]
+        [Route("/api/v1/auth/publickey")]
         public string GetKeys()
         {
 
@@ -44,7 +44,7 @@ namespace RingServer.Controllers
         }
 
         [HttpPost]
-        [Route("removeKeys")]
+        [Route("/api/v1/auth/removeKeys")]
         public string RemoveKeys()
         {
 
@@ -62,7 +62,7 @@ namespace RingServer.Controllers
         }
 
         [HttpPost]
-        [Route("generateKeys")]
+        [Route("/api/v1/auth/generateKeys")]
         public string GenerateKeys()
         {
 

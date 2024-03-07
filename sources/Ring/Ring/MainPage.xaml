@@ -13,7 +13,7 @@
             Color="White"
             WidthRequest="100"
             HeightRequest="100"
-            Margin="20"
+            Margin="50"
             HorizontalOptions="Center"
             VerticalOptions="Center"
             SemanticProperties.Hint="Activity indicator" />
@@ -23,6 +23,7 @@
             
             <Label
                 Text="Ring"
+                Margin="20"
                 Padding="20"
                 Style="{StaticResource Headline}"
                 SemanticProperties.HeadingLevel="Level1" />
