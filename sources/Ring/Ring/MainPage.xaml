@@ -39,7 +39,7 @@
 
             <Button
                 x:Name="rmvButton"
-                Text="Cancella Numero"
+                Text="Delete Number"
                 Margin="5"
                 Command="{Binding RemoveNumberCommand}"
                 SemanticProperties.Hint="Remove the number (debug)"
@@ -47,7 +47,7 @@
 
             <Button
                 x:Name="retryButton"
-                Text="Riprova"
+                Text="Retry"
                 Margin="5"
                 Command="{Binding ConnectCommand}"
                 IsVisible="{Binding IsRetryVisible}"

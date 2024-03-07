@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Ring.RegisterPage"
              Title="Register"
+             xmlns:ct="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
              xmlns:viewmodel="clr-namespace:Ring.ViewModel"
              x:DataType="viewmodel:RegisterViewModel"
              Shell.NavBarIsVisible="False">
@@ -18,39 +19,46 @@
             AbsoluteLayout.LayoutFlags="All"
             AbsoluteLayout.LayoutBounds="0.5, 0.5, 0.9, 0.9"
             BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource OffBlack}}"
-            Padding="20">
+            Padding="20"
+            CornerRadius="20">
 
             <VerticalStackLayout
                 Grid.Row="1"
                 Grid.Column="1">
 
-                <Label Text="Welcome to Ring!"
-                       Style="{StaticResource Headline}"
-                       VerticalOptions="Center"
-                       HorizontalOptions="Center" />
+                <Label
+                    Text="Welcome to Ring!"
+                    Style="{StaticResource Headline}"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Center" />
 
-                <Label Text="Please enter your phone number to register"
-                       Style="{StaticResource SubHeadline}"
-                       VerticalOptions="Center"
-                       HorizontalOptions="Center" />
+                <Label
+                    Text="Please enter your phone number to register"
+                    Style="{StaticResource SubHeadline}"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Center" />
 
-                <Entry Placeholder="Numero di telefono"
-                       x:Name="phoneNumberEntry"
-                       Text="{Binding PhoneNumber}"
-                       WidthRequest="250"
-                       Keyboard="Telephone"
-                       Margin="10" />
+                <Entry
+                    Placeholder="Phone number"
+                    Keyboard="Telephone"
+                    Text="{Binding PhoneNumber}"
+                    x:Name="phoneNumberEntry"
+                    WidthRequest="250"
+                    Margin="10" />
 
-                <Button Text="Prosegui"
-                        Command="{Binding RegisterCommand}"
-                        SemanticProperties.Hint="Register your phone number"
-                        WidthRequest="100"
-                        Margin="10" />
+                <Button
+                    Text="Next"
+                    IsEnabled="{Binding Source={x:Reference phoneNumberEntry}, Path=Text.Length}"
+                    Command="{Binding NextCommand}"
+                    SemanticProperties.Hint="Register your phone number"
+                    WidthRequest="100"
+                    Margin="10" />
 
-                <Label Text="{Binding ErrorText}"
-                       Style="{StaticResource SubHeadline}"
-                       VerticalOptions="Center"
-                       HorizontalOptions="Center" />
+                <Label
+                    Text="{Binding ErrorText}"
+                    Style="{StaticResource SubHeadline}"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Center" />
             </VerticalStackLayout>
                 
         </Frame>

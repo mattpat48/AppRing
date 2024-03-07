@@ -3,16 +3,16 @@ using Ring.ViewModel;
 
 namespace Ring;
 
-public partial class RegisterPage : ContentPage
+public partial class VerificationPage : ContentPage
 {
-	public RegisterPage(RegisterViewModel viewModel)
+	public VerificationPage(VerificationViewModel viewModel)
 	{
 		InitializeComponent();
 		BindingContext = viewModel;
     }
 
     protected override async void OnAppearing()
-    {
+	{
         base.OnAppearing();
         Opacity = 0;
         await this.FadeTo(1, 500);

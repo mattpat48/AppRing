@@ -18,12 +18,12 @@ public partial class RegisterViewModel : ObservableObject
     // costruttore per il viewmodel
     public RegisterViewModel()
     {
-        ErrorText = string.Empty;
         PhoneNumber = string.Empty;
+        ErrorText = string.Empty;
     }
 
     [RelayCommand]
-    async Task Register()
+    async Task Next()
     {
         if (!string.IsNullOrEmpty(PhoneNumber))
         {
@@ -39,7 +39,11 @@ public partial class RegisterViewModel : ObservableObject
                 await SecureStorage.SetAsync("PrivateDeviceKey", Convert.ToBase64String(privateKey));
                 await SecureStorage.SetAsync("PhoneNumber", PhoneNumber);
 
-                await Shell.Current.Navigation.PopModalAsync();
+                //await Shell.Current.Navigation.PopModalAsync();
+
+                var verificationVm = new VerificationViewModel();
+                var verificationPage = new VerificationPage(verificationVm);
+                await Shell.Current.Navigation.PushModalAsync(verificationPage);
             }
             else
             {

@@ -22,8 +22,12 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 3,
           "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
@@ -48,7 +52,7 @@
               "RelativeDocumentMoniker": "RingServer\\Controllers\\CredentialsController.cs",
               "ToolTip": "D:\\Apps\\AppRing\\sources\\RingServer\\RingServer\\Controllers\\CredentialsController.cs",
               "RelativeToolTip": "RingServer\\Controllers\\CredentialsController.cs",
-              "ViewState": "AQIAADkAAAAAAAAAAAAwwE0AAAAoAAAA",
+              "ViewState": "AQIAAAwAAAAAAAAAAAAQwBQAAAAZAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-03-06T15:39:36.186Z",
               "EditorCaption": ""
@@ -61,7 +65,7 @@
               "RelativeDocumentMoniker": "RingServer\\Program.cs",
               "ToolTip": "D:\\Apps\\AppRing\\sources\\RingServer\\RingServer\\Program.cs",
               "RelativeToolTip": "RingServer\\Program.cs",
-              "ViewState": "AQIAAB0AAAAAAAAAAAAAwE4AAAA5AAAA",
+              "ViewState": "AQIAADYAAAAAAAAAAAAowDwAAABJAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-03-06T15:25:37.995Z",
               "EditorCaption": ""
