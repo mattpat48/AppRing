@@ -35,8 +35,8 @@ public partial class RegisterViewModel : ObservableObject
                 var publicKey = rsa.ExportSubjectPublicKeyInfo();
                 var privateKey = rsa.ExportRSAPrivateKey();
 
-                await SecureStorage.SetAsync("PrivateKey", Convert.ToBase64String(privateKey));
-                await SecureStorage.SetAsync("PublicKey", Convert.ToBase64String(publicKey));
+                await SecureStorage.SetAsync("PublicDeviceKey", Convert.ToBase64String(publicKey));
+                await SecureStorage.SetAsync("PrivateDeviceKey", Convert.ToBase64String(privateKey));
                 await SecureStorage.SetAsync("PhoneNumber", PhoneNumber);
 
                 await Shell.Current.Navigation.PopModalAsync();

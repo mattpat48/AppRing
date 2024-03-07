@@ -1,0 +1,74 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Apps\\AppRing\\sources\\RingServer\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{8A34AACD-8CB9-4444-932C-3BACE2BDF12F}|RingServer\\RingServer.csproj|d:\\apps\\appring\\sources\\ringserver\\ringserver\\controllers\\credentialscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8A34AACD-8CB9-4444-932C-3BACE2BDF12F}|RingServer\\RingServer.csproj|solutionrelative:ringserver\\controllers\\credentialscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8A34AACD-8CB9-4444-932C-3BACE2BDF12F}|RingServer\\RingServer.csproj|d:\\apps\\appring\\sources\\ringserver\\ringserver\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8A34AACD-8CB9-4444-932C-3BACE2BDF12F}|RingServer\\RingServer.csproj|solutionrelative:ringserver\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8A34AACD-8CB9-4444-932C-3BACE2BDF12F}|RingServer\\RingServer.csproj|d:\\apps\\appring\\sources\\ringserver\\ringserver\\credentials.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8A34AACD-8CB9-4444-932C-3BACE2BDF12F}|RingServer\\RingServer.csproj|solutionrelative:ringserver\\credentials.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Credentials.cs",
+              "DocumentMoniker": "D:\\Apps\\AppRing\\sources\\RingServer\\RingServer\\Credentials.cs",
+              "RelativeDocumentMoniker": "RingServer\\Credentials.cs",
+              "ToolTip": "D:\\Apps\\AppRing\\sources\\RingServer\\RingServer\\Credentials.cs",
+              "RelativeToolTip": "RingServer\\Credentials.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAMAAAAFAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-03-06T15:59:34.012Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "CredentialsController.cs",
+              "DocumentMoniker": "D:\\Apps\\AppRing\\sources\\RingServer\\RingServer\\Controllers\\CredentialsController.cs",
+              "RelativeDocumentMoniker": "RingServer\\Controllers\\CredentialsController.cs",
+              "ToolTip": "D:\\Apps\\AppRing\\sources\\RingServer\\RingServer\\Controllers\\CredentialsController.cs",
+              "RelativeToolTip": "RingServer\\Controllers\\CredentialsController.cs",
+              "ViewState": "AQIAADkAAAAAAAAAAAAwwE0AAAAoAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-03-06T15:39:36.186Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\Apps\\AppRing\\sources\\RingServer\\RingServer\\Program.cs",
+              "RelativeDocumentMoniker": "RingServer\\Program.cs",
+              "ToolTip": "D:\\Apps\\AppRing\\sources\\RingServer\\RingServer\\Program.cs",
+              "RelativeToolTip": "RingServer\\Program.cs",
+              "ViewState": "AQIAAB0AAAAAAAAAAAAAwE4AAAA5AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-03-06T15:25:37.995Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

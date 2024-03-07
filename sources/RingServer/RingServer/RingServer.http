@@ -1,0 +1,6 @@
+@RingServer_HostAddress = http://localhost:5062
+
+GET {{RingServer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

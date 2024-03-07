@@ -1,0 +1,133 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ring</name>
+    </assembly>
+    <members>
+        <member name="T:Ring.ViewModel.MainViewModel">
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.IsLoading">
+            <inheritdoc cref="F:Ring.ViewModel.MainViewModel.isLoading"/>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.IsContentVisible">
+            <inheritdoc cref="F:Ring.ViewModel.MainViewModel.isContentVisible"/>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.IsOpenEnabled">
+            <inheritdoc cref="F:Ring.ViewModel.MainViewModel.isOpenEnabled"/>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.IsRetryVisible">
+            <inheritdoc cref="F:Ring.ViewModel.MainViewModel.isRetryVisible"/>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.MessageText">
+            <inheritdoc cref="F:Ring.ViewModel.MainViewModel.messageText"/>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.TextColor">
+            <inheritdoc cref="F:Ring.ViewModel.MainViewModel.textColor"/>
+        </member>
+        <member name="F:Ring.ViewModel.MainViewModel.connectCommand">
+            <summary>The backing field for <see cref="P:Ring.ViewModel.MainViewModel.ConnectCommand"/>.</summary>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.ConnectCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.MainViewModel.Connect"/>.</summary>
+        </member>
+        <member name="F:Ring.ViewModel.MainViewModel.checkCommand">
+            <summary>The backing field for <see cref="P:Ring.ViewModel.MainViewModel.CheckCommand"/>.</summary>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.CheckCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.MainViewModel.Check"/>.</summary>
+        </member>
+        <member name="F:Ring.ViewModel.MainViewModel.openCommand">
+            <summary>The backing field for <see cref="P:Ring.ViewModel.MainViewModel.OpenCommand"/>.</summary>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.OpenCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.MainViewModel.Open"/>.</summary>
+        </member>
+        <member name="F:Ring.ViewModel.MainViewModel.removeNumberCommand">
+            <summary>The backing field for <see cref="P:Ring.ViewModel.MainViewModel.RemoveNumberCommand"/>.</summary>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.RemoveNumberCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.MainViewModel.RemoveNumber"/>.</summary>
+        </member>
+        <member name="T:Ring.ViewModel.RegisterViewModel">
+            <inheritdoc/>
+            <inheritdoc/>
+        </member>
+        <member name="P:Ring.ViewModel.RegisterViewModel.PhoneNumber">
+            <inheritdoc cref="F:Ring.ViewModel.RegisterViewModel.phoneNumber"/>
+        </member>
+        <member name="P:Ring.ViewModel.RegisterViewModel.ErrorText">
+            <inheritdoc cref="F:Ring.ViewModel.RegisterViewModel.errorText"/>
+        </member>
+        <member name="F:Ring.ViewModel.RegisterViewModel.registerCommand">
+            <summary>The backing field for <see cref="P:Ring.ViewModel.RegisterViewModel.RegisterCommand"/>.</summary>
+        </member>
+        <member name="P:Ring.ViewModel.RegisterViewModel.RegisterCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.RegisterViewModel.Register"/>.</summary>
+        </member>
+        <member name="T:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs">
+            <summary>
+            A helper type providing cached, reusable <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instances
+            for all properties generated with <see cref="T:CommunityToolkit.Mvvm.ComponentModel.ObservablePropertyAttribute"/>.
+            </summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsLoading">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsLoading" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsContentVisible">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsContentVisible" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsOpenEnabled">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsOpenEnabled" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsRetryVisible">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsRetryVisible" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.MessageText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "MessageText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.TextColor">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "TextColor" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.PhoneNumber">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "PhoneNumber" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.ErrorText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "ErrorText" generated properties.</summary>
+        </member>
+        <member name="T:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs">
+            <summary>
+            A helper type providing cached, reusable <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instances
+            for all properties generated with <see cref="T:CommunityToolkit.Mvvm.ComponentModel.ObservablePropertyAttribute"/>.
+            </summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsLoading">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsLoading" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsContentVisible">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsContentVisible" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsOpenEnabled">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsOpenEnabled" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsRetryVisible">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsRetryVisible" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.MessageText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "MessageText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.TextColor">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "TextColor" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.PhoneNumber">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "PhoneNumber" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.ErrorText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "ErrorText" generated properties.</summary>
+        </member>
+    </members>
+</doc>

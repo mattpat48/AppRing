@@ -13,6 +13,7 @@
             Color="White"
             WidthRequest="100"
             HeightRequest="100"
+            Margin="20"
             HorizontalOptions="Center"
             VerticalOptions="Center"
             SemanticProperties.Hint="Activity indicator" />

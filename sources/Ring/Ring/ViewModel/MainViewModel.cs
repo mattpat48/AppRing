@@ -36,7 +36,6 @@ public partial class MainViewModel : ObservableObject
     // costruttore per il viewmodel
     public MainViewModel()
     {
-
         IsLoading = true;
         IsContentVisible = false;
 
