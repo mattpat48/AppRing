@@ -6,4 +6,5 @@
 /sources/Ring/.vs/Ring
 /sources/Ring/Ring/obj
 /sources/RingServer/RingServer/obj
-/sources/RingServer/RingServer/bin/Debug/net8.0
+/sources/RingServer/RingServer/bin/
+/sources/RingServer/.vs/RingServer/FileContentIndex
