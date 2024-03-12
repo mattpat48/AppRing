@@ -1,16 +1,13 @@
 ﻿using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Cryptography.X509Certificates;
-using System.IO;
+using Newtonsoft.Json;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace RingServer.Controllers
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class CredentialsController : ControllerBase
+    public class CredentialsController : Controller
     {
-
         private readonly IDataProtector _protector;
         private readonly string publicKeyPath;
         private readonly string privateKeyPath;
@@ -22,69 +19,111 @@ namespace RingServer.Controllers
             privateKeyPath = "RingServer/Keys/serverPrivateKey.pem";
         }
 
+        public class EncryptedRequest
+        {
+            public string EncryptedData { get; set; }
+            public string EncryptedKey { get; set; }
+            public string EncryptedIV { get; set; }
+
+            public EncryptedRequest(string encryptedData, string encryptedKey, string encryptedIV)
+            {
+                EncryptedData = encryptedData;
+                EncryptedKey = encryptedKey;
+                EncryptedIV = encryptedIV;
+            }
+        }
+
+        public class DecryptedRequest
+        {
+            public string PKey { get; set; }
+            public string Number { get; set; }
+            public string Id { get; set; }
+
+            public DecryptedRequest(string pKey, string number, string id)
+            {
+                PKey = pKey;
+                Number = number;
+                Id = id;
+            }
+        }
+
+
         [HttpGet]
         [Route("/api/v1/auth/publickey")]
-        public string GetKeys()
+        public IActionResult GetKeys()
         {
 
             if (System.IO.File.Exists(publicKeyPath))
             {
-                var publicKey = System.IO.File.ReadAllBytes(publicKeyPath);
-
-                if (publicKey.Length == 0) { return "Key length = 0"; }
-
-                var publicString = Convert.ToBase64String(publicKey);
-
-                return ($"{publicString}");
+                var publicKey = System.IO.File.ReadAllText(publicKeyPath);
+                if (publicKey.Length == 0)
+                {
+                    return BadRequest("Key length = 0");
+                }
+                else
+                {
+                    return Ok(publicKey);
+                }
             }
             else
             {
-                return "Keys not found";
+                return NotFound("Public key not found");
             }
         }
 
         [HttpPost]
-        [Route("/api/v1/auth/removeKeys")]
-        public string RemoveKeys()
+        [Route("/api/v1/auth/signin")]
+        public async Task<IActionResult> SignIn()
         {
-
-            bool removedPublic = false;
-            bool removedPrivate = false;
-
-            if (System.IO.File.Exists(publicKeyPath)) { System.IO.File.Delete(publicKeyPath); removedPublic = true;  }
-            if (System.IO.File.Exists(privateKeyPath)) { System.IO.File.Delete(privateKeyPath); removedPrivate = true;  }
-
-            if (removedPublic && removedPrivate) return "Keys removed";
-            else if (removedPublic && !removedPrivate) return "Public removed, private not found";
-            else if (!removedPublic && removedPrivate) return "Private removed, public not found";
-            else return "Keys not found";
-
-        }
-
-        [HttpPost]
-        [Route("/api/v1/auth/generateKeys")]
-        public string GenerateKeys()
-        {
-
-            if (System.IO.File.Exists(publicKeyPath) || System.IO.File.Exists(privateKeyPath))
+            using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
             {
-                return "Keys already exist";
-            }
+                var requestBody = await reader.ReadToEndAsync();
+                if (requestBody == null)
+                {
+                    return BadRequest("Outer invalid request payload");
+                }
+                else
+                {
+                    EncryptedRequest request = JsonConvert.DeserializeObject<EncryptedRequest>(requestBody);
 
-            try
-            {
-                var rsa = RSA.Create(2048);
-                var publicKey = rsa.ExportSubjectPublicKeyInfo();
-                var privateKey = rsa.ExportRSAPrivateKey();
+                    // da gestire connessione con db
+                    string protectedPrivateKeyPem = System.IO.File.ReadAllText(privateKeyPath);
+                    string privateKeyPem = _protector.Unprotect(protectedPrivateKeyPem);
 
-                System.IO.File.WriteAllBytes(publicKeyPath, publicKey);
-                System.IO.File.WriteAllBytes(privateKeyPath, _protector.Protect(privateKey));
+                    using RSA rsa = RSA.Create();
+                    rsa.ImportFromPem(privateKeyPem.ToCharArray());
 
-                return "Keys generated";
-            }
-            catch (Exception ex)
-            {
-                   return ex.Message;
+                    if (request != null)
+                    {
+                        byte[] key = rsa.Decrypt(Convert.FromBase64String(request.EncryptedKey), RSAEncryptionPadding.Pkcs1);
+                        byte[] iv = rsa.Decrypt(Convert.FromBase64String(request.EncryptedIV), RSAEncryptionPadding.Pkcs1);
+
+                        byte[] encryptedData = Convert.FromBase64String(request.EncryptedData);
+
+                        using Aes aes = Aes.Create();
+                        aes.Key = key;
+                        aes.IV = iv;
+
+                        ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+
+                        using (MemoryStream msDecrypt = new MemoryStream(encryptedData))
+                        {
+                            using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                            {
+                                using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+                                {
+                                    string plaintext = srDecrypt.ReadToEnd();
+                                    var userInfo = JsonConvert.DeserializeObject<DecryptedRequest>(plaintext);
+                                    return Ok(userInfo);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        return BadRequest("Inner invalid request payload");
+                    }
+                }
             }
         }
     }

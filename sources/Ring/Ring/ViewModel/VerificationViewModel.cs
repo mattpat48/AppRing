@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -29,11 +30,14 @@ public partial class VerificationViewModel : ObservableObject
     [RelayCommand]
     async Task Verify()
     {
+        // verifica del codice di verifica
         if (!string.IsNullOrEmpty(VerificationCode))
         {
             if (VerificationCode.Length == 8)
             {
+                // codice di verifica corretto, vado sulla main page
                 ErrorText = string.Empty;
+                await SecureStorage.SetAsync("IsVerified", "yes");
                 await Shell.Current.Navigation.PopToRootAsync();
             }
             else
@@ -43,16 +47,26 @@ public partial class VerificationViewModel : ObservableObject
         }
     }
 
+    // comando per inviare nuovamente il codice di verifica
     [RelayCommand]
     async Task Resend()
     {
         VerificationCode = string.Empty;
     }
 
+    // comando per tornare indietro
     [RelayCommand]
     async Task Back()
     {
-        await Shell.Current.Navigation.PopModalAsync();
+        SecureStorage.Remove("PublicDeviceKey");
+        SecureStorage.Remove("PrivateDeviceKey");
+        SecureStorage.Remove("ServerKey");
+        SecureStorage.Remove("PhoneNumber");
+        SecureStorage.Remove("DeviceId");
+
+        var registerVm = new RegisterViewModel();
+        var registerPage = new RegisterPage(registerVm);
+        await Shell.Current.Navigation.PushModalAsync(registerPage);
     }
 
 }

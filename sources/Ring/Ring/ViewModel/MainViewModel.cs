@@ -4,16 +4,19 @@ using MQTTnet;
 using MQTTnet.Client;
 using System.Text.Json;
 using Microsoft.Maui.Storage;
+using Microsoft.Maui.Devices;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace Ring.ViewModel;
 
 public partial class MainViewModel : ObservableObject
 {
 
-    // proprietà osservabile del caricamento
+    // caricamento si o no
     [ObservableProperty]
     bool isLoading;
+    // visibilità del contenuto della pagina
     [ObservableProperty]
     bool isContentVisible;
 
@@ -22,13 +25,13 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     bool isRetryVisible;
 
-    // proprietà osservabile del messaggio
+    // messaggio di errore
     [ObservableProperty]
     string messageText;
     [ObservableProperty]
     string textColor;
 
-
+    // server, client e opzioni per scambio mqtt
     private MqttFactory mqttServer;
     private IMqttClient mqttClient;
     private MqttClientOptions options;
@@ -55,6 +58,8 @@ public partial class MainViewModel : ObservableObject
             .WithTcpServer("10.20.100.50", 1883)
             //.WithCredentials("username", "password")
             .Build();
+
+        Check().Wait();
     }
 
     [RelayCommand]
@@ -86,6 +91,7 @@ public partial class MainViewModel : ObservableObject
     public async Task Check()
     {
         IsLoading = true;
+
         var phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
         if (string.IsNullOrEmpty(phoneNumber))
         {
@@ -96,8 +102,23 @@ public partial class MainViewModel : ObservableObject
             var registerPage = new RegisterPage(registerVm);
             await Shell.Current.Navigation.PushModalAsync(registerPage);
         }
-        else { IsContentVisible = true; }
-        IsLoading = false;
+        else {
+            var isVerified = await SecureStorage.GetAsync("IsVerified");
+            if (string.IsNullOrEmpty(isVerified))
+            {
+                IsContentVisible = false;
+                IsLoading = false;
+
+                var verificationVm = new VerificationViewModel();
+                var verificationPage = new VerificationPage(verificationVm);
+                await Shell.Current.Navigation.PushModalAsync(verificationPage);
+            }
+            else
+            {
+                IsLoading = false;
+                IsContentVisible = true;
+            }
+        }
     }
 
     [RelayCommand]
@@ -107,11 +128,11 @@ public partial class MainViewModel : ObservableObject
 
         var toSend = new
         {
-            id = "IdDevice",
-            datetime = "DateTime",
+            id = await SecureStorage.GetAsync("DeviceId"),
+            datetime = DateTime.Now,
             lat = "Lat",
-            language = "Lng",
-            key = "Key",
+            language = "language",
+            key = SecureStorage.GetAsync("PublicKey"),
             phone = await SecureStorage.GetAsync("PhoneNumber")
         };
 
@@ -129,7 +150,6 @@ public partial class MainViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            TextColor = "Red";
             MessageText = ex.Message;
         }
 
