@@ -11,18 +11,23 @@ namespace RingServer.Controllers
 {
     public class CredentialsController : Controller
     {
-        private readonly IDataProtector _protector;
-        private readonly string publicKeyPath;
-        private readonly string privateKeyPath;
+        private readonly IDataProtector _publicProtector;
+        private readonly IDataProtector _privateProtector;
 
+        private readonly string _config;
+        private AppSettingsUpdater _updater;
         private Vonage.Request.Credentials vonageCredentials;
 
         public CredentialsController(IDataProtectionProvider provider)
         {
-            _protector = provider.CreateProtector("Keys");
-            publicKeyPath = "RingServer/Keys/serverPublicKey.pem";
-            privateKeyPath = "RingServer/Keys/serverPrivateKey.pem";
-            vonageCredentials = Vonage.Request.Credentials.FromApiKeyAndSecret("dcd0a6fb", "4QJBjH1opdIZg3Xj");
+            _publicProtector = provider.CreateProtector("PublicKeyProtector");
+            _privateProtector = provider.CreateProtector("PrivateKeyProtector");
+
+            _config = "appsettings.json";
+            _updater = new AppSettingsUpdater(_config);
+            string vonageKey = _updater.GetSetting("vonageKey");
+            string vonageSecret = _updater.GetSetting("vonageSecret");
+            vonageCredentials = Vonage.Request.Credentials.FromApiKeyAndSecret(vonageKey, vonageSecret);
         }
 
         public class EncryptedRequest
@@ -58,17 +63,18 @@ namespace RingServer.Controllers
         [Route("/api/v1/auth/publickey")]
         public IActionResult GetKeys()
         {
-
-            if (System.IO.File.Exists(publicKeyPath))
+            string publicKey = _updater.GetSetting("publicKey");
+            if (publicKey != string.Empty)
             {
-                var publicKey = System.IO.File.ReadAllText(publicKeyPath);
+                
                 if (publicKey.Length == 0)
                 {
                     return BadRequest("Key length = 0");
                 }
                 else
                 {
-                    return Ok(publicKey);
+                    string unprotectedPublicKey = _publicProtector.Unprotect(publicKey);
+                    return Ok(unprotectedPublicKey);
                 }
             }
             else
@@ -93,8 +99,8 @@ namespace RingServer.Controllers
                     EncryptedRequest request = JsonConvert.DeserializeObject<EncryptedRequest>(requestBody);
 
                     // da gestire connessione con db
-                    string protectedPrivateKeyPem = System.IO.File.ReadAllText(privateKeyPath);
-                    string privateKeyPem = _protector.Unprotect(protectedPrivateKeyPem);
+                    string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
+                    string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
 
                     using RSA rsa = RSA.Create();
                     rsa.ImportFromPem(privateKeyPem.ToCharArray());

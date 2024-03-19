@@ -16,11 +16,13 @@ namespace RingServer
             // Add services to the container.
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.AddDataProtection();
             builder.Services.AddDistributedMemoryCache();
+
+            builder.Services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo(@"D:\Apps\AppRing"))
+            .SetApplicationName("RingServer");
 
             builder.Services.AddSession(options =>
             {
@@ -57,35 +59,29 @@ namespace RingServer
 
         private static bool CheckForKeys()
         {
-            string publicKeyPath = "RingServer/Keys/serverPublicKey.pem";
-            string privateKeyPath = "RingServer/Keys/serverPrivateKey.pem";
-
-            return File.Exists(publicKeyPath) && File.Exists(privateKeyPath);
+            AppSettingsUpdater updater = new AppSettingsUpdater("appsettings.json");
+            return updater.GetSetting("publicKey") != string.Empty && updater.GetSetting("privateKey") != string.Empty;
         }
 
         private static void SaveRSAKeys(IServiceProvider services, byte[] publicKey, byte[] privateKey)
         {
-            // Percorsi dove salvare le chiavi
-            string publicKeyPath = "RingServer/Keys/serverPublicKey.pem";
-            string privateKeyPath = "RingServer/Keys/serverPrivateKey.pem";
+            var publicProtector = services.GetRequiredService<IDataProtectionProvider>().CreateProtector("PublicKeyProtector");
+            var privateProtector = services.GetRequiredService<IDataProtectionProvider>().CreateProtector("PrivateKeyProtector");
 
-            // Estrai i percorsi delle directory dalle stringhe dei percorsi dei file
-            string publicKeyDir = Path.GetDirectoryName(publicKeyPath);
-            string privateKeyDir = Path.GetDirectoryName(privateKeyPath);
+            // Criptare e salvare la chiave pubblica e quella privata
+            var protectedPublicKey = publicProtector.Protect(publicKey);
+            var protectedPrivateKey = privateProtector.Protect(privateKey);
 
-            // Crea le directory se non esistono
-            if (!string.IsNullOrEmpty(publicKeyDir)) { Directory.CreateDirectory(publicKeyDir); }
-            if (!string.IsNullOrEmpty(privateKeyDir)) { Directory.CreateDirectory(privateKeyDir); }
+            AppSettingsUpdater updater = new AppSettingsUpdater("appsettings.json");
+            if (updater.GetSetting("publicKey") == string.Empty)
+            {
+                updater.AddSetting("publicKey", Convert.ToBase64String(protectedPublicKey));
+            }
+            if (updater.GetSetting("privateKey") == string.Empty)
+            {
+                updater.AddSetting("privateKey", Convert.ToBase64String(protectedPrivateKey));
+            }
 
-            // Salvataggio della chiave pubblica
-            File.WriteAllBytes(publicKeyPath, publicKey);
-
-            // Criptare e salvare la chiave privata
-            var protector = services.GetDataProtector("Keys");
-            var protectedKey = protector.Protect(privateKey);
-
-            File.WriteAllBytes(publicKeyPath, publicKey);
-            File.WriteAllBytes(privateKeyPath, protectedKey);
         }
 
     }

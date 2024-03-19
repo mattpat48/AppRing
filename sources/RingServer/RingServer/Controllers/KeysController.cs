@@ -11,15 +11,17 @@ namespace RingServer.Controllers
     public class KeysController : ControllerBase
     {
 
-        private readonly IDataProtector _protector;
-        private readonly string publicKeyPath;
-        private readonly string privateKeyPath;
+        private readonly IDataProtector _publicProtector;
+        private readonly IDataProtector _privateProtector;
+        private readonly string _config;
+        private AppSettingsUpdater _updater;
 
         public KeysController(IDataProtectionProvider provider)
         {
-            _protector = provider.CreateProtector("Keys");
-            publicKeyPath = "RingServer/Keys/serverPublicKey.pem";
-            privateKeyPath = "RingServer/Keys/serverPrivateKey.pem";
+            _publicProtector = provider.CreateProtector("PublicKeyProtector");
+            _privateProtector = provider.CreateProtector("PrivateKeyProtector");
+            _config = "appsettings.json";
+            _updater = new AppSettingsUpdater(_config);
         }
 
         [HttpPost]
@@ -30,8 +32,8 @@ namespace RingServer.Controllers
             bool removedPublic = false;
             bool removedPrivate = false;
 
-            if (System.IO.File.Exists(publicKeyPath)) { System.IO.File.Delete(publicKeyPath); removedPublic = true;  }
-            if (System.IO.File.Exists(privateKeyPath)) { System.IO.File.Delete(privateKeyPath); removedPrivate = true;  }
+            if (_updater.GetSetting("publicKey") != string.Empty) { _updater.RemoveSetting("publicKey"); removedPublic = true;  }
+            if (_updater.GetSetting("privateKey") != string.Empty) { _updater.RemoveSetting("privateKey"); removedPrivate = true;  }
 
             if (removedPublic && removedPrivate) return Ok("Keys removed");
             else if (removedPublic && !removedPrivate) return Ok("Public removed, private not found");
@@ -45,7 +47,10 @@ namespace RingServer.Controllers
         public IActionResult GenerateKeys()
         {
 
-            if (System.IO.File.Exists(publicKeyPath) || System.IO.File.Exists(privateKeyPath))
+            bool publicExist = _updater.GetSetting("publicKey") != string.Empty;
+            bool privateExist = _updater.GetSetting("privateKey") != string.Empty;
+
+            if (publicExist && privateExist)
             {
                 return BadRequest("Keys already exist");
             }
@@ -56,8 +61,15 @@ namespace RingServer.Controllers
                 var publicKey = rsa.ExportRSAPublicKeyPem();
                 var privateKey = rsa.ExportRSAPrivateKeyPem();
 
-                System.IO.File.WriteAllText(publicKeyPath, publicKey);
-                System.IO.File.WriteAllText(privateKeyPath, _protector.Protect(privateKey));
+                // Criptare e salvare la chiave pubblica e quella privata
+
+                if (publicExist) _updater.RemoveSetting("publicKey");
+                if (privateExist) _updater.RemoveSetting("privateKey");
+                var protectedPublicKey = _publicProtector.Protect(publicKey);
+                var protectedPrivateKey = _privateProtector.Protect(privateKey);
+
+                _updater.AddSetting("publicKey", protectedPublicKey);
+                _updater.AddSetting("privateKey", protectedPrivateKey);
 
                 return Ok("Keys generated");
             }

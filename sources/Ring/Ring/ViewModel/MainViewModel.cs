@@ -67,8 +67,6 @@ public partial class MainViewModel : ObservableObject
         _httpClient = new HttpClient();
         _registerAPI = new RegisterAPI(_httpClient);
         _verificationAPI = new VerificationAPI(_httpClient);
-
-        Check().Wait();
     }
 
     [RelayCommand]
@@ -102,7 +100,8 @@ public partial class MainViewModel : ObservableObject
         IsLoading = true;
 
         var phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
-        if (string.IsNullOrEmpty(phoneNumber))
+        var isVerified = await SecureStorage.GetAsync("IsVerified");
+        if (string.IsNullOrEmpty(phoneNumber) || string.IsNullOrEmpty(isVerified))
         {
             IsContentVisible = false;
             IsLoading = false;
@@ -113,26 +112,7 @@ public partial class MainViewModel : ObservableObject
         }
         else
         {
-            var isVerified = await SecureStorage.GetAsync("IsVerified");
-            if (string.IsNullOrEmpty(isVerified))
-            {
-                SecureStorage.Remove("PublicDeviceKey");
-                SecureStorage.Remove("PrivateDeviceKey");
-                SecureStorage.Remove("ServerKey");
-                SecureStorage.Remove("PhoneNumber");
-                SecureStorage.Remove("IsVerified");
-
-                var registerVm = new RegisterViewModel(_registerAPI, _verificationAPI);
-                var registerPage = new RegisterPage(registerVm);
-                await Shell.Current.Navigation.PushModalAsync(registerPage);
-
-
-            }
-            else
-            {
-                IsLoading = false;
-                IsContentVisible = true;
-            }
+            await Connect();
         }
     }
 
