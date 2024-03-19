@@ -18,15 +18,22 @@
             VerticalOptions="Center"
             SemanticProperties.Hint="Activity indicator" />
 
-        <VerticalStackLayout
-            IsVisible="{Binding IsContentVisible}">
+        <Grid
+            RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto"
+            ColumnDefinitions="Auto"
+            RowSpacing="10"
+            IsVisible="{Binding IsContentVisible}"
+            HorizontalOptions="Center"
+            VerticalOptions="Center">
             
             <Label
                 Text="Ring"
                 Margin="20"
                 Padding="20"
                 Style="{StaticResource Headline}"
-                SemanticProperties.HeadingLevel="Level1" />
+                SemanticProperties.HeadingLevel="Level1"
+                Grid.Row="0"
+                Grid.ColumnSpan="1"/>
 
             <Button
                 x:Name="msgButton"
@@ -36,7 +43,9 @@
                 Command="{Binding OpenCommand}"
                 WidthRequest="100"
                 SemanticProperties.Hint="Send or unsend a message"
-                HorizontalOptions="Center" />
+                HorizontalOptions="Center" 
+                Grid.Row="1"
+                Grid.ColumnSpan="1"/>
 
             <Button
                 x:Name="rmvButton"
@@ -44,7 +53,9 @@
                 Margin="5"
                 Command="{Binding RemoveNumberCommand}"
                 SemanticProperties.Hint="Remove the number (debug)"
-                HorizontalOptions="Center" />
+                HorizontalOptions="Center"
+                Grid.Row="2"
+                Grid.ColumnSpan="1"/>
 
             <Button
                 x:Name="retryButton"
@@ -53,17 +64,22 @@
                 Command="{Binding ConnectCommand}"
                 IsVisible="{Binding IsRetryVisible}"
                 SemanticProperties.Hint="Retry connecting to server"
-                HorizontalOptions="Center" />
+                HorizontalOptions="Center"
+                Grid.Row="3"
+                Grid.ColumnSpan="1"/>
 
             <Label
                 Text="{Binding MessageText}"
                 Padding="10"
                 FontSize="20"
                 TextColor="{Binding TextColor}"
-                HorizontalOptions="Center"
-                SemanticProperties.HeadingLevel="Level2" />
+                LineBreakMode="WordWrap"
+                HorizontalOptions="FillAndExpand"
+                SemanticProperties.HeadingLevel="Level2"
+                Grid.Row="4"
+                Grid.ColumnSpan="1"/>
             
-        </VerticalStackLayout>
+        </Grid>
         
     </VerticalStackLayout>
     

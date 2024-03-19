@@ -16,8 +16,7 @@ public partial class MainPage : ContentPage
         base.OnAppearing();
         var viewModel = BindingContext as MainViewModel;
         if (viewModel != null) {
-            await viewModel.Connect(); 
-            await viewModel.Check();
+            await viewModel.Connect();
         }
         
     }

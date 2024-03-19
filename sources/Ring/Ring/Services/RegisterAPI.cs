@@ -12,9 +12,9 @@ public class RegisterAPI
 {
     private readonly HttpClient _httpClient;
 
-    public RegisterAPI()
+    public RegisterAPI(HttpClient client)
     {
-        _httpClient = new HttpClient();
+        _httpClient = client;
     }
 
     public async Task<string> GetServerKey()

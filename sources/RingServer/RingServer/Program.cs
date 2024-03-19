@@ -1,9 +1,7 @@
 
-using System.Data.SqlTypes;
-using System.IO;
+using System;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.DataProtection;
-using System.Text;
 
 namespace RingServer
 {
@@ -22,6 +20,15 @@ namespace RingServer
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddDataProtection();
+            builder.Services.AddDistributedMemoryCache();
+
+            builder.Services.AddSession(options =>
+            {
+                // Configure session options if needed (e.g., IdleTimeout)
+                options.IdleTimeout = TimeSpan.FromMinutes(30); // Example: Set session timeout
+                options.Cookie.HttpOnly = true; // Prevents accessing the cookie from client-side scripts
+                options.Cookie.IsEssential = true; // Mark the session cookie as essential
+            });
 
             var app = builder.Build();
 
@@ -32,13 +39,14 @@ namespace RingServer
                 app.UseSwaggerUI();
             }
 
+            app.UseSession();
             app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
 
             if (!CheckForKeys())
             {
-                var rsa = RSA.Create(2048);
+                using RSA rsa = RSA.Create(2048);
                 var publicKey = rsa.ExportSubjectPublicKeyInfo();
                 var privateKey = rsa.ExportRSAPrivateKey();
                 SaveRSAKeys(app.Services, publicKey, privateKey);
@@ -78,19 +86,6 @@ namespace RingServer
 
             File.WriteAllBytes(publicKeyPath, publicKey);
             File.WriteAllBytes(privateKeyPath, protectedKey);
-        }
-
-        private static byte[] LoadPrivateKey(IServiceProvider services, string filePath)
-        {
-            byte[] protectedKey = File.ReadAllBytes(filePath);
-            var protector = services.GetDataProtector("Keys");
-            return protector.Unprotect(protectedKey);
-        }
-
-        private static byte[] LoadPublicKey(IServiceProvider services, string filePath)
-        {
-            byte[] publicKey = File.ReadAllBytes(filePath);
-            return publicKey;
         }
 
     }

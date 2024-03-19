@@ -22,29 +22,52 @@
             Padding="20"
             CornerRadius="20">
 
-            <VerticalStackLayout
-                Grid.Row="1"
-                Grid.Column="1">
+            <Grid
+                RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto"
+                ColumnDefinitions="Auto, Auto"
+                RowSpacing="10"
+                VerticalOptions="Center"
+                HorizontalOptions="Center">
 
                 <Label
                     Text="Welcome to Ring!"
+                    LineBreakMode="WordWrap"
+                    HorizontalOptions="FillAndExpand"
                     Style="{StaticResource Headline}"
                     VerticalOptions="Center"
-                    HorizontalOptions="Center" />
+                    Grid.Row="0"
+                    Grid.ColumnSpan="2" />
 
                 <Label
                     Text="Please enter your phone number to register"
+                    LineBreakMode="WordWrap"
+                    HorizontalOptions="FillAndExpand"
                     Style="{StaticResource SubHeadline}"
-                    VerticalOptions="Center"
-                    HorizontalOptions="Center" />
+                    VerticalOptions="FillAndExpand"
+                    Grid.Row="1"
+                    Grid.ColumnSpan="2" />
+
+                <Picker
+                    Title="Country"
+                    ItemsSource="{Binding PhonePrefixes}"
+                    SelectedItem="{Binding SelectedPhonePrefix}"
+                    x:Name="countryPicker"
+                    WidthRequest="100"
+                    HorizontalOptions="End"
+                    Margin="10"
+                    Grid.Row="2"
+                    Grid.Column="0" />
 
                 <Entry
                     Placeholder="Phone number"
                     Keyboard="Telephone"
                     Text="{Binding PhoneNumber}"
                     x:Name="phoneNumberEntry"
-                    WidthRequest="250"
-                    Margin="10" />
+                    WidthRequest="200"
+                    HorizontalOptions="Start"
+                    Margin="10"
+                    Grid.Row="2"
+                    Grid.Column="1" />
 
                 <Button
                     Text="Next"
@@ -52,21 +75,29 @@
                     Command="{Binding NextCommand}"
                     SemanticProperties.Hint="Register your phone number"
                     WidthRequest="100"
-                    Margin="10" />
+                    Margin="10"
+                    Grid.Row="3"
+                    Grid.ColumnSpan="2" />
 
                 <Label
                     Text="{Binding ErrorText}"
                     TextColor="Red"
                     Style="{StaticResource SubHeadline}"
+                    LineBreakMode="TailTruncation"
+                    HorizontalOptions="FillAndExpand"
                     VerticalOptions="Center"
-                    HorizontalOptions="Center" />
+                    Grid.Row="4"
+                    Grid.ColumnSpan="2" />
 
                 <Label
                     Text="{Binding Response}"
                     Style="{StaticResource SubHeadline}"
-                    VerticalOptions="Center"
-                    HorizontalOptions="Center" />
-            </VerticalStackLayout>
+                    LineBreakMode="WordWrap"
+                    HorizontalOptions="FillAndExpand"
+                    VerticalOptions="FillAndExpand"
+                    Grid.Row="5"
+                    Grid.ColumnSpan="2" />
+            </Grid>
                 
         </Frame>
     

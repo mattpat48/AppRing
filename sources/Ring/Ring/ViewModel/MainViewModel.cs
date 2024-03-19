@@ -7,6 +7,7 @@ using Microsoft.Maui.Storage;
 using Microsoft.Maui.Devices;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using Ring.Services;
 
 namespace Ring.ViewModel;
 
@@ -36,6 +37,10 @@ public partial class MainViewModel : ObservableObject
     private IMqttClient mqttClient;
     private MqttClientOptions options;
 
+    private HttpClient _httpClient;
+    private RegisterAPI _registerAPI;
+    private VerificationAPI _verificationAPI;
+
     // costruttore per il viewmodel
     public MainViewModel()
     {
@@ -55,9 +60,13 @@ public partial class MainViewModel : ObservableObject
         // inizializzo le opzioni del server mqtt
         options = new MqttClientOptionsBuilder()
             // ATTENZIONE: inserire l'indirizzo IP del server MQTT
-            .WithTcpServer("10.20.100.50", 1883)
+            .WithTcpServer("127.0.0.1", 1883)
             //.WithCredentials("username", "password")
             .Build();
+
+        _httpClient = new HttpClient();
+        _registerAPI = new RegisterAPI(_httpClient);
+        _verificationAPI = new VerificationAPI(_httpClient);
 
         Check().Wait();
     }
@@ -98,20 +107,26 @@ public partial class MainViewModel : ObservableObject
             IsContentVisible = false;
             IsLoading = false;
 
-            var registerVm = new RegisterViewModel();
+            var registerVm = new RegisterViewModel(_registerAPI, _verificationAPI);
             var registerPage = new RegisterPage(registerVm);
             await Shell.Current.Navigation.PushModalAsync(registerPage);
         }
-        else {
+        else
+        {
             var isVerified = await SecureStorage.GetAsync("IsVerified");
             if (string.IsNullOrEmpty(isVerified))
             {
-                IsContentVisible = false;
-                IsLoading = false;
+                SecureStorage.Remove("PublicDeviceKey");
+                SecureStorage.Remove("PrivateDeviceKey");
+                SecureStorage.Remove("ServerKey");
+                SecureStorage.Remove("PhoneNumber");
+                SecureStorage.Remove("IsVerified");
 
-                var verificationVm = new VerificationViewModel();
-                var verificationPage = new VerificationPage(verificationVm);
-                await Shell.Current.Navigation.PushModalAsync(verificationPage);
+                var registerVm = new RegisterViewModel(_registerAPI, _verificationAPI);
+                var registerPage = new RegisterPage(registerVm);
+                await Shell.Current.Navigation.PushModalAsync(registerPage);
+
+
             }
             else
             {

@@ -18,6 +18,8 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
+    <PackageReference Include="Twilio" Version="7.0.1" />
+    <PackageReference Include="Vonage" Version="6.16.0" />
   </ItemGroup>
 
   <ItemGroup>

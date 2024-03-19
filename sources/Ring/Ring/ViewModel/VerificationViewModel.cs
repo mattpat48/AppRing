@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Ring.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,32 +19,48 @@ public partial class VerificationViewModel : ObservableObject
     bool isVerifyEnabled;
 
     [ObservableProperty]
-    string errorText;
+    string messageText;
+    [ObservableProperty]
+    string colorText;
 
-    public VerificationViewModel()
+
+    private RegisterAPI _registerAPI;
+    private VerificationAPI _verificationAPI;
+
+    public VerificationViewModel(RegisterAPI registerAPI, VerificationAPI verificationAPI)
     {
         VerificationCode = string.Empty;
         IsVerifyEnabled = false;
-        ErrorText = string.Empty;
+        MessageText = string.Empty;
+        ColorText = "White";
+        _registerAPI = registerAPI;
+        _verificationAPI = verificationAPI;
     }
 
     [RelayCommand]
     async Task Verify()
     {
         // verifica del codice di verifica
-        if (!string.IsNullOrEmpty(VerificationCode))
+        if (!string.IsNullOrEmpty(VerificationCode) && VerificationCode.Length == 8)
         {
-            if (VerificationCode.Length == 8)
+            var response = await _verificationAPI.CheckCode(VerificationCode);
+            if (response == "success")
             {
                 // codice di verifica corretto, vado sulla main page
-                ErrorText = string.Empty;
+                MessageText = string.Empty;
                 await SecureStorage.SetAsync("IsVerified", "yes");
                 await Shell.Current.Navigation.PopToRootAsync();
             }
             else
             {
-                ErrorText = "Codice di verifica non valido";
+                ColorText = "Red";
+                MessageText = "Verification code does not match!";
             }
+        }
+        else
+        {
+            ColorText = "Red";
+            MessageText = "Insert a valid code!";
         }
     }
 
@@ -51,7 +68,18 @@ public partial class VerificationViewModel : ObservableObject
     [RelayCommand]
     async Task Resend()
     {
-        VerificationCode = string.Empty;
+        string phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
+        var sendSMSResponse = await _verificationAPI.SendSMS(phoneNumber);
+        if (sendSMSResponse == "success")
+        {
+            ColorText = "White";
+            MessageText = "We sent you another code.";
+        }
+        else
+        {
+            ColorText = "Red";
+            MessageText = sendSMSResponse;
+        }
     }
 
     // comando per tornare indietro
@@ -62,9 +90,9 @@ public partial class VerificationViewModel : ObservableObject
         SecureStorage.Remove("PrivateDeviceKey");
         SecureStorage.Remove("ServerKey");
         SecureStorage.Remove("PhoneNumber");
-        SecureStorage.Remove("DeviceId");
+        SecureStorage.Remove("IsVerified");
 
-        var registerVm = new RegisterViewModel();
+        var registerVm = new RegisterViewModel(_registerAPI, _verificationAPI);
         var registerPage = new RegisterPage(registerVm);
         await Shell.Current.Navigation.PushModalAsync(registerPage);
     }

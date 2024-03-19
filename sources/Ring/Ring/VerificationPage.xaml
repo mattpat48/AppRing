@@ -23,7 +23,7 @@
             <VerticalStackLayout>
 
                 <Grid
-                    RowDefinitions="Auto, Auto, Auto, Auto, Auto"
+                    RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto"
                     ColumnDefinitions="Auto, Auto"
                     RowSpacing="10"
                     VerticalOptions="Center"
@@ -37,6 +37,8 @@
 
                     <Label
                         Text="We sent you a SMS containing an 8 digit code, please insert it below."
+                        LineBreakMode="WordWrap"
+                        HorizontalOptions="FillAndExpand"
                         Style="{StaticResource SubHeadline}"
                         Grid.Row="1"
                         Grid.ColumnSpan="2"/>
@@ -81,10 +83,15 @@
                         Grid.Row="4"
                         Grid.Column="1" />
 
-                    <Label Text="{Binding ErrorText}"
-                           Style="{StaticResource SubHeadline}"
-                           VerticalOptions="Center"
-                           HorizontalOptions="Center" />
+                    <Label
+                        Text="{Binding MessageText}"
+                        TextColor="{Binding ColorText}"
+                        Style="{StaticResource SubHeadline}"
+                        VerticalOptions="Center"
+                        LineBreakMode="WordWrap"
+                        HorizontalOptions="FillAndExpand"
+                        Grid.Row="5"
+                        Grid.ColumnSpan="2"/>
 
                 </Grid>
             </VerticalStackLayout>
