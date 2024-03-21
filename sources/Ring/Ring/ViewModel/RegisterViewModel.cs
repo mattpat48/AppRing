@@ -54,6 +54,7 @@ public partial class RegisterViewModel : ObservableObject
         // controllo se il numero di telefono è valido
         if (!string.IsNullOrEmpty(PhoneNumber))
         {
+            PhoneNumber = PhoneNumber.Replace(" ", string.Empty);
             if (PhoneNumber.Length == 10)
             {
                 string storingNumber = SelectedPhonePrefix + PhoneNumber;

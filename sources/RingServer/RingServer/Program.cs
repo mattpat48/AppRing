@@ -2,6 +2,8 @@
 using System;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace RingServer
 {
@@ -32,6 +34,9 @@ namespace RingServer
                 options.Cookie.IsEssential = true; // Mark the session cookie as essential
             });
 
+            var Configuration = builder.Configuration;
+            var RingDBContext = new RingDBContext(new DbContextOptions<RingDBContext>(), Configuration.GetConnectionString("DefaultConnection"));
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -48,9 +53,9 @@ namespace RingServer
 
             if (!CheckForKeys())
             {
-                using RSA rsa = RSA.Create(2048);
-                var publicKey = rsa.ExportSubjectPublicKeyInfo();
-                var privateKey = rsa.ExportRSAPrivateKey();
+                using RSA rsa = RSA.Create(4096);
+                var publicKey = rsa.ExportRSAPublicKeyPem();
+                var privateKey = rsa.ExportRSAPrivateKeyPem();
                 SaveRSAKeys(app.Services, publicKey, privateKey);
             }
 
@@ -63,7 +68,7 @@ namespace RingServer
             return updater.GetSetting("publicKey") != string.Empty && updater.GetSetting("privateKey") != string.Empty;
         }
 
-        private static void SaveRSAKeys(IServiceProvider services, byte[] publicKey, byte[] privateKey)
+        private static void SaveRSAKeys(IServiceProvider services, string publicKey, string privateKey)
         {
             var publicProtector = services.GetRequiredService<IDataProtectionProvider>().CreateProtector("PublicKeyProtector");
             var privateProtector = services.GetRequiredService<IDataProtectionProvider>().CreateProtector("PrivateKeyProtector");
@@ -75,11 +80,11 @@ namespace RingServer
             AppSettingsUpdater updater = new AppSettingsUpdater("appsettings.json");
             if (updater.GetSetting("publicKey") == string.Empty)
             {
-                updater.AddSetting("publicKey", Convert.ToBase64String(protectedPublicKey));
+                updater.AddSetting("publicKey", protectedPublicKey);
             }
             if (updater.GetSetting("privateKey") == string.Empty)
             {
-                updater.AddSetting("privateKey", Convert.ToBase64String(protectedPrivateKey));
+                updater.AddSetting("privateKey", protectedPrivateKey);
             }
 
         }

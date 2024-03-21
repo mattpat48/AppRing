@@ -13,11 +13,18 @@ public partial class MainPage : ContentPage
 
     protected override async void OnAppearing()
     {
-        base.OnAppearing();
         var viewModel = BindingContext as MainViewModel;
         if (viewModel != null) {
             await viewModel.Check();
         }
-        
+    }
+
+    protected override async void OnDisappearing()
+    {
+        var viewModel = BindingContext as MainViewModel;
+        if (viewModel != null)
+        {
+            await viewModel.Disconnect();
+        }
     }
 }

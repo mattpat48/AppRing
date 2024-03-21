@@ -16,3 +16,5 @@
 /sources/RingServer/.vs/ProjectEvaluation/ringserver.metadata.v7.bin
 /sources/Ring/.vs/ProjectEvaluation/ring.projects.v7.bin
 /sources/Ring/.vs/ProjectEvaluation/ring.metadata.v7.bin
+/node_modules
+/sources/RingServer/RingServer/appsettings.json

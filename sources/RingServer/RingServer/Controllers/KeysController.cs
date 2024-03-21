@@ -57,7 +57,7 @@ namespace RingServer.Controllers
 
             try
             {
-                var rsa = RSA.Create(4096);
+                using RSA rsa = RSA.Create(4096);
                 var publicKey = rsa.ExportRSAPublicKeyPem();
                 var privateKey = rsa.ExportRSAPrivateKeyPem();
 

@@ -47,7 +47,7 @@ public partial class MainViewModel : ObservableObject
         IsLoading = true;
         IsContentVisible = false;
 
-        IsOpenEnabled = false;
+        IsOpenEnabled = true;
         IsRetryVisible = false;
 
         MessageText = string.Empty;
@@ -60,8 +60,8 @@ public partial class MainViewModel : ObservableObject
         // inizializzo le opzioni del server mqtt
         options = new MqttClientOptionsBuilder()
             // ATTENZIONE: inserire l'indirizzo IP del server MQTT
-            .WithTcpServer("127.0.0.1", 1883)
-            //.WithCredentials("username", "password")
+            .WithTcpServer("localhost", 1883)
+            .WithCredentials("user", "ringuser")
             .Build();
 
         _httpClient = new HttpClient();
@@ -70,33 +70,68 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public async Task Connect()
+    private async Task<bool> Connect()
     {
-        IsLoading = true;
-        IsContentVisible = false;
+        IsOpenEnabled = false;
+        IsRetryVisible = false;
         MessageText = string.Empty;
 
-        try
+        if (!mqttClient.IsConnected)
         {
-            await mqttClient.ConnectAsync(options);
-            await mqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("ringRequest/request").Build());
-            IsOpenEnabled = true;
-            IsRetryVisible = false;
-        }
-        catch (Exception ex)
-        {
-            MessageText = ex.Message;
-            TextColor = "Red";
-            IsRetryVisible = true;
-        }
+            try
+            {
+                MqttClientConnectResult connectionResult = await mqttClient.ConnectAsync(options);
+                MqttClientConnectResultCode connectionResultCode = connectionResult.ResultCode;
 
-        IsLoading = false;
-        IsContentVisible = true;
+                if (connectionResultCode == MqttClientConnectResultCode.Success)
+                {
+                    MqttClientSubscribeResult subscribeResult =
+                        await mqttClient.SubscribeAsync(
+                            new MqttTopicFilterBuilder()
+                            .WithTopic("ringRequest/request")
+                            .Build()
+                        );
+                    MqttClientSubscribeResultCode subscribeResultCode = subscribeResult.Items.First().ResultCode;
+                    if (subscribeResultCode == MqttClientSubscribeResultCode.GrantedQoS0)
+                    {
+                        IsOpenEnabled = true;
+                        IsRetryVisible = false;
+                        IsContentVisible = true;
+                    }
+                    else
+                    {
+                        MessageText = "Subscribe failed";
+                        TextColor = "Red";
+                        IsRetryVisible = true;
+                    }
+                }
+                else
+                {
+                    MessageText = "Connection failed";
+                    TextColor = "Red";
+                    IsRetryVisible = true;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageText = ex.Message;
+                TextColor = "Red";
+                IsRetryVisible = true;
+            }
+        }
+        return mqttClient.IsConnected;
+    }
+
+    public async Task Disconnect()
+    {
+        await mqttClient.DisconnectAsync();
     }
 
     [RelayCommand]
     public async Task Check()
     {
+
         IsLoading = true;
 
         var phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
@@ -109,16 +144,22 @@ public partial class MainViewModel : ObservableObject
             var registerVm = new RegisterViewModel(_registerAPI, _verificationAPI);
             var registerPage = new RegisterPage(registerVm);
             await Shell.Current.Navigation.PushModalAsync(registerPage);
+            return;
         }
-        else
-        {
-            await Connect();
-        }
+
+        IsContentVisible = true;
+        IsLoading = false;
     }
 
     [RelayCommand]
     async Task Open()
     {
+
+        bool connected = await Connect();
+        if (!connected)
+        {
+            return;
+        }
         MessageText = string.Empty;
 
         var toSend = new
@@ -139,9 +180,19 @@ public partial class MainViewModel : ObservableObject
             .Build();
         try
         {
-            await mqttClient.PublishAsync(message);
-            TextColor = "Green";
-            MessageText = "Message sent";
+            MqttClientPublishResult publishResult = await mqttClient.PublishAsync(message);
+            MqttClientPublishReasonCode publishResultCode = publishResult.ReasonCode;
+
+            if (publishResultCode == MqttClientPublishReasonCode.Success)
+            {
+                TextColor = "Green";
+                MessageText = "Message sent";
+            }
+            else
+            {
+                MessageText = "Message not sent";
+                TextColor = "Red";
+            }
         }
         catch (Exception ex)
         {

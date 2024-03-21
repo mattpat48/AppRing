@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Vonage.Messaging;
 using Vonage;
+using Microsoft.EntityFrameworkCore;
 
 namespace RingServer.Controllers
 {
@@ -18,6 +19,8 @@ namespace RingServer.Controllers
         private AppSettingsUpdater _updater;
         private Vonage.Request.Credentials vonageCredentials;
 
+        private readonly RingDBContext _context;
+
         public CredentialsController(IDataProtectionProvider provider)
         {
             _publicProtector = provider.CreateProtector("PublicKeyProtector");
@@ -28,6 +31,8 @@ namespace RingServer.Controllers
             string vonageKey = _updater.GetSetting("vonageKey");
             string vonageSecret = _updater.GetSetting("vonageSecret");
             vonageCredentials = Vonage.Request.Credentials.FromApiKeyAndSecret(vonageKey, vonageSecret);
+
+            _context = new RingDBContext(new DbContextOptions<RingDBContext>(), _updater.GetSetting("DefaultConnection"));
         }
 
         public class EncryptedRequest
@@ -203,6 +208,14 @@ namespace RingServer.Controllers
                     }
                 }
             }
+        }
+
+        [HttpGet]
+        [Route("/api/v1/auth/getusers")]
+        public IActionResult GetUsers()
+        {
+            var users = _context.Users.ToList();
+            return Ok(users);
         }
     }
 }
