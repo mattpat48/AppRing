@@ -8,7 +8,7 @@ namespace RingServer.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class KeysController : ControllerBase
+    public class KeysController : Controller
     {
 
         private readonly IDataProtector _publicProtector;

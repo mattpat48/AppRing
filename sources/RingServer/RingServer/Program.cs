@@ -34,8 +34,7 @@ namespace RingServer
                 options.Cookie.IsEssential = true; // Mark the session cookie as essential
             });
 
-            var Configuration = builder.Configuration;
-            var RingDBContext = new RingDBContext(new DbContextOptions<RingDBContext>(), Configuration.GetConnectionString("DefaultConnection"));
+            builder.Services.AddDbContext<RingDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseConnection")));
 
             var app = builder.Build();
 

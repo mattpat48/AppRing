@@ -10,6 +10,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace RingServer.Controllers
 {
+    [ApiController]
+    [Route("[controller]")]
     public class CredentialsController : Controller
     {
         private readonly IDataProtector _publicProtector;
@@ -19,9 +21,9 @@ namespace RingServer.Controllers
         private AppSettingsUpdater _updater;
         private Vonage.Request.Credentials vonageCredentials;
 
-        private readonly RingDBContext _context;
+        private readonly RingDBContext _dbContext;
 
-        public CredentialsController(IDataProtectionProvider provider)
+        public CredentialsController(IDataProtectionProvider provider, RingDBContext dbContext)
         {
             _publicProtector = provider.CreateProtector("PublicKeyProtector");
             _privateProtector = provider.CreateProtector("PrivateKeyProtector");
@@ -32,7 +34,7 @@ namespace RingServer.Controllers
             string vonageSecret = _updater.GetSetting("vonageSecret");
             vonageCredentials = Vonage.Request.Credentials.FromApiKeyAndSecret(vonageKey, vonageSecret);
 
-            _context = new RingDBContext(new DbContextOptions<RingDBContext>(), _updater.GetSetting("DefaultConnection"));
+            _dbContext = dbContext;
         }
 
         public class EncryptedRequest
@@ -60,6 +62,18 @@ namespace RingServer.Controllers
                 PKey = pKey;
                 Number = number;
                 Id = id;
+            }
+        }
+
+        public class VerifyRequest
+        {
+            public string Code { get; set; }
+            public string Number { get; set; }
+
+            public VerifyRequest(string code, string number)
+            {
+                Code = code;
+                Number = number;
             }
         }
 
@@ -99,47 +113,77 @@ namespace RingServer.Controllers
                 {
                     return BadRequest("Outer invalid request payload");
                 }
-                else
+                EncryptedRequest request = JsonConvert.DeserializeObject<EncryptedRequest>(requestBody);
+
+                string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
+                string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
+
+                using RSA rsa = RSA.Create();
+                rsa.ImportFromPem(privateKeyPem.ToCharArray());
+
+                if (request != null)
                 {
-                    EncryptedRequest request = JsonConvert.DeserializeObject<EncryptedRequest>(requestBody);
+                    byte[] key = rsa.Decrypt(Convert.FromBase64String(request.EncryptedKey), RSAEncryptionPadding.Pkcs1);
+                    byte[] iv = rsa.Decrypt(Convert.FromBase64String(request.EncryptedIV), RSAEncryptionPadding.Pkcs1);
 
-                    // da gestire connessione con db
-                    string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
-                    string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
+                    byte[] encryptedData = Convert.FromBase64String(request.EncryptedData);
 
-                    using RSA rsa = RSA.Create();
-                    rsa.ImportFromPem(privateKeyPem.ToCharArray());
+                    using Aes aes = Aes.Create();
+                    aes.Key = key;
+                    aes.IV = iv;
 
-                    if (request != null)
+                    ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+
+                    using (MemoryStream msDecrypt = new MemoryStream(encryptedData))
                     {
-                        byte[] key = rsa.Decrypt(Convert.FromBase64String(request.EncryptedKey), RSAEncryptionPadding.Pkcs1);
-                        byte[] iv = rsa.Decrypt(Convert.FromBase64String(request.EncryptedIV), RSAEncryptionPadding.Pkcs1);
-
-                        byte[] encryptedData = Convert.FromBase64String(request.EncryptedData);
-
-                        using Aes aes = Aes.Create();
-                        aes.Key = key;
-                        aes.IV = iv;
-
-                        ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
-
-                        using (MemoryStream msDecrypt = new MemoryStream(encryptedData))
+                        using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
                         {
-                            using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                            using (StreamReader srDecrypt = new StreamReader(csDecrypt))
                             {
-                                using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+                                string plaintext = srDecrypt.ReadToEnd();
+                                var userInfo = JsonConvert.DeserializeObject<DecryptedRequest>(plaintext);
+                                if (userInfo != null)
                                 {
-                                    string plaintext = srDecrypt.ReadToEnd();
-                                    var userInfo = JsonConvert.DeserializeObject<DecryptedRequest>(plaintext);
-                                    return Ok(userInfo);
+                                    string verificationCode = new Random().Next(10000000, 99999999).ToString();
+                                    if (_dbContext.Users.All(u => u.phoneNumber != userInfo.Number))
+                                    {
+                                        _dbContext.Users.Add(new User
+                                        {
+                                            phoneNumber = userInfo.Number,
+                                            deviceId = userInfo.Id,
+                                            verificationCode = string.Empty,
+                                            verificationExpire = DateTime.MinValue,
+                                            lastLogin = DateTime.MinValue,
+                                            publicKey = userInfo.PKey
+                                        });
+                                    }
+                                    else
+                                    {
+                                        _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).First().verificationCode = string.Empty;
+                                        _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).First().lastLogin = DateTime.MinValue;
+                                    }
+
+                                    try
+                                    {
+                                        await _dbContext.SaveChangesAsync();
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        return StatusCode(500, "An error occurred while saving the user to the database");
+                                    }
+                                    return Ok();
+                                }
+                                else
+                                {
+                                    return BadRequest("Invalid request payload");
                                 }
                             }
                         }
                     }
-                    else
-                    {
-                        return BadRequest("Inner invalid request payload");
-                    }
+                }
+                else
+                {
+                    return BadRequest("Invalid request payload");
                 }
             }
         }
@@ -160,11 +204,20 @@ namespace RingServer.Controllers
                     try
                     {
                         var to = JsonConvert.DeserializeObject<string>(requestBody);
-                        string verificationCode = new Random().Next(10000000, 99999999).ToString();
 
-                        HttpContext.Session.SetString("VerificationCode", verificationCode);
+                        string verificationCode = new Random().Next(10000000, 99999999).ToString();
+                        _dbContext.Users.Where(u => u.phoneNumber == to).First().verificationCode = verificationCode;
+                        _dbContext.Users.Where(u => u.phoneNumber == to).First().verificationExpire = DateTime.Now.AddMinutes(5);
+                        try
+                        {
+                            await _dbContext.SaveChangesAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                            return StatusCode(500, "An error occurred while saving the user to the database");
+                        }
+
                         string message = "Your verification code is: " + verificationCode;
-                        
                         var vonageClient = new VonageClient(vonageCredentials);
                         var smsResponse = vonageClient.SmsClient.SendAnSms(new SendSmsRequest
                         {
@@ -196,26 +249,48 @@ namespace RingServer.Controllers
                 }
                 else
                 {
-                    var code = JsonConvert.DeserializeObject<string>(requestBody);
-                    string verificationCode = HttpContext.Session.GetString("VerificationCode");
-                    if (code == verificationCode)
+                    try
                     {
-                        return Ok("Code verified");
+                        var info = JsonConvert.DeserializeObject<VerifyRequest>(requestBody);
+                        if (info == null)
+                        {
+                            return BadRequest("Invalid request payload");
+                        }
+
+                        string code = info.Code;
+                        string number = info.Number;
+
+                        string verificationCode = _dbContext.Users.Where(u => u.phoneNumber == number).Select(u => u.verificationCode).First();
+                        DateTime verificationExpire = _dbContext.Users.Where(u => u.phoneNumber == number).Select(u => u.verificationExpire).First();
+
+                        if (DateTime.Now > verificationExpire)
+                        {
+                            return BadRequest("Verification code expired");
+                        }
+                        if (code == verificationCode)
+                        {
+                            _dbContext.Users.Where(u => u.phoneNumber == info.Number).First().lastLogin = DateTime.Now;
+                            try
+                            {
+                                await _dbContext.SaveChangesAsync();
+                            }
+                            catch (Exception ex)
+                            {
+                                return StatusCode(500, "An error occurred while saving the user to the database");
+                            }
+                            return Ok("Code verified");
+                        }
+                        else
+                        {
+                            return BadRequest("Invalid code");
+                        }
                     }
-                    else
+                    catch (Exception e)
                     {
-                        return BadRequest("Invalid code");
+                        return BadRequest(e.Message);
                     }
                 }
             }
-        }
-
-        [HttpGet]
-        [Route("/api/v1/auth/getusers")]
-        public IActionResult GetUsers()
-        {
-            var users = _context.Users.ToList();
-            return Ok(users);
         }
     }
 }
