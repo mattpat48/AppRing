@@ -56,12 +56,14 @@ namespace RingServer.Controllers
             public string PKey { get; set; }
             public string Number { get; set; }
             public string Id { get; set; }
+            public string RememberLogin { get; set; }
 
-            public DecryptedRequest(string pKey, string number, string id)
+            public DecryptedRequest(string pKey, string number, string id, string rememberLogin)
             {
                 PKey = pKey;
                 Number = number;
                 Id = id;
+                RememberLogin = rememberLogin;
             }
         }
 
@@ -74,6 +76,18 @@ namespace RingServer.Controllers
             {
                 Code = code;
                 Number = number;
+            }
+        }
+
+        public class Identifier
+        {
+            public string Number { get; set; }
+            public string Id { get; set; }
+
+            public Identifier(string number, string id)
+            {
+                Number = number;
+                Id = id;
             }
         }
 
@@ -154,13 +168,15 @@ namespace RingServer.Controllers
                                             verificationCode = string.Empty,
                                             verificationExpire = DateTime.MinValue,
                                             lastLogin = DateTime.MinValue,
-                                            publicKey = userInfo.PKey
+                                            publicKey = userInfo.PKey,
+                                            rememberLogin = userInfo.RememberLogin
                                         });
                                     }
                                     else
                                     {
                                         _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).First().verificationCode = string.Empty;
                                         _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).First().lastLogin = DateTime.MinValue;
+                                        _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).First().rememberLogin = userInfo.RememberLogin;
                                     }
 
                                     try
@@ -217,6 +233,7 @@ namespace RingServer.Controllers
                             return StatusCode(500, "An error occurred while saving the user to the database");
                         }
 
+                        /*
                         string message = "Your verification code is: " + verificationCode;
                         var vonageClient = new VonageClient(vonageCredentials);
                         var smsResponse = vonageClient.SmsClient.SendAnSms(new SendSmsRequest
@@ -225,7 +242,7 @@ namespace RingServer.Controllers
                             From = "Ring",
                             Text = message
                         });
-
+                        */
                         return Ok("SMS sent");
                     }
                     catch (Exception e)
@@ -257,17 +274,14 @@ namespace RingServer.Controllers
                             return BadRequest("Invalid request payload");
                         }
 
-                        string code = info.Code;
-                        string number = info.Number;
-
-                        string verificationCode = _dbContext.Users.Where(u => u.phoneNumber == number).Select(u => u.verificationCode).First();
-                        DateTime verificationExpire = _dbContext.Users.Where(u => u.phoneNumber == number).Select(u => u.verificationExpire).First();
+                        string verificationCode = _dbContext.Users.Where(u => u.phoneNumber == info.Number).Select(u => u.verificationCode).First();
+                        DateTime verificationExpire = _dbContext.Users.Where(u => u.phoneNumber == info.Number).Select(u => u.verificationExpire).First();
 
                         if (DateTime.Now > verificationExpire)
                         {
                             return BadRequest("Verification code expired");
                         }
-                        if (code == verificationCode)
+                        if (info.Code == verificationCode)
                         {
                             _dbContext.Users.Where(u => u.phoneNumber == info.Number).First().lastLogin = DateTime.Now;
                             try
@@ -276,13 +290,77 @@ namespace RingServer.Controllers
                             }
                             catch (Exception ex)
                             {
-                                return StatusCode(500, "An error occurred while saving the user to the database");
+                                return StatusCode(500, ex.Message);
                             }
                             return Ok("Code verified");
                         }
                         else
                         {
                             return BadRequest("Invalid code");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        return BadRequest(e.Message);
+                    }
+                }
+            }
+        }
+
+        [HttpPost]
+        [Route("/api/v1/auth/checklogout")]
+        public async Task<IActionResult> CheckLogout()
+        {
+            using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                string requestBody = await reader.ReadToEndAsync();
+                if (requestBody == null)
+                {
+                    return BadRequest("Invalid request payload");
+                }
+                else
+                {
+                    try
+                    {
+                        var user = JsonConvert.DeserializeObject<Identifier>(requestBody);
+                        if (user == null)
+                        {
+                            return BadRequest("Invalid request payload");
+                        }
+
+                        if (_dbContext.Users.All(u => u.phoneNumber != user.Number || u.deviceId != user.Id))
+                        {
+                            return BadRequest("User not found");
+                        }
+                        else
+                        {
+                            DateTime lastLogin = _dbContext.Users.Where(u => u.phoneNumber == user.Number && u.deviceId == user.Id).First().lastLogin;
+                            if (_dbContext.Users.Where(u => u.phoneNumber == user.Number && u.deviceId == user.Id).First().rememberLogin == "n")
+                            {
+                                if (DateTime.Compare(lastLogin.AddMinutes(10), DateTime.Now) <= 0)
+                                {
+                                    _dbContext.Users.Where(u => u.phoneNumber == user.Number && u.deviceId == user.Id).First().lastLogin = DateTime.MinValue;
+                                    await _dbContext.SaveChangesAsync();
+                                    return Ok("Login Expired");
+                                }
+                                else
+                                {
+                                    return Ok("Login Valid");
+                                }
+                            }
+                            else
+                            {
+                                if (DateTime.Compare(lastLogin.AddDays(60), DateTime.Now) <= 0)
+                                {
+                                    _dbContext.Users.Where(u => u.phoneNumber == user.Number && u.deviceId == user.Id).First().lastLogin = DateTime.MinValue;
+                                    await _dbContext.SaveChangesAsync();
+                                    return Ok("Login Expired");
+                                }
+                                else
+                                {
+                                    return Ok("Login Valid");
+                                }
+                            }
                         }
                     }
                     catch (Exception e)

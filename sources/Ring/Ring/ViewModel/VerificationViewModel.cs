@@ -48,19 +48,21 @@ public partial class VerificationViewModel : ObservableObject
             {
                 // codice di verifica corretto, vado sulla main page
                 MessageText = string.Empty;
-                await SecureStorage.SetAsync("IsVerified", "yes");
+                await SecureStorage.SetAsync("IsVerified", "y");
                 await Shell.Current.Navigation.PopToRootAsync();
             }
             else
             {
                 ColorText = "Red";
                 MessageText = "Verification code does not match!";
+                await SecureStorage.SetAsync("IsVerified", "n");
             }
         }
         else
         {
             ColorText = "Red";
             MessageText = "Insert a valid code!";
+            await SecureStorage.SetAsync("IsVerified", "n");
         }
     }
 
@@ -86,8 +88,6 @@ public partial class VerificationViewModel : ObservableObject
     [RelayCommand]
     async Task Back()
     {
-        SecureStorage.Remove("PublicDeviceKey");
-        SecureStorage.Remove("PrivateDeviceKey");
         SecureStorage.Remove("ServerKey");
         SecureStorage.Remove("PhoneNumber");
         SecureStorage.Remove("IsVerified");

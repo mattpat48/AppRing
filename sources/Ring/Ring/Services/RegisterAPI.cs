@@ -11,15 +11,18 @@ namespace Ring.Services;
 public class RegisterAPI
 {
     private readonly HttpClient _httpClient;
+    private readonly string _server;
 
     public RegisterAPI(HttpClient client)
     {
         _httpClient = client;
+        _server = Environment.GetEnvironmentVariable("API_SERVER");
     }
 
     public async Task<string> GetServerKey()
     {
-        var url = "https://localhost:7046/api/v1/auth/publickey";
+        var url = _server + "/api/v1/auth/publickey";
+
         try
         {
             // richiedo la chiave pubblica del server
@@ -59,19 +62,21 @@ public class RegisterAPI
 
     public async Task<string> SignInRequest()
     {
-        var url = "https://localhost:7046/api/v1/auth/signin";
+        var url = _server + "/api/v1/auth/signin";
 
         // recupero le informazioni da inviare al server
         var keyToSend = await SecureStorage.GetAsync("PublicDeviceKey");
         var phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
         var idToSend = await SecureStorage.GetAsync("DeviceId");
+        var rememberLogin = await SecureStorage.GetAsync("RememberLogin");
 
         // creo il contenuto da inviare al server
         var myContent = new
         {
             PKey = keyToSend,
             Number = phoneNumber,
-            Id = idToSend
+            Id = idToSend,
+            RememberLogin = rememberLogin
         };
 
         try

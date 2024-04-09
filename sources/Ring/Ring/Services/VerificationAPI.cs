@@ -13,10 +13,12 @@ public class VerificationAPI
 {
 
     private readonly HttpClient _httpClient;
+    private readonly string _server;
 
     public VerificationAPI(HttpClient client)
     {
         _httpClient = client;
+        _server = Environment.GetEnvironmentVariable("API_SERVER");
     }
 
     public async Task<string> SendSMS(string phoneNumber)
@@ -27,7 +29,7 @@ public class VerificationAPI
         }
         else
         {
-            var url = "https://localhost:7046/api/v1/auth/sendcode";
+            var url = _server + "/api/v1/auth/sendcode";
 
             string jsonRequestBody = JsonConvert.SerializeObject(phoneNumber);
             var stringContent = new StringContent(jsonRequestBody, Encoding.UTF8, "application/json");
@@ -48,9 +50,15 @@ public class VerificationAPI
 
     public async Task<string> CheckCode(string inserted)
     {
-        var url = "https://localhost:7046/api/v1/auth/verifycode";
+        var url = _server + "/api/v1/auth/verifycode";
 
-        string jsonRequestBody = JsonConvert.SerializeObject(inserted);
+        var toSend = new
+        {
+            Code = inserted,
+            Number = await SecureStorage.GetAsync("PhoneNumber")
+        };
+
+        string jsonRequestBody = JsonConvert.SerializeObject(toSend);
         var stringContent = new StringContent(jsonRequestBody, Encoding.UTF8, "application/json");
 
         HttpResponseMessage response = await _httpClient.PostAsync(url, stringContent);

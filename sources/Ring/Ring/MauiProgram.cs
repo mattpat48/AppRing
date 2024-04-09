@@ -24,6 +24,11 @@ namespace Ring
             builder.Services.AddTransient<VerificationPage>();
             builder.Services.AddTransient<VerificationViewModel>();
 
+            Environment.SetEnvironmentVariable("MQTT_SERVER", "10.20.100.28");
+            Environment.SetEnvironmentVariable("MQTT_PORT", "1883");
+
+            Environment.SetEnvironmentVariable("API_SERVER", "https://localhost:7046");
+
             return builder.Build();
         }
     }

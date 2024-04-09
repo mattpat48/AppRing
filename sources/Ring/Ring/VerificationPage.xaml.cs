@@ -10,18 +10,4 @@ public partial class VerificationPage : ContentPage
 		InitializeComponent();
 		BindingContext = viewModel;
     }
-
-    protected override async void OnAppearing()
-	{
-        base.OnAppearing();
-        Opacity = 0;
-        await this.FadeTo(1, 500);
-    }
-
-    protected override async void OnDisappearing()
-    {
-        base.OnDisappearing();
-        Opacity = 1;
-        await this.FadeTo(0, 500);
-    }
 }

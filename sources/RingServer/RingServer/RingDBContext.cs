@@ -22,4 +22,5 @@ public class User
     public DateTime verificationExpire { get; set; }
     public DateTime lastLogin { get; set; }
     public string publicKey { get; set; }
+    public string rememberLogin { get; set; }
 }

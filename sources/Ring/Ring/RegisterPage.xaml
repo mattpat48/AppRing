@@ -69,6 +69,21 @@
                     Grid.Row="2"
                     Grid.Column="1" />
 
+                <CheckBox
+                    IsChecked="{Binding RememberLogin}"
+                    HorizontalOptions="End"
+                    VerticalOptions="FillAndExpand"
+                    Grid.Row="3"
+                    Grid.Column="0" />
+
+                <Label
+                    Text="Remember me"
+                    LineBreakMode="WordWrap"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center"
+                    Grid.Row="3"
+                    Grid.Column="1" />
+
                 <Button
                     Text="Next"
                     IsEnabled="{Binding Source={x:Reference phoneNumberEntry}, Path=Text.Length}"
@@ -76,7 +91,7 @@
                     SemanticProperties.Hint="Register your phone number"
                     WidthRequest="100"
                     Margin="10"
-                    Grid.Row="3"
+                    Grid.Row="4"
                     Grid.ColumnSpan="2" />
 
                 <Label
@@ -86,17 +101,9 @@
                     LineBreakMode="TailTruncation"
                     HorizontalOptions="FillAndExpand"
                     VerticalOptions="Center"
-                    Grid.Row="4"
-                    Grid.ColumnSpan="2" />
-
-                <Label
-                    Text="{Binding Response}"
-                    Style="{StaticResource SubHeadline}"
-                    LineBreakMode="WordWrap"
-                    HorizontalOptions="FillAndExpand"
-                    VerticalOptions="FillAndExpand"
                     Grid.Row="5"
                     Grid.ColumnSpan="2" />
+                
             </Grid>
                 
         </Frame>

@@ -27,9 +27,8 @@ public partial class RegisterViewModel : ObservableObject
     [ObservableProperty]
     string errorText;
 
-    // risposta del server
     [ObservableProperty]
-    string response;
+    bool rememberLogin;
 
     string deviceId;
     private RegisterAPI _registerAPI;
@@ -42,7 +41,7 @@ public partial class RegisterViewModel : ObservableObject
         PhonePrefixes = new List<string> { "+39", "+44", "+1", "+49", "+33", "+34", "+31", "+32", "+30", "+41", "+43", "+45", "+46", "+47", "+48"};
         SelectedPhonePrefix = "+39";
         ErrorText = string.Empty;
-        Response = string.Empty;
+        rememberLogin = false;
         this.deviceId = string.Empty;
         _registerAPI = registerAPI;
         _verificationAPI = verificationAPI;
@@ -62,8 +61,8 @@ public partial class RegisterViewModel : ObservableObject
 
                 // genero la chiave pubblica e privata
                 using RSA rsa = RSA.Create(2048);
-                var publicKey = rsa.ExportRSAPublicKeyPem();
-                var privateKey = rsa.ExportRSAPrivateKeyPem();
+                string publicKey = rsa.ExportRSAPublicKeyPem();
+                string privateKey = rsa.ExportRSAPrivateKeyPem();
 
                 // genero un id univoco per il dispositivo se non esiste 
                 deviceId = await SecureStorage.GetAsync("DeviceId");
@@ -76,6 +75,11 @@ public partial class RegisterViewModel : ObservableObject
                 await SecureStorage.SetAsync("PrivateDeviceKey", privateKey);
                 await SecureStorage.SetAsync("PhoneNumber", storingNumber);
                 await SecureStorage.SetAsync("DeviceId", deviceId);
+                await SecureStorage.SetAsync("IsVerified", "n");
+                if (RememberLogin == true)
+                    await SecureStorage.SetAsync("RememberLogin", "y");
+                else
+                    await SecureStorage.SetAsync("RememberLogin", "n");
 
                 // richiedo la registrazione al server
                 var signInResponse = await _registerAPI.SignInRequest();
@@ -93,16 +97,19 @@ public partial class RegisterViewModel : ObservableObject
                     else
                     {
                         ErrorText = sendSMSResponse;
-                        SecureStorage.Remove("PublicDeviceKey");
-                        SecureStorage.Remove("PrivateDeviceKey");
                         SecureStorage.Remove("ServerKey");
                         SecureStorage.Remove("PhoneNumber");
-                        SecureStorage.Remove("IsVerified");
+                        await SecureStorage.SetAsync("IsVerified", "n");
+                        SecureStorage.Remove("RememberLogin");
                     }
                 }
                 else
                 {
                     ErrorText = signInResponse;
+                    SecureStorage.Remove("ServerKey");
+                    SecureStorage.Remove("PhoneNumber");
+                    await SecureStorage.SetAsync("IsVerified", "n");
+                    SecureStorage.Remove("RememberLogin");
                 }
             }
             else

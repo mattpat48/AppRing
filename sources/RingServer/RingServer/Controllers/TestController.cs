@@ -1,10 +1,4 @@
-﻿using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using System.Security.Cryptography;
-using System.Text;
-using Vonage.Messaging;
-using Vonage;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace RingServer.Controllers
@@ -84,7 +78,7 @@ namespace RingServer.Controllers
                         }
                         catch (Exception ex)
                         {
-                            return StatusCode(500, "An error occurred while saving the user to the database");
+                            return StatusCode(500, ex.Message);
                         }
                         return Ok();
                     }
@@ -185,6 +179,7 @@ namespace RingServer.Controllers
         }
 
         [HttpGet]
+        [Route("/api/v1/auth/users")]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
             var users = await _dbContext.Users.ToListAsync();
