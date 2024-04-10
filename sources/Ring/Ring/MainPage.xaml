@@ -11,62 +11,98 @@
             IsRunning="{Binding IsLoading}"
             IsVisible="{Binding IsLoading}"
             Color="White"
-            WidthRequest="100"
-            HeightRequest="100"
             Margin="50"
             HorizontalOptions="Center"
             VerticalOptions="Center"
             SemanticProperties.Hint="Activity indicator" />
 
         <Grid
-            RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto"
+            RowDefinitions="Auto, Auto, Auto"
             ColumnDefinitions="Auto"
             RowSpacing="10"
             IsVisible="{Binding IsContentVisible}"
             HorizontalOptions="Center"
             VerticalOptions="Center">
-            
-            <Label
-                Text="Ring"
-                Margin="20"
-                Padding="20"
-                Style="{StaticResource Headline}"
-                SemanticProperties.HeadingLevel="Level1"
+            <Grid.Shadow>
+                <Shadow
+                    Radius="40"
+                    Opacity="0.8"
+                    Offset="20,20" 
+                    Brush="Black" />
+            </Grid.Shadow>
+
+            <Frame
+                BackgroundColor="{StaticResource PrimaryDark}"
+                CornerRadius="20"
+                VerticalOptions="CenterAndExpand"
+                HasShadow="True"
                 Grid.Row="0"
-                Grid.ColumnSpan="1"/>
+                Margin="0, 30, 0, 20"
+                Grid.ColumnSpan="2" >
 
-            <Button
-                x:Name="msgButton"
-                Text="Open"
-                Margin="5"
-                IsEnabled="{Binding IsOpenEnabled}"
-                Command="{Binding OpenCommand}"
-                WidthRequest="100"
-                SemanticProperties.Hint="Send or unsend a message"
-                HorizontalOptions="Center" 
+                <Label
+                    Text="Ring"
+                    TextColor="Black"
+                    FontAttributes="Bold"
+                    Style="{StaticResource Headline}"
+                    SemanticProperties.HeadingLevel="Level1"/>
+
+            </Frame>
+
+            <Frame
+                BackgroundColor="{StaticResource Gray800}"
+                CornerRadius="20"
+                VerticalOptions="CenterAndExpand"
+                HasShadow="True"
                 Grid.Row="1"
-                Grid.ColumnSpan="1"/>
+                Grid.ColumnSpan="2" >
+                <Grid
+                    RowDefinitions="Auto, Auto, Auto"
+                    ColumnDefinitions="Auto"
+                    RowSpacing="10"
+                    HorizontalOptions="CenterAndExpand">
+                    <Grid.Shadow>
+                        <Shadow
+                            Radius="20"
+                            Opacity="0.8"
+                            Offset="10,10" 
+                            Brush="Black" />
+                    </Grid.Shadow>
+                    
+                    <Button
+                        x:Name="msgButton"
+                        Text="Open"
+                        Margin="5"
+                        IsEnabled="{Binding IsOpenEnabled}"
+                        Command="{Binding OpenCommand}"
+                        WidthRequest="100"
+                        SemanticProperties.Hint="Send or unsend a message"
+                        HorizontalOptions="Center" 
+                        Grid.Row="0"
+                        Grid.ColumnSpan="1"/>
 
-            <Button
-                x:Name="rmvButton"
-                Text="Delete Number"
-                Margin="5"
-                Command="{Binding RemoveNumberCommand}"
-                SemanticProperties.Hint="Remove the number (debug)"
-                HorizontalOptions="Center"
-                Grid.Row="2"
-                Grid.ColumnSpan="1"/>
+                    <Button
+                        x:Name="rmvButton"
+                        Text="Delete Number"
+                        Margin="5"
+                        Command="{Binding RemoveNumberCommand}"
+                        SemanticProperties.Hint="Remove the number (debug)"
+                        HorizontalOptions="Center"
+                        Grid.Row="1"
+                        Grid.ColumnSpan="1"/>
 
-            <Button
-                x:Name="retryButton"
-                Text="Retry"
-                Margin="5"
-                Command="{Binding ConnectCommand}"
-                IsVisible="{Binding IsRetryVisible}"
-                SemanticProperties.Hint="Retry connecting to server"
-                HorizontalOptions="Center"
-                Grid.Row="3"
-                Grid.ColumnSpan="1"/>
+                    <Button
+                        x:Name="retryButton"
+                        Text="Retry"
+                        Margin="5"
+                        Command="{Binding ConnectCommand}"
+                        IsVisible="{Binding IsRetryVisible}"
+                        SemanticProperties.Hint="Retry connecting to server"
+                        HorizontalOptions="Center"
+                        Grid.Row="2"
+                        Grid.ColumnSpan="1"/>
+                </Grid>
+            </Frame>
 
             <Label
                 Text="{Binding MessageText}"
@@ -76,7 +112,7 @@
                 LineBreakMode="WordWrap"
                 HorizontalOptions="FillAndExpand"
                 SemanticProperties.HeadingLevel="Level2"
-                Grid.Row="4"
+                Grid.Row="2"
                 Grid.ColumnSpan="1"/>
             
         </Grid>

@@ -354,7 +354,7 @@ namespace RingServer.Controllers
                                 {
                                     _dbContext.Users.Where(u => u.phoneNumber == user.Number && u.deviceId == user.Id).First().lastLogin = DateTime.MinValue;
                                     await _dbContext.SaveChangesAsync();
-                                    return Ok("Login Expired");
+                                    return BadRequest("Login Expired");
                                 }
                                 else
                                 {

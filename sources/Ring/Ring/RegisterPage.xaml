@@ -19,80 +19,122 @@
             AbsoluteLayout.LayoutFlags="All"
             AbsoluteLayout.LayoutBounds="0.5, 0.5, 0.9, 0.9"
             BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource OffBlack}}"
-            Padding="20"
+            Padding="30"
             CornerRadius="20">
 
             <Grid
-                RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto"
-                ColumnDefinitions="Auto, Auto"
-                RowSpacing="10"
-                VerticalOptions="Center"
-                HorizontalOptions="Center">
+                RowDefinitions="Auto, Auto, Auto"
+                ColumnDefinitions="*, *"
+                RowSpacing="10" >
+                <Grid.Shadow>
+                    <Shadow
+                        Radius="40"
+                        Opacity="0.8"
+                        Offset="20,20" 
+                        Brush="Black" />
+                </Grid.Shadow>
 
-                <Label
-                    Text="Welcome to Ring!"
-                    LineBreakMode="WordWrap"
-                    HorizontalOptions="FillAndExpand"
-                    Style="{StaticResource Headline}"
-                    VerticalOptions="Center"
+                <Frame
+                    BackgroundColor="{StaticResource PrimaryDark}"
+                    CornerRadius="20"
+                    VerticalOptions="CenterAndExpand"
+                    HasShadow="True"
                     Grid.Row="0"
-                    Grid.ColumnSpan="2" />
+                    Grid.ColumnSpan="2" >
 
-                <Label
-                    Text="Please enter your phone number to register"
-                    LineBreakMode="WordWrap"
-                    HorizontalOptions="FillAndExpand"
-                    Style="{StaticResource SubHeadline}"
-                    VerticalOptions="FillAndExpand"
+                    <Grid
+                        RowDefinitions="Auto, Auto"
+                        RowSpacing="10">
+
+                        <Label
+                            Padding="5"
+                            Text="Welcome to Ring!"
+                            FontAttributes="Bold"
+                            TextColor="Black"
+                            LineBreakMode="WordWrap"
+                            VerticalOptions="CenterAndExpand"
+                            HorizontalOptions="CenterAndExpand"
+                            Style="{StaticResource Headline}">
+                        </Label>
+
+                        <Label
+                            TextColor="{StaticResource Gray800}"
+                            Text="Please enter your phone number to register."
+                            LineBreakMode="WordWrap"
+                            HorizontalOptions="CenterAndExpand"
+                            VerticalOptions="CenterAndExpand"
+                            Style="{StaticResource SubHeadline}"
+                            Grid.Row="1"
+                            Grid.ColumnSpan="2" />
+                    </Grid>
+
+                </Frame>
+
+                <Frame
+                    BackgroundColor="{StaticResource Gray800}"
+                    BorderColor="Transparent"
+                    CornerRadius="20"
                     Grid.Row="1"
-                    Grid.ColumnSpan="2" />
+                    Grid.ColumnSpan="2">
+                    <Frame.Shadow>
+                        <Shadow
+                            Radius="20"
+                            Opacity="0.8"
+                            Offset="10,10"
+                            Brush="Black" />
+                    </Frame.Shadow>
 
-                <Picker
-                    Title="Country"
-                    ItemsSource="{Binding PhonePrefixes}"
-                    SelectedItem="{Binding SelectedPhonePrefix}"
-                    x:Name="countryPicker"
-                    WidthRequest="100"
-                    HorizontalOptions="End"
-                    Margin="10"
-                    Grid.Row="2"
-                    Grid.Column="0" />
+                    <Grid
+                        RowDefinitions="Auto, Auto, Auto"
+                        RowSpacing="15"
+                        ColumnDefinitions="Auto, Auto"
+                        HorizontalOptions="Center">
 
-                <Entry
-                    Placeholder="Phone number"
-                    Keyboard="Telephone"
-                    Text="{Binding PhoneNumber}"
-                    x:Name="phoneNumberEntry"
-                    WidthRequest="200"
-                    HorizontalOptions="Start"
-                    Margin="10"
-                    Grid.Row="2"
-                    Grid.Column="1" />
+                        <Picker
+                            Title="Country"
+                            ItemsSource="{Binding PhonePrefixes}"
+                            SelectedItem="{Binding SelectedPhonePrefix}"
+                            x:Name="countryPicker"
+                            WidthRequest="100"
+                            Margin="10, 0, 0, 10"
+                            Grid.Row="0"
+                            Grid.Column="0"/>
 
-                <CheckBox
-                    IsChecked="{Binding RememberLogin}"
-                    HorizontalOptions="End"
-                    VerticalOptions="FillAndExpand"
-                    Grid.Row="3"
-                    Grid.Column="0" />
+                        <Entry
+                            Placeholder="Phone number"
+                            Keyboard="Telephone"
+                            Text="{Binding PhoneNumber}"
+                            x:Name="phoneNumberEntry"
+                            WidthRequest="120"
+                            Margin="10, 0, 0, 10"
+                            Grid.Row="0"
+                            Grid.Column="1"/>
 
-                <Label
-                    Text="Remember me"
-                    LineBreakMode="WordWrap"
-                    HorizontalOptions="Start"
-                    VerticalOptions="Center"
-                    Grid.Row="3"
-                    Grid.Column="1" />
+                        <CheckBox
+                            IsChecked="{Binding RememberLogin}"
+                            HorizontalOptions="End"
+                            Grid.Row="1"
+                            Grid.Column="0" />
 
-                <Button
-                    Text="Next"
-                    IsEnabled="{Binding Source={x:Reference phoneNumberEntry}, Path=Text.Length}"
-                    Command="{Binding NextCommand}"
-                    SemanticProperties.Hint="Register your phone number"
-                    WidthRequest="100"
-                    Margin="10"
-                    Grid.Row="4"
-                    Grid.ColumnSpan="2" />
+                        <Label
+                            Text="Remember me"
+                            LineBreakMode="WordWrap"
+                            HorizontalOptions="Start"
+                            VerticalOptions="Center"
+                            Grid.Row="1"
+                            Grid.Column="1" />
+                        <Button
+                            Text="Next"
+                            IsEnabled="{Binding Source={x:Reference phoneNumberEntry}, Path=Text.Length}"
+                            Command="{Binding NextCommand}"
+                            SemanticProperties.Hint="Register your phone number"
+                            HorizontalOptions="CenterAndExpand"
+                            WidthRequest="75"
+                            Grid.Row="2"
+                            Grid.ColumnSpan="2" />
+                        
+                    </Grid>
+                </Frame>
 
                 <Label
                     Text="{Binding ErrorText}"
@@ -101,7 +143,7 @@
                     LineBreakMode="TailTruncation"
                     HorizontalOptions="FillAndExpand"
                     VerticalOptions="Center"
-                    Grid.Row="5"
+                    Grid.Row="2"
                     Grid.ColumnSpan="2" />
                 
             </Grid>

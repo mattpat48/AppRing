@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Ring.VerificationPage"
              Title="Verification"
+             xmlns:ct="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
              xmlns:viewmodel="clr-namespace:Ring.ViewModel"
              x:DataType="viewmodel:VerificationViewModel"
              Shell.NavBarIsVisible="False">
@@ -18,84 +19,133 @@
             AbsoluteLayout.LayoutFlags="All"
             AbsoluteLayout.LayoutBounds="0.5, 0.5, 0.9, 0.9"
             BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource OffBlack}}"
-            Padding="20">
+            Padding="30"
+            CornerRadius="20">
 
-            <VerticalStackLayout>
+            <Grid
+                RowDefinitions="Auto, Auto, Auto"
+                ColumnDefinitions="*, *"
+                RowSpacing="10">
+                <Grid.Shadow>
+                    <Shadow
+                        Radius="40"
+                        Opacity="0.8"
+                        Offset="20,20" 
+                        Brush="Black" />
+                </Grid.Shadow>
 
-                <Grid
-                    RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto"
-                    ColumnDefinitions="Auto, Auto"
-                    RowSpacing="10"
+                <Frame
+                    BackgroundColor="{StaticResource PrimaryDark}"
+                    CornerRadius="20"
+                    VerticalOptions="CenterAndExpand"
+                    HasShadow="True"
+                    Grid.Row="0"
+                    Grid.ColumnSpan="2" >
+
+                    <Grid
+                        RowDefinitions="Auto, Auto"
+                        RowSpacing="10">
+
+                        <Label
+                            Padding="5"
+                            Text="Verification code"
+                            FontAttributes="Bold"
+                            TextColor="Black"
+                            LineBreakMode="WordWrap"
+                            VerticalOptions="CenterAndExpand"
+                            HorizontalOptions="CenterAndExpand"
+                            Style="{StaticResource Headline}">
+                        </Label>
+
+                        <Label
+                            TextColor="{StaticResource Gray800}"
+                            Text="We sent you an 8-digit code via SMS, please insert it below to continue to the app."
+                            LineBreakMode="WordWrap"
+                            HorizontalOptions="CenterAndExpand"
+                            VerticalOptions="CenterAndExpand"
+                            Style="{StaticResource SubHeadline}"
+                            Grid.Row="1"
+                            Grid.ColumnSpan="2" />
+                    </Grid>
+
+                </Frame>
+
+                <Frame
+                    BackgroundColor="{StaticResource Gray800}"
+                    CornerRadius="20"
+                    VerticalOptions="CenterAndExpand"
+                    HasShadow="True"
+                    Grid.Row="1"
+                    Grid.ColumnSpan="2" >
+                    <Grid
+                        RowDefinitions="Auto, Auto, Auto"
+                        ColumnDefinitions="*, *"
+                        RowSpacing="10">
+                        <Grid.Shadow>
+                            <Shadow
+                                Radius="40"
+                                Opacity="0.8"
+                                Offset="20,20" 
+                                Brush="Black" />
+                        </Grid.Shadow>
+
+                        <Entry 
+                            Placeholder="Code"
+                            x:Name="verificationCodeEntry"
+                            Text="{Binding VerificationCode}"
+                            HorizontalOptions="CenterAndExpand"
+                            HorizontalTextAlignment="Center"
+                            WidthRequest="125"
+                            Keyboard="Telephone"
+                            Margin="10"
+                            Grid.Row="0"
+                            Grid.ColumnSpan="2" />
+
+                        <Button
+                            Text="Verify"
+                            IsEnabled="{Binding Source={x:Reference verificationCodeEntry}, Path=Text.Length}"
+                            Command="{Binding VerifyCommand}"
+                            SemanticProperties.Hint="Verify your phone number"
+                            WidthRequest="100"
+                            Margin="10" 
+                            Grid.Row="1"
+                            Grid.ColumnSpan="2"/>
+
+                        <Button
+                            Text="Resend"
+                            Command="{Binding ResendCommand}"
+                            SemanticProperties.Hint="Resend verification code"
+                            HorizontalOptions="End"
+                            WidthRequest="100"
+                            Margin="10"
+                            Grid.Row="2"
+                            Grid.Column="0" />
+
+                        <Button
+                            Text="Back"
+                            Command="{Binding BackCommand}"
+                            SemanticProperties.Hint="Go back to the previous page"
+                            HorizontalOptions="Start"
+                            WidthRequest="100"
+                            Margin="10"
+                            Grid.Row="2"
+                            Grid.Column="1" />
+
+                    </Grid>
+                </Frame>
+
+                <Label
+                    Text="{Binding MessageText}"
+                    TextColor="{Binding ColorText}"
+                    Style="{StaticResource SubHeadline}"
                     VerticalOptions="Center"
-                    HorizontalOptions="Center">
+                    LineBreakMode="WordWrap"
+                    HorizontalOptions="CenterAndExpand"
+                    Grid.Row="2"
+                    Grid.ColumnSpan="2"/>
 
-                    <Label
-                        Text="Verification code"
-                        Style="{StaticResource Headline}"
-                        Grid.Row="0"
-                        Grid.ColumnSpan="2"/>
-
-                    <Label
-                        Text="We sent you a SMS containing an 8 digit code, please insert it below."
-                        LineBreakMode="WordWrap"
-                        HorizontalOptions="FillAndExpand"
-                        Style="{StaticResource SubHeadline}"
-                        Grid.Row="1"
-                        Grid.ColumnSpan="2"/>
-
-                    <Entry 
-                        Placeholder="Code"
-                        x:Name="verificationCodeEntry"
-                        Text="{Binding VerificationCode}"
-                        WidthRequest="250"
-                        Keyboard="Telephone"
-                        Margin="10"
-                        Grid.Row="2"
-                        Grid.ColumnSpan="2" />
-
-                    <Button
-                        Text="Verify"
-                        IsEnabled="{Binding Source={x:Reference verificationCodeEntry}, Path=Text.Length}"
-                        Command="{Binding VerifyCommand}"
-                        SemanticProperties.Hint="Verify your phone number"
-                        WidthRequest="100"
-                        Margin="10" 
-                        Grid.Row="3"
-                        Grid.ColumnSpan="2"/>
-
-                    <Button
-                        Text="Resend"
-                        Command="{Binding ResendCommand}"
-                        SemanticProperties.Hint="Resend verification code"
-                        HorizontalOptions="End"
-                        WidthRequest="100"
-                        Margin="10"
-                        Grid.Row="4"
-                        Grid.Column="0" />
-
-                    <Button
-                        Text="Back"
-                        Command="{Binding BackCommand}"
-                        SemanticProperties.Hint="Go back to the previous page"
-                        HorizontalOptions="Start"
-                        WidthRequest="100"
-                        Margin="10"
-                        Grid.Row="4"
-                        Grid.Column="1" />
-
-                    <Label
-                        Text="{Binding MessageText}"
-                        TextColor="{Binding ColorText}"
-                        Style="{StaticResource SubHeadline}"
-                        VerticalOptions="Center"
-                        LineBreakMode="WordWrap"
-                        HorizontalOptions="FillAndExpand"
-                        Grid.Row="5"
-                        Grid.ColumnSpan="2"/>
-
-                </Grid>
-            </VerticalStackLayout>
-
+            </Grid>
+                
         </Frame>
 
     </AbsoluteLayout>

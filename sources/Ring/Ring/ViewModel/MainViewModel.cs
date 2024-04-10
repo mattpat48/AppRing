@@ -178,8 +178,8 @@ public partial class MainViewModel : ObservableObject
 
         string phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
         string isVerified = await SecureStorage.GetAsync("IsVerified");
-        string logoutResponse = await CheckLogout();
-        if (string.IsNullOrEmpty(phoneNumber) || isVerified == "n" || logoutResponse != "success")
+        var logoutResponse = await CheckLogout();
+        if (string.IsNullOrEmpty(phoneNumber) || string.IsNullOrEmpty(isVerified) || string.Compare(isVerified, "n") == 0 || string.Compare(logoutResponse, "success") != 0)
         {
             IsLoading = false;
             IsContentVisible = false;

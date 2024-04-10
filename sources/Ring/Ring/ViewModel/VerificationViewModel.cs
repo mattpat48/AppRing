@@ -50,19 +50,22 @@ public partial class VerificationViewModel : ObservableObject
                 MessageText = string.Empty;
                 await SecureStorage.SetAsync("IsVerified", "y");
                 await Shell.Current.Navigation.PopToRootAsync();
+                return;
             }
             else
             {
                 ColorText = "Red";
                 MessageText = "Verification code does not match!";
-                await SecureStorage.SetAsync("IsVerified", "n");
+                SecureStorage.Remove("IsVerified");
+                return;
             }
         }
         else
         {
             ColorText = "Red";
             MessageText = "Insert a valid code!";
-            await SecureStorage.SetAsync("IsVerified", "n");
+            SecureStorage.Remove("IsVerified");
+            return;
         }
     }
 
@@ -80,7 +83,7 @@ public partial class VerificationViewModel : ObservableObject
         else
         {
             ColorText = "Red";
-            MessageText = sendSMSResponse;
+            MessageText = "Error while sending SMS.";
         }
     }
 

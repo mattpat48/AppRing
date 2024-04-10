@@ -1,12 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Maui.Storage;
-using Microsoft.Maui.Devices;
-using System.Net.Http;
 using System.Security.Cryptography;
-using Newtonsoft.Json;
-using System.Text;
-using System.Diagnostics;
 using Ring.Services;
 
 namespace Ring.ViewModel;
@@ -75,46 +69,49 @@ public partial class RegisterViewModel : ObservableObject
                 await SecureStorage.SetAsync("PrivateDeviceKey", privateKey);
                 await SecureStorage.SetAsync("PhoneNumber", storingNumber);
                 await SecureStorage.SetAsync("DeviceId", deviceId);
-                await SecureStorage.SetAsync("IsVerified", "n");
                 if (RememberLogin == true)
                     await SecureStorage.SetAsync("RememberLogin", "y");
                 else
                     await SecureStorage.SetAsync("RememberLogin", "n");
 
                 // richiedo la registrazione al server
-                var signInResponse = await _registerAPI.SignInRequest();
+                var  signInResponse = await _registerAPI.SignInRequest();
                 if (signInResponse == "success")
                 {
                     // vado alla pagina di verifica
-                    var phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
+                    string phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
                     var sendSMSResponse = await _verificationAPI.SendSMS(phoneNumber);
                     if (sendSMSResponse == "success")
                     {
                         var verificationVm = new VerificationViewModel(_registerAPI, _verificationAPI);
                         var verificationPage = new VerificationPage(verificationVm);
                         await Shell.Current.Navigation.PushModalAsync(verificationPage);
+                        return;
                     }
                     else
                     {
-                        ErrorText = sendSMSResponse;
+                        ErrorText = "Error while sending SMS.";
                         SecureStorage.Remove("ServerKey");
                         SecureStorage.Remove("PhoneNumber");
-                        await SecureStorage.SetAsync("IsVerified", "n");
+                        SecureStorage.Remove("IsVerified");
                         SecureStorage.Remove("RememberLogin");
+                        return;
                     }
                 }
                 else
                 {
-                    ErrorText = signInResponse;
+                    ErrorText = "Error while signing in.";
                     SecureStorage.Remove("ServerKey");
                     SecureStorage.Remove("PhoneNumber");
-                    await SecureStorage.SetAsync("IsVerified", "n");
+                    SecureStorage.Remove("IsVerified");
                     SecureStorage.Remove("RememberLogin");
+                    return;
                 }
             }
             else
             {
                 ErrorText = "Invalid phone number";
+                return;
             }
         }
     }
