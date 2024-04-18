@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using RingServer.Utils;
 
 namespace RingServer
 {
@@ -52,7 +53,7 @@ namespace RingServer
 
             if (!CheckForKeys())
             {
-                using RSA rsa = RSA.Create(4096);
+                using RSA rsa = RSA.Create(2048);
                 var publicKey = rsa.ExportRSAPublicKeyPem();
                 var privateKey = rsa.ExportRSAPrivateKeyPem();
                 SaveRSAKeys(app.Services, publicKey, privateKey);
@@ -85,8 +86,6 @@ namespace RingServer
             {
                 updater.AddSetting("privateKey", protectedPrivateKey);
             }
-
         }
-
     }
 }

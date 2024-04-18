@@ -1,12 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ring.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ring.ViewModel;
 
@@ -40,10 +34,11 @@ public partial class VerificationViewModel : ObservableObject
     [RelayCommand]
     async Task Verify()
     {
+        IsVerifyEnabled = false;
         // verifica del codice di verifica
         if (!string.IsNullOrEmpty(VerificationCode) && VerificationCode.Length == 8)
         {
-            var response = await _verificationAPI.CheckCode(VerificationCode);
+            var response = await _verificationAPI.VerifyCode(VerificationCode);
             if (response == "success")
             {
                 // codice di verifica corretto, vado sulla main page

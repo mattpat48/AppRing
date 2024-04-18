@@ -7,6 +7,8 @@ using System.Text;
 using Vonage.Messaging;
 using Vonage;
 using Microsoft.EntityFrameworkCore;
+using RingServer.Utils;
+using Jose;
 
 namespace RingServer.Controllers
 {
@@ -14,13 +16,18 @@ namespace RingServer.Controllers
     [Route("[controller]")]
     public class CredentialsController : Controller
     {
+        // Protettori per la chiave pubblica e privata
         private readonly IDataProtector _publicProtector;
         private readonly IDataProtector _privateProtector;
 
+        // Percorso del file di configurazione e updater per la modifica, prelievo o rimozione dei dati
         private readonly string _config;
         private AppSettingsUpdater _updater;
+
+        // Credenziali per l'invio di SMS
         private Vonage.Request.Credentials vonageCredentials;
 
+        // Contesto del database
         private readonly RingDBContext _dbContext;
 
         public CredentialsController(IDataProtectionProvider provider, RingDBContext dbContext)
@@ -37,65 +44,12 @@ namespace RingServer.Controllers
             _dbContext = dbContext;
         }
 
-        public class EncryptedRequest
-        {
-            public string EncryptedData { get; set; }
-            public string EncryptedKey { get; set; }
-            public string EncryptedIV { get; set; }
-
-            public EncryptedRequest(string encryptedData, string encryptedKey, string encryptedIV)
-            {
-                EncryptedData = encryptedData;
-                EncryptedKey = encryptedKey;
-                EncryptedIV = encryptedIV;
-            }
-        }
-
-        public class DecryptedRequest
-        {
-            public string PKey { get; set; }
-            public string Number { get; set; }
-            public string Id { get; set; }
-            public string RememberLogin { get; set; }
-
-            public DecryptedRequest(string pKey, string number, string id, string rememberLogin)
-            {
-                PKey = pKey;
-                Number = number;
-                Id = id;
-                RememberLogin = rememberLogin;
-            }
-        }
-
-        public class VerifyRequest
-        {
-            public string Code { get; set; }
-            public string Number { get; set; }
-
-            public VerifyRequest(string code, string number)
-            {
-                Code = code;
-                Number = number;
-            }
-        }
-
-        public class Identifier
-        {
-            public string Number { get; set; }
-            public string Id { get; set; }
-
-            public Identifier(string number, string id)
-            {
-                Number = number;
-                Id = id;
-            }
-        }
-
 
         [HttpGet]
         [Route("/api/v1/auth/publickey")]
         public IActionResult GetKeys()
         {
+            // Controllo se la chiave pubblica esiste
             string publicKey = _updater.GetSetting("publicKey");
             if (publicKey != string.Empty)
             {
@@ -106,6 +60,7 @@ namespace RingServer.Controllers
                 }
                 else
                 {
+                    // Ritorno la chiave pubblica dopo aver rimosso il protettore
                     string unprotectedPublicKey = _publicProtector.Unprotect(publicKey);
                     return Ok(unprotectedPublicKey);
                 }
@@ -127,79 +82,59 @@ namespace RingServer.Controllers
                 {
                     return BadRequest("Outer invalid request payload");
                 }
-                EncryptedRequest request = JsonConvert.DeserializeObject<EncryptedRequest>(requestBody);
 
-                string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
-                string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
-
-                using RSA rsa = RSA.Create();
-                rsa.ImportFromPem(privateKeyPem.ToCharArray());
-
-                if (request != null)
+                try
                 {
-                    byte[] key = rsa.Decrypt(Convert.FromBase64String(request.EncryptedKey), RSAEncryptionPadding.Pkcs1);
-                    byte[] iv = rsa.Decrypt(Convert.FromBase64String(request.EncryptedIV), RSAEncryptionPadding.Pkcs1);
+                    // Decifro il payload ricevuto
+                    string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
+                    string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
 
-                    byte[] encryptedData = Convert.FromBase64String(request.EncryptedData);
+                    string plaintext = CryptographyTools.DecryptString(privateKeyPem, requestBody);
 
-                    using Aes aes = Aes.Create();
-                    aes.Key = key;
-                    aes.IV = iv;
-
-                    ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
-
-                    using (MemoryStream msDecrypt = new MemoryStream(encryptedData))
+                    var userInfo = JsonConvert.DeserializeObject<CommonClasses.SignInRequest>(plaintext);
+                    if (userInfo != null)
                     {
-                        using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                        // Aggiungo l'utente al database se non esiste
+                        if (_dbContext.Users.All(u => u.phoneNumber != userInfo.Number))
                         {
-                            using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+                            _dbContext.Users.Add(new User
                             {
-                                string plaintext = srDecrypt.ReadToEnd();
-                                var userInfo = JsonConvert.DeserializeObject<DecryptedRequest>(plaintext);
-                                if (userInfo != null)
-                                {
-                                    string verificationCode = new Random().Next(10000000, 99999999).ToString();
-                                    if (_dbContext.Users.All(u => u.phoneNumber != userInfo.Number))
-                                    {
-                                        _dbContext.Users.Add(new User
-                                        {
-                                            phoneNumber = userInfo.Number,
-                                            deviceId = userInfo.Id,
-                                            verificationCode = string.Empty,
-                                            verificationExpire = DateTime.MinValue,
-                                            lastLogin = DateTime.MinValue,
-                                            publicKey = userInfo.PKey,
-                                            rememberLogin = userInfo.RememberLogin
-                                        });
-                                    }
-                                    else
-                                    {
-                                        _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).First().verificationCode = string.Empty;
-                                        _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).First().lastLogin = DateTime.MinValue;
-                                        _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).First().rememberLogin = userInfo.RememberLogin;
-                                    }
-
-                                    try
-                                    {
-                                        await _dbContext.SaveChangesAsync();
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        return StatusCode(500, "An error occurred while saving the user to the database");
-                                    }
-                                    return Ok();
-                                }
-                                else
-                                {
-                                    return BadRequest("Invalid request payload");
-                                }
-                            }
+                                phoneNumber = userInfo.Number,
+                                deviceId = userInfo.Id,
+                                verificationCode = string.Empty,
+                                verificationExpire = DateTime.MinValue,
+                                lastLogin = DateTime.MinValue,
+                                publicKey = userInfo.PKey,
+                                rememberLogin = userInfo.RememberLogin
+                            });
                         }
+                        // Altrimenti aggiorno i dati dell'utente
+                        else
+                        {
+                            _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).First().verificationCode = string.Empty;
+                            _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).First().lastLogin = DateTime.MinValue;
+                            _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).First().publicKey = userInfo.PKey;
+                            _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).First().rememberLogin = userInfo.RememberLogin;
+                        }
+
+                        try
+                        {
+                            await _dbContext.SaveChangesAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                            return StatusCode(500, "An error occurred while saving the user to the database: " + ex.Message);
+                        }
+                        return Ok();
+                    }
+                    else
+                    {
+                        return BadRequest("Invalid request payload");
                     }
                 }
-                else
+                catch (Exception e)
                 {
-                    return BadRequest("Invalid request payload");
+                    return BadRequest(e.Message);
                 }
             }
         }
@@ -219,8 +154,15 @@ namespace RingServer.Controllers
                 {
                     try
                     {
-                        var to = JsonConvert.DeserializeObject<string>(requestBody);
+                        // Decifro il payload ricevuto
+                        string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
+                        string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
 
+                        string plaintext = CryptographyTools.DecryptString(privateKeyPem, requestBody);
+
+                        string to = JsonConvert.DeserializeObject<string>(plaintext);
+
+                        // Genero un codice di verifica e lo salvo nel database con la scadenza
                         string verificationCode = new Random().Next(10000000, 99999999).ToString();
                         _dbContext.Users.Where(u => u.phoneNumber == to).First().verificationCode = verificationCode;
                         _dbContext.Users.Where(u => u.phoneNumber == to).First().verificationExpire = DateTime.Now.AddMinutes(5);
@@ -230,7 +172,7 @@ namespace RingServer.Controllers
                         }
                         catch (Exception ex)
                         {
-                            return StatusCode(500, "An error occurred while saving the user to the database");
+                            return StatusCode(500, "An error occurred while saving the user to the database: " + ex.Message);
                         }
 
                         /*
@@ -245,9 +187,9 @@ namespace RingServer.Controllers
                         */
                         return Ok("SMS sent");
                     }
-                    catch (Exception e)
+                    catch (Exception ex)
                     {
-                        return BadRequest("SMS not sent: " + e.Message);
+                        return BadRequest("SMS not sent: " + ex.Message);
                     }
                 }
             }
@@ -268,22 +210,32 @@ namespace RingServer.Controllers
                 {
                     try
                     {
-                        var info = JsonConvert.DeserializeObject<VerifyRequest>(requestBody);
-                        if (info == null)
+                        // Decifro il payload ricevuto
+                        string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
+                        string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
+
+                        string plaintext = CryptographyTools.DecryptString(privateKeyPem, requestBody);
+
+                        var userInfo = JsonConvert.DeserializeObject<CommonClasses.VerifyRequest>(plaintext);
+                        if (userInfo == null)
                         {
                             return BadRequest("Invalid request payload");
                         }
 
-                        string verificationCode = _dbContext.Users.Where(u => u.phoneNumber == info.Number).Select(u => u.verificationCode).First();
-                        DateTime verificationExpire = _dbContext.Users.Where(u => u.phoneNumber == info.Number).Select(u => u.verificationExpire).First();
+                        // Prendo il codice di verifica e la scadenza dal database
+                        string verificationCode = _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).Select(u => u.verificationCode).First();
+                        DateTime verificationExpire = _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).Select(u => u.verificationExpire).First();
 
+                        // Controllo se il codice è scaduto
                         if (DateTime.Now > verificationExpire)
                         {
                             return BadRequest("Verification code expired");
                         }
-                        if (info.Code == verificationCode)
+                        // Controllo se il codice è corretto
+                        else if (userInfo.Code == verificationCode)
                         {
-                            _dbContext.Users.Where(u => u.phoneNumber == info.Number).First().lastLogin = DateTime.Now;
+                            // Aggiorno il database con l'ultimo accesso
+                            _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).First().lastLogin = DateTime.Now;
                             try
                             {
                                 await _dbContext.SaveChangesAsync();
@@ -322,26 +274,37 @@ namespace RingServer.Controllers
                 {
                     try
                     {
-                        var user = JsonConvert.DeserializeObject<Identifier>(requestBody);
-                        if (user == null)
+                        // Decifro il payload ricevuto
+                        string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
+                        string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
+
+                        string plaintext = CryptographyTools.DecryptString(privateKeyPem, requestBody);
+
+                        var userInfo = JsonConvert.DeserializeObject<CommonClasses.Identifier>(plaintext);
+                        if (userInfo == null)
                         {
                             return BadRequest("Invalid request payload");
                         }
 
-                        if (_dbContext.Users.All(u => u.phoneNumber != user.Number || u.deviceId != user.Id))
+                        // Controllo se l'utente esiste
+                        if (_dbContext.Users.All(u => u.phoneNumber != userInfo.Number || u.deviceId != userInfo.Id))
                         {
                             return BadRequest("User not found");
                         }
                         else
                         {
-                            DateTime lastLogin = _dbContext.Users.Where(u => u.phoneNumber == user.Number && u.deviceId == user.Id).First().lastLogin;
-                            if (_dbContext.Users.Where(u => u.phoneNumber == user.Number && u.deviceId == user.Id).First().rememberLogin == "n")
+                            // Prendo l'ultimo accesso dal database
+                            DateTime lastLogin = _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number && u.deviceId == userInfo.Id).First().lastLogin;
+                            string rememberLogin = _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number && u.deviceId == userInfo.Id).First().rememberLogin;
+                            // Controllo se l'utente ha richiesto di non ricordare il login
+                            if (rememberLogin == "n")
                             {
-                                if (DateTime.Compare(lastLogin.AddMinutes(10), DateTime.Now) <= 0)
+                                // Controllo se sono passati 10 minuti dall'ultimo accesso, dato che non è stato richiesto di ricordare il login
+                                if (lastLogin.AddMinutes(10) <= DateTime.Now)
                                 {
-                                    _dbContext.Users.Where(u => u.phoneNumber == user.Number && u.deviceId == user.Id).First().lastLogin = DateTime.MinValue;
+                                    _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number && u.deviceId == userInfo.Id).First().lastLogin = DateTime.MinValue;
                                     await _dbContext.SaveChangesAsync();
-                                    return Ok("Login Expired");
+                                    return BadRequest("Login Expired");
                                 }
                                 else
                                 {
@@ -350,9 +313,10 @@ namespace RingServer.Controllers
                             }
                             else
                             {
-                                if (DateTime.Compare(lastLogin.AddDays(60), DateTime.Now) <= 0)
+                                // Controllo se sono passati 60 giorni dall'ultimo accesso, dato che è stato richiesto di ricordare il login
+                                if (lastLogin.AddDays(60) <= DateTime.Now)
                                 {
-                                    _dbContext.Users.Where(u => u.phoneNumber == user.Number && u.deviceId == user.Id).First().lastLogin = DateTime.MinValue;
+                                    _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number && u.deviceId == userInfo.Id).First().lastLogin = DateTime.MinValue;
                                     await _dbContext.SaveChangesAsync();
                                     return BadRequest("Login Expired");
                                 }

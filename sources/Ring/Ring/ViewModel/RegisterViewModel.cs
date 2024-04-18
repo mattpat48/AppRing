@@ -17,6 +17,11 @@ public partial class RegisterViewModel : ObservableObject
     [ObservableProperty]
     string selectedPhonePrefix;
 
+    [ObservableProperty]
+    bool isNextEnabled;
+    [ObservableProperty]
+    string nextText;
+
     // messaggio di errore
     [ObservableProperty]
     string errorText;
@@ -39,11 +44,34 @@ public partial class RegisterViewModel : ObservableObject
         this.deviceId = string.Empty;
         _registerAPI = registerAPI;
         _verificationAPI = verificationAPI;
+        isNextEnabled = true;
+        NextText = "Next";
+    }
+
+    public void OnAppearing()
+    {
+        ErrorText = string.Empty;
+        SecureStorage.Remove("ServerKey");
+        SecureStorage.Remove("PhoneNumber");
+        SecureStorage.Remove("IsVerified");
+        SecureStorage.Remove("RememberLogin");
+    }
+
+    public void handleError(string error)
+    {
+        ErrorText = error;
+        NextText = "Retry";
+        IsNextEnabled = true;
+        SecureStorage.Remove("ServerKey");
+        SecureStorage.Remove("PhoneNumber");
+        SecureStorage.Remove("IsVerified");
+        SecureStorage.Remove("RememberLogin");
     }
 
     [RelayCommand]
     async Task Next()
     {
+        IsNextEnabled = false;
         // controllo se il numero di telefono è valido
         if (!string.IsNullOrEmpty(PhoneNumber))
         {
@@ -64,7 +92,12 @@ public partial class RegisterViewModel : ObservableObject
                 {
                     deviceId = Guid.NewGuid().ToString();
                 }
-
+                string getServerKeyResponse = await _registerAPI.GetServerKey();
+                if (getServerKeyResponse != "success")
+                {
+                    handleError("Error getting server key.");
+                    return;
+                }
                 await SecureStorage.SetAsync("PublicDeviceKey", publicKey);
                 await SecureStorage.SetAsync("PrivateDeviceKey", privateKey);
                 await SecureStorage.SetAsync("PhoneNumber", storingNumber);
@@ -90,21 +123,13 @@ public partial class RegisterViewModel : ObservableObject
                     }
                     else
                     {
-                        ErrorText = "Error while sending SMS.";
-                        SecureStorage.Remove("ServerKey");
-                        SecureStorage.Remove("PhoneNumber");
-                        SecureStorage.Remove("IsVerified");
-                        SecureStorage.Remove("RememberLogin");
+                        handleError("Error while sending SMS.");
                         return;
                     }
                 }
                 else
                 {
-                    ErrorText = "Error while signing in.";
-                    SecureStorage.Remove("ServerKey");
-                    SecureStorage.Remove("PhoneNumber");
-                    SecureStorage.Remove("IsVerified");
-                    SecureStorage.Remove("RememberLogin");
+                    handleError("Error while signing in.");
                     return;
                 }
             }

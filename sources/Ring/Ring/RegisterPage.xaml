@@ -38,6 +38,7 @@
                     BackgroundColor="{StaticResource PrimaryDark}"
                     CornerRadius="20"
                     VerticalOptions="CenterAndExpand"
+                    HorizontalOptions="Center"
                     HasShadow="True"
                     Grid.Row="0"
                     Grid.ColumnSpan="2" >
@@ -73,22 +74,24 @@
                 <Frame
                     BackgroundColor="{StaticResource Gray800}"
                     BorderColor="Transparent"
+                    HorizontalOptions="Center"
                     CornerRadius="20"
                     Grid.Row="1"
                     Grid.ColumnSpan="2">
-                    <Frame.Shadow>
-                        <Shadow
-                            Radius="20"
-                            Opacity="0.8"
-                            Offset="10,10"
-                            Brush="Black" />
-                    </Frame.Shadow>
+                    
 
                     <Grid
                         RowDefinitions="Auto, Auto, Auto"
                         RowSpacing="15"
                         ColumnDefinitions="Auto, Auto"
                         HorizontalOptions="Center">
+                        <Grid.Shadow>
+                            <Shadow
+                                Radius="20"
+                                Opacity="0.8"
+                                Offset="10,10"
+                                Brush="Black" />
+                        </Grid.Shadow>
 
                         <Picker
                             Title="Country"
@@ -110,21 +113,24 @@
                             Grid.Row="0"
                             Grid.Column="1"/>
 
-                        <CheckBox
-                            IsChecked="{Binding RememberLogin}"
-                            HorizontalOptions="End"
+                        <StackLayout
                             Grid.Row="1"
-                            Grid.Column="0" />
+                            Orientation="Horizontal"
+                            Grid.ColumnSpan="2"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center">
+                            <CheckBox
+                                IsChecked="{Binding RememberLogin}" />
 
-                        <Label
-                            Text="Remember me"
-                            LineBreakMode="WordWrap"
-                            HorizontalOptions="Start"
-                            VerticalOptions="Center"
-                            Grid.Row="1"
-                            Grid.Column="1" />
+                            <Label
+                                Text="Remember me"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center"
+                                LineBreakMode="WordWrap"/>
+                        </StackLayout>
+                        
                         <Button
-                            Text="Next"
+                            Text="{Binding NextText}"
                             IsEnabled="{Binding Source={x:Reference phoneNumberEntry}, Path=Text.Length}"
                             Command="{Binding NextCommand}"
                             SemanticProperties.Hint="Register your phone number"

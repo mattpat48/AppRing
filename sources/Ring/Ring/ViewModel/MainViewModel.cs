@@ -2,14 +2,12 @@
 using CommunityToolkit.Mvvm.Input;
 using MQTTnet;
 using MQTTnet.Client;
-using System.Text.Json;
-using Microsoft.Maui.Storage;
-using Microsoft.Maui.Devices;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
 using Ring.Services;
+using Ring.Utils;
 using Newtonsoft.Json;
 using System.Text;
+using System.Collections.ObjectModel;
+using CommunityToolkit.Maui.Core.Extensions;
 
 namespace Ring.ViewModel;
 
@@ -34,16 +32,31 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     string textColor;
 
+    [ObservableProperty]
+    string gateIdDisplay;
+    [ObservableProperty]
+    string gateNameDisplay;
+
+    [ObservableProperty]
+    bool gateSelected;
+    [ObservableProperty]
+    bool gateNotSelected;
+
     // server, client e opzioni per scambio mqtt
     private MqttFactory mqttServer;
     private IMqttClient mqttClient;
     private MqttClientOptions options;
 
     private HttpClient _httpClient;
+    private MainAPI _mainAPI;
     private RegisterAPI _registerAPI;
     private VerificationAPI _verificationAPI;
 
-    private readonly string _server;
+    [ObservableProperty]
+    ObservableCollection<Gate> gates;
+    Gate selectedGate;
+
+    
 
     // costruttore per il viewmodel
     public MainViewModel()
@@ -56,6 +69,12 @@ public partial class MainViewModel : ObservableObject
 
         MessageText = string.Empty;
         TextColor = "White";
+
+        GateIdDisplay = string.Empty;
+        GateNameDisplay = string.Empty;
+
+        GateSelected = false;
+        GateNotSelected = false;
 
         // inizializzo il client e server mqtt
         mqttServer = new MqttFactory();
@@ -72,10 +91,81 @@ public partial class MainViewModel : ObservableObject
             .Build();
 
         _httpClient = new HttpClient();
+        _mainAPI = new MainAPI(_httpClient);
         _registerAPI = new RegisterAPI(_httpClient);
         _verificationAPI = new VerificationAPI(_httpClient);
 
-        _server = Environment.GetEnvironmentVariable("API_SERVER");
+        Gates = new ObservableCollection<Gate>();
+        selectedGate = new Gate(string.Empty, string.Empty);
+    }
+
+    public void handleError(string message)
+    {
+        MessageText = message;
+        TextColor = "Red";
+        IsOpenEnabled = false;
+        IsRetryVisible = true;
+        IsContentVisible = true;
+        IsLoading = false;
+        return;
+    }
+
+    async Task GetGates()
+    {
+        string getGatesResponse;
+        List<Gate> gatesReturned;
+        try
+        {
+            (getGatesResponse, gatesReturned) = await _mainAPI.GetAllGates();
+            if (getGatesResponse != "success")
+            {
+                handleError(getGatesResponse);
+                return;
+            }
+            else if (gatesReturned != null && gatesReturned.Count() == 0)
+            {
+                handleError("No gates to retrieve.");
+                return;
+            }
+            Gates = gatesReturned.ToObservableCollection();
+            if (Gates.Count() == 1)
+            {
+                selectedGate = Gates.First();
+                GateIdDisplay = "Gate ID: " + selectedGate.gateId;
+                GateNameDisplay = "Gate name: " + selectedGate.name;
+                IsLoading = false;
+                IsContentVisible = true;
+                IsRetryVisible = false;
+                IsOpenEnabled = true;
+                GateSelected = true;
+                GateNotSelected = false;
+                return;
+            }
+            else
+            {
+                IsLoading = false;
+                IsContentVisible = true;
+                GateSelected = false;
+                GateNotSelected = true;
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            handleError(ex.Message);
+            return;
+        }
+    }
+
+    [RelayCommand]
+    private void SelectGate(Gate selected)
+    {
+        selectedGate = selected;
+        GateIdDisplay = "Gate ID: " + selected.gateId;
+        GateNameDisplay = "Gate Name: " + selected.name;
+        GateSelected = true;
+        GateNotSelected = false;
+        return;
     }
 
     [RelayCommand]
@@ -110,30 +200,18 @@ public partial class MainViewModel : ObservableObject
                     }
                     else
                     {
-                        MessageText = "Subscribe failed";
-                        TextColor = "Red";
-                        IsRetryVisible = true;
-                        IsContentVisible = true;
-                        IsLoading = false;
+                        handleError("Subscription failed");
                     }
                 }
                 else
                 {
-                    MessageText = "Connection failed";
-                    TextColor = "Red";
-                    IsRetryVisible = true;
-                    IsContentVisible = true;
-                    IsLoading = false;
+                    handleError("Connection failed");
                 }
 
             }
             catch (Exception ex)
             {
-                MessageText = ex.Message;
-                TextColor = "Red";
-                IsRetryVisible = true;
-                IsContentVisible = true;
-                IsLoading = false;
+                handleError(ex.Message);
             }
         }
         return mqttClient.IsConnected;
@@ -144,57 +222,46 @@ public partial class MainViewModel : ObservableObject
         await mqttClient.DisconnectAsync();
     }
 
-    public async Task<string> CheckLogout()
-    {
-        var url = _server + "/api/v1/auth/checklogout";
-
-        var toSend = new
-        {
-            Number = await SecureStorage.GetAsync("PhoneNumber"),
-            Id = await SecureStorage.GetAsync("DeviceId")
-        };
-
-        string jsonRequestBody = JsonConvert.SerializeObject(toSend);
-        var stringContent = new StringContent(jsonRequestBody, Encoding.UTF8, "application/json");
-
-        HttpResponseMessage response = await _httpClient.PostAsync(url, stringContent);
-        var responseContent = await response.Content.ReadAsStringAsync();
-
-        if (!response.IsSuccessStatusCode)
-        {
-            return responseContent;
-        }
-        else
-        {
-            return "success";
-        }
-    }
-
     [RelayCommand]
     public async Task Check()
     {
-
         IsLoading = true;
-
-        string phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
-        string isVerified = await SecureStorage.GetAsync("IsVerified");
-        var logoutResponse = await CheckLogout();
-        if (string.IsNullOrEmpty(phoneNumber) || string.IsNullOrEmpty(isVerified) || string.Compare(isVerified, "n") == 0 || string.Compare(logoutResponse, "success") != 0)
+        
+        try
         {
-            IsLoading = false;
-            IsContentVisible = false;
-
-            var registerVm = new RegisterViewModel(_registerAPI, _verificationAPI);
-            var registerPage = new RegisterPage(registerVm);
-            await Shell.Current.Navigation.PushModalAsync(registerPage);
-            return;
-        }
-        else
-        {
-            if (logoutResponse == "success")
+            string getServerKeyResponse = await _registerAPI.GetServerKey();
+            if (getServerKeyResponse != "success")
             {
-                await Connect();
+                handleError("Error getting server key.");
+                return;
             }
+            string phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
+            string isVerified = await SecureStorage.GetAsync("IsVerified");
+            if (string.IsNullOrEmpty(phoneNumber) || string.IsNullOrEmpty(isVerified) || string.Compare(isVerified, "n") == 0)
+            {
+                IsLoading = false;
+                IsContentVisible = false;
+
+                var registerVm = new RegisterViewModel(_registerAPI, _verificationAPI);
+                var registerPage = new RegisterPage(registerVm);
+                await Shell.Current.Navigation.PushModalAsync(registerPage);
+                return;
+            }
+            else
+            {
+                var logoutResponse = await _mainAPI.CheckLogout();
+                if (logoutResponse == "success")
+                {
+                    await GetGates();
+                    await Connect();
+                    return;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            handleError(ex.Message);
+            return;
         }
     }
 
@@ -216,7 +283,8 @@ public partial class MainViewModel : ObservableObject
             lat = "Lat",
             language = "language",
             key = await SecureStorage.GetAsync("PublicDeviceKey"),
-            phone = await SecureStorage.GetAsync("PhoneNumber")
+            phone = await SecureStorage.GetAsync("PhoneNumber"),
+            gate = selectedGate.gateId
         };
 
         IsOpenEnabled = false;
@@ -254,7 +322,9 @@ public partial class MainViewModel : ObservableObject
     {
         SecureStorage.Remove("PhoneNumber");
         await mqttClient.DisconnectAsync();
-        await Check();
+        var registerVm = new RegisterViewModel(_registerAPI, _verificationAPI);
+        var registerPage = new RegisterPage(registerVm);
+        await Shell.Current.Navigation.PushModalAsync(registerPage);
     }
 
 }

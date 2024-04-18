@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Ring.Utils;
 
 namespace Ring.Services;
 
@@ -31,8 +32,9 @@ public class VerificationAPI
         {
             var url = _server + "/api/v1/auth/sendcode";
 
-            string jsonRequestBody = JsonConvert.SerializeObject(phoneNumber);
-            var stringContent = new StringContent(jsonRequestBody, Encoding.UTF8, "application/json");
+            string key = await SecureStorage.GetAsync("ServerKey");
+
+            var stringContent = CryptographyTools.EncryptString(await SecureStorage.GetAsync("ServerKey"), JsonConvert.SerializeObject(phoneNumber));
 
             HttpResponseMessage response = await _httpClient.PostAsync(url, stringContent);
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -48,7 +50,7 @@ public class VerificationAPI
         }
     }
 
-    public async Task<string> CheckCode(string inserted)
+    public async Task<string> VerifyCode(string inserted)
     {
         var url = _server + "/api/v1/auth/verifycode";
 
@@ -58,8 +60,13 @@ public class VerificationAPI
             Number = await SecureStorage.GetAsync("PhoneNumber")
         };
 
-        string jsonRequestBody = JsonConvert.SerializeObject(toSend);
-        var stringContent = new StringContent(jsonRequestBody, Encoding.UTF8, "application/json");
+        string key = await SecureStorage.GetAsync("ServerKey");
+        
+        if (key == null)
+        {
+            return "Server key not found";
+        }
+        var stringContent = CryptographyTools.EncryptString(key, JsonConvert.SerializeObject(toSend));
 
         HttpResponseMessage response = await _httpClient.PostAsync(url, stringContent);
         var responseContent = await response.Content.ReadAsStringAsync();

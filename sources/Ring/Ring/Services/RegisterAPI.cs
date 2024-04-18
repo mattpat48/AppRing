@@ -1,10 +1,5 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
+using Ring.Utils;
 
 namespace Ring.Services;
 
@@ -85,54 +80,13 @@ public class RegisterAPI
 
             if (geServerKeyResponse == "success")
             {
-                // cifro il contenuto da inviare al server
-                var json = JsonConvert.SerializeObject(myContent);
-
                 // recupero la chiave pubblica del server salvata in precedenza
-                var rsaPublicKey = await SecureStorage.GetAsync("ServerKey");
-
-                byte[] encryptedData;
-                byte[] encryptedAesKey;
-                byte[] encryptedAesIV;
+                var serverKey = await SecureStorage.GetAsync("ServerKey");
 
                 // cifro il contenuto con la chiave pubblica del server
-                if (!string.IsNullOrEmpty(rsaPublicKey))
+                if (!string.IsNullOrEmpty(serverKey))
                 {
-                    using RSA rsa = RSA.Create(4096);
-                    rsa.ImportFromPem(rsaPublicKey.ToCharArray());
-
-                    // genero una chiave simmetrica per AES
-                    using Aes aes = Aes.Create();
-                    aes.GenerateKey();
-                    aes.GenerateIV();
-
-                    // cripto i dati usando AES
-                    ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
-                    using MemoryStream msEncrypt = new();
-                    using (CryptoStream csEncrypt = new(msEncrypt, encryptor, CryptoStreamMode.Write))
-                    {
-                        using StreamWriter swEncrypt = new(csEncrypt);
-                        // Scrivi tutti i dati da criptare nel flusso.
-                        swEncrypt.Write(json);
-                    }
-                    encryptedData = msEncrypt.ToArray();
-                    encryptedAesKey = rsa.Encrypt(aes.Key, RSAEncryptionPadding.Pkcs1);
-                    encryptedAesIV = rsa.Encrypt(aes.IV, RSAEncryptionPadding.Pkcs1);
-
-                    // converto i dati cifrati in base64
-                    string encryptedDataBase64 = Convert.ToBase64String(encryptedData);
-                    string encryptedAesKeyBase64 = Convert.ToBase64String(encryptedAesKey);
-                    string encryptedAesIVBase64 = Convert.ToBase64String(encryptedAesIV);
-
-                    // creo il contenuto da inviare al server
-                    var requestBody = new
-                    {
-                        EncryptedData = encryptedDataBase64,
-                        EncryptedKey = encryptedAesKeyBase64,
-                        EncryptedIV = encryptedAesIVBase64
-                    };
-                    string jsonRequestBody = JsonConvert.SerializeObject(requestBody);
-                    var stringContent = new StringContent(jsonRequestBody, Encoding.UTF8, "application/json");
+                    var stringContent = CryptographyTools.EncryptString(serverKey, JsonConvert.SerializeObject(myContent));
 
                     // invio il contenuto cifrato al server
                     HttpResponseMessage response = await _httpClient.PostAsync(url, stringContent);

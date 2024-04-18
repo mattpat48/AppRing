@@ -38,6 +38,7 @@
                     BackgroundColor="{StaticResource PrimaryDark}"
                     CornerRadius="20"
                     VerticalOptions="CenterAndExpand"
+                    HorizontalOptions="Center"
                     HasShadow="True"
                     Grid.Row="0"
                     Grid.ColumnSpan="2" >
@@ -74,6 +75,7 @@
                     BackgroundColor="{StaticResource Gray800}"
                     CornerRadius="20"
                     VerticalOptions="CenterAndExpand"
+                    HorizontalOptions="Center"
                     HasShadow="True"
                     Grid.Row="1"
                     Grid.ColumnSpan="2" >

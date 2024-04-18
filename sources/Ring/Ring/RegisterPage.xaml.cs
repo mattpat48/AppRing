@@ -11,17 +11,12 @@ public partial class RegisterPage : ContentPage
 		BindingContext = viewModel;
     }
 
-    protected override async void OnAppearing()
+    protected override void OnAppearing()
     {
-        base.OnAppearing();
-        Opacity = 0;
-        await this.FadeTo(1, 500);
-    }
-
-    protected override async void OnDisappearing()
-    {
-        base.OnDisappearing();
-        Opacity = 1;
-        await this.FadeTo(0, 500);
+        var viewModel = BindingContext as RegisterViewModel;
+        if (viewModel != null)
+        {
+            viewModel.OnAppearing();
+        }
     }
 }

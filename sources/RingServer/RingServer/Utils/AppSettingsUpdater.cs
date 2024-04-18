@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using Newtonsoft.Json.Linq;
 
-namespace RingServer;
+namespace RingServer.Utils;
 public class AppSettingsUpdater
 {
     private readonly string _filePath;
