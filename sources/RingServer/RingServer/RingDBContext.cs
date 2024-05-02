@@ -9,6 +9,8 @@ public class RingDBContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>().HasKey(u => new { u.phoneNumber, u.deviceId });
+        modelBuilder.Entity<Gate>().HasKey(g => g.gateId);
+        modelBuilder.Entity<UserGate>().HasKey(ug => ug.usergateId);
     }
 
     public DbSet<User> Users { get; set; }

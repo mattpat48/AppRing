@@ -19,3 +19,6 @@
 /node_modules
 /sources/RingServer/RingServer/appsettings.json
 /sources/Ring/Ring/hs_err_pid24208.log
+/sources/RingServer/.vs/RingServer/v17/TestStore/0
+/sources/Ring/Ring/bin/Debug/net8.0-ios/iossimulator-x64
+/sources/Ring/Ring/bin/Debug/net8.0-maccatalyst/maccatalyst-x64

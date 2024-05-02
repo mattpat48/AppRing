@@ -89,7 +89,13 @@ namespace RingServer.Controllers
                     string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
                     string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
 
-                    string plaintext = CryptographyTools.DecryptString(privateKeyPem, requestBody);
+                    bool outcome;
+                    string plaintext;
+                    (outcome, plaintext) = CryptographyTools.DecryptString(privateKeyPem, requestBody);
+                    if(!outcome)
+                    {
+                        return BadRequest(plaintext);
+                    }
 
                     var userInfo = JsonConvert.DeserializeObject<CommonClasses.SignInRequest>(plaintext);
                     if (userInfo != null)
@@ -158,9 +164,16 @@ namespace RingServer.Controllers
                         string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
                         string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
 
-                        string plaintext = CryptographyTools.DecryptString(privateKeyPem, requestBody);
+                        bool outcome;
+                        string plaintext;
+                        CommonClasses.Identifier userInfo;
+                        (outcome, plaintext, userInfo) = CryptographyTools.TotalDecrypt(privateKeyPem, requestBody, _dbContext);
+                        if (!outcome || string.IsNullOrEmpty(plaintext) || userInfo == null)
+                        {
+                            return BadRequest(plaintext);
+                        }
 
-                        string to = JsonConvert.DeserializeObject<string>(plaintext);
+                        string to = userInfo.Number;
 
                         // Genero un codice di verifica e lo salvo nel database con la scadenza
                         string verificationCode = new Random().Next(10000000, 99999999).ToString();
@@ -175,6 +188,7 @@ namespace RingServer.Controllers
                             return StatusCode(500, "An error occurred while saving the user to the database: " + ex.Message);
                         }
 
+                        // TEMP UNAVAIBLE
                         /*
                         string message = "Your verification code is: " + verificationCode;
                         var vonageClient = new VonageClient(vonageCredentials);
@@ -214,25 +228,28 @@ namespace RingServer.Controllers
                         string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
                         string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
 
-                        string plaintext = CryptographyTools.DecryptString(privateKeyPem, requestBody);
-
-                        var userInfo = JsonConvert.DeserializeObject<CommonClasses.VerifyRequest>(plaintext);
-                        if (userInfo == null)
+                        bool outcome;
+                        string plaintext;
+                        CommonClasses.Identifier userInfo;
+                        (outcome, plaintext, userInfo) = CryptographyTools.TotalDecrypt(privateKeyPem, requestBody, _dbContext);
+                        if (!outcome || string.IsNullOrEmpty(plaintext) || userInfo == null)
                         {
-                            return BadRequest("Invalid request payload");
+                            return BadRequest(plaintext);
                         }
+
+                        var inserted = JsonConvert.DeserializeObject<string>(plaintext);
 
                         // Prendo il codice di verifica e la scadenza dal database
                         string verificationCode = _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).Select(u => u.verificationCode).First();
                         DateTime verificationExpire = _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).Select(u => u.verificationExpire).First();
-
+                        
                         // Controllo se il codice è scaduto
                         if (DateTime.Now > verificationExpire)
                         {
                             return BadRequest("Verification code expired");
                         }
                         // Controllo se il codice è corretto
-                        else if (userInfo.Code == verificationCode)
+                        else if (inserted == verificationCode)
                         {
                             // Aggiorno il database con l'ultimo accesso
                             _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).First().lastLogin = DateTime.Now;
@@ -278,12 +295,13 @@ namespace RingServer.Controllers
                         string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
                         string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
 
-                        string plaintext = CryptographyTools.DecryptString(privateKeyPem, requestBody);
-
-                        var userInfo = JsonConvert.DeserializeObject<CommonClasses.Identifier>(plaintext);
-                        if (userInfo == null)
+                        bool outcome;
+                        string plaintext;
+                        CommonClasses.Identifier userInfo;
+                        (outcome, plaintext, userInfo) = CryptographyTools.TotalDecrypt(privateKeyPem, requestBody, _dbContext);
+                        if (!outcome || string.IsNullOrEmpty(plaintext) || userInfo == null)
                         {
-                            return BadRequest("Invalid request payload");
+                            return BadRequest(plaintext);
                         }
 
                         // Controllo se l'utente esiste

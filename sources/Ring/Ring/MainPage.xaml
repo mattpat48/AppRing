@@ -2,27 +2,18 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Ring.MainPage"
-             xmlns:fontAwesome="clr-namespace:FontAwesome5;assembly=FontAwesome5"
              xmlns:viewmodel="clr-namespace:Ring.ViewModel"
              xmlns:model="clr-namespace:Ring.Utils"
              x:DataType="viewmodel:MainViewModel"
              x:Name="mainPage"
              Shell.NavBarIsVisible="False">
-    <VerticalStackLayout>
-
-        <ActivityIndicator
-            IsRunning="{Binding IsLoading}"
-            IsVisible="{Binding IsLoading}"
-            Color="White"
-            Margin="50"
-            HorizontalOptions="Center"
-            VerticalOptions="Center"
-            SemanticProperties.Hint="Activity indicator" />
+    <AbsoluteLayout
+        HorizontalOptions="Center">
 
         <Grid
-            RowDefinitions="Auto, Auto, Auto, Auto"
+            RowDefinitions="Auto, Auto, Auto, Auto, Auto"
             ColumnDefinitions="Auto"
-            RowSpacing="10"
+            RowSpacing="20"
             IsVisible="{Binding IsContentVisible}"
             HorizontalOptions="Center"
             VerticalOptions="Center">
@@ -38,10 +29,11 @@
                 BackgroundColor="{StaticResource PrimaryDark}"
                 CornerRadius="20"
                 VerticalOptions="CenterAndExpand"
+                HorizontalOptions="Center"
                 HasShadow="True"
                 Grid.Row="0"
-                Margin="0, 30, 0, 20"
-                Grid.ColumnSpan="2" >
+                Grid.ColumnSpan="1"
+                Margin="0, 50, 0, 0">
 
                 <Label
                     Text="Ring"
@@ -55,12 +47,11 @@
             <Frame
                 BackgroundColor="{StaticResource Gray800}"
                 IsVisible="{Binding GateNotSelected}"
+                HorizontalOptions="CenterAndExpand"
                 CornerRadius="20"
-                VerticalOptions="CenterAndExpand"
-                HasShadow="True"
-                Grid.Row="1"
-                Grid.ColumnSpan="2">
+                Grid.Row="1">
                 <CollectionView
+                    HorizontalOptions="CenterAndExpand"
                     ItemsSource="{Binding Gates}">
                     <CollectionView.ItemsLayout>
                         <GridItemsLayout
@@ -72,10 +63,14 @@
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="model:Gate">
                             <Grid
+                                HorizontalOptions="CenterAndExpand"
+                                ColumnSpacing="20"
                                 ColumnDefinitions="Auto, Auto">
+
                                 <Label
                                     Text="{Binding name}"
                                     TextColor="White"
+                                    LineBreakMode="WordWrap"
                                     FontAttributes="Bold"
                                     FontSize="20"
                                     HorizontalOptions="Start"
@@ -90,6 +85,7 @@
                                     HorizontalOptions="End"
                                     VerticalOptions="Center">
                                 </Button>
+
                             </Grid>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
@@ -101,6 +97,7 @@
                 IsVisible="{Binding GateSelected}"
                 CornerRadius="20"
                 VerticalOptions="CenterAndExpand"
+                HorizontalOptions="Center"
                 HasShadow="True"
                 Grid.Row="1" >
                 <Grid
@@ -140,6 +137,7 @@
                         x:Name="openButton"
                         Text="Open"
                         Margin="5"
+                        IsEnabled="{Binding IsOpenEnabled}"
                         Command="{Binding OpenCommand}"
                         SemanticProperties.Hint="Open the gate"
                         HorizontalOptions="Center"
@@ -154,10 +152,11 @@
                 IsVisible="true"
                 CornerRadius="20"
                 VerticalOptions="CenterAndExpand"
+                HorizontalOptions="Center"
                 HasShadow="True"
                 Grid.Row="2" >
                 <Grid
-                    RowDefinitions="Auto, Auto"
+                    RowDefinitions="Auto, Auto, Auto"
                     ColumnDefinitions="Auto"
                     RowSpacing="10"
                     HorizontalOptions="CenterAndExpand">
@@ -170,14 +169,26 @@
                     </Grid.Shadow>
 
                     <Button
-                        x:Name="reloadButton"
-                        Text="Reload"
-                        IsVisible="true"
+                        x:Name="deselectGate"
+                        Text="Deselect"
+                        IsEnabled="{Binding GateSelected}"
+                        IsVisible="{Binding GateSelected}"
                         Margin="5"
-                        Command="{Binding CheckCommand}"
+                        Command="{Binding DeselectGateCommand}"
                         SemanticProperties.Hint="Reload connection to server"
                         HorizontalOptions="Center"
                         Grid.Row="0"/>
+
+                    <Button
+                        x:Name="reloadButton"
+                        Text="Reload"
+                        IsEnabled="{Binding IsReloadEnabled}"
+                        IsVisible="{Binding GateNotSelected}"
+                        Margin="5"
+                        Command="{Binding ReloadCommand}"
+                        SemanticProperties.Hint="Reload connection to server"
+                        HorizontalOptions="Center"
+                        Grid.Row="1"/>
 
                     <Button
                         x:Name="rmvButton"
@@ -186,7 +197,7 @@
                         Command="{Binding RemoveNumberCommand}"
                         SemanticProperties.Hint="Remove the number (debug)"
                         HorizontalOptions="Center"
-                        Grid.Row="1"/>
+                        Grid.Row="2"/>
                 </Grid>
             </Frame>
 
@@ -196,11 +207,22 @@
                 FontSize="20"
                 TextColor="{Binding TextColor}"
                 LineBreakMode="WordWrap"
-                HorizontalOptions="FillAndExpand"
+                HorizontalOptions="CenterAndExpand"
+                VerticalOptions="CenterAndExpand"
                 Grid.Row="3"/>
-            
+
+            <ActivityIndicator
+                IsRunning="{Binding IsLoading}"
+                IsVisible="{Binding IsLoading}"
+                Color="White"
+                Margin="50"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                Grid.Row="4"
+                SemanticProperties.Hint="Activity indicator"/>
+
         </Grid>
-        
-    </VerticalStackLayout>
+
+    </AbsoluteLayout>
     
 </ContentPage>

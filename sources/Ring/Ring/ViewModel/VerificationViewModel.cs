@@ -68,7 +68,13 @@ public partial class VerificationViewModel : ObservableObject
     [RelayCommand]
     async Task Resend()
     {
-        string phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
+        string? phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
+        if (phoneNumber == null)
+        {
+            ColorText = "Red";
+            MessageText = "Phone number not found!";
+            return;
+        }
         var sendSMSResponse = await _verificationAPI.SendSMS(phoneNumber);
         if (sendSMSResponse == "success")
         {

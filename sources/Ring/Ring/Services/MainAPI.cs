@@ -5,7 +5,7 @@ namespace Ring.Services;
 public class MainAPI
 {
     private readonly HttpClient _httpClient;
-    private readonly string _server;
+    private readonly string? _server;
 
     public MainAPI(HttpClient client)
     {
@@ -17,18 +17,28 @@ public class MainAPI
     {
         var url = _server + "/api/v1/auth/checklogout";
 
-        var toSend = new
+        string? number = await SecureStorage.GetAsync("PhoneNumber");
+        string? id = await SecureStorage.GetAsync("DeviceId");
+        if (string.IsNullOrEmpty(number) || string.IsNullOrEmpty(id))
         {
-            Number = await SecureStorage.GetAsync("PhoneNumber"),
-            Id = await SecureStorage.GetAsync("DeviceId")
-        };
-
-        string key = await SecureStorage.GetAsync("ServerKey");
-        if (key == null)
-        {
-            return "Server key not found";
+            return "Phone number or device id not found";
         }
-        var stringContent = CryptographyTools.EncryptString(key, JsonConvert.SerializeObject(toSend));
+
+        string? publicKey = await SecureStorage.GetAsync("ServerKey");
+        string? deviceKey = await SecureStorage.GetAsync("PrivateDeviceKey");
+        if (string.IsNullOrEmpty(publicKey) || string.IsNullOrEmpty(deviceKey))
+        {
+            return "Server key or device key not found";
+        }
+        
+        bool outcome;
+        StringContent stringContent;
+        (outcome, stringContent) = CryptographyTools.TotalEncrypt(deviceKey, publicKey, JsonConvert.SerializeObject("Check Logout Request"), number, id);
+
+        if (!outcome)
+        {
+            return "Error encrypting data";
+        }
 
         HttpResponseMessage response = await _httpClient.PostAsync(url, stringContent);
         var responseContent = await response.Content.ReadAsStringAsync();
@@ -47,18 +57,28 @@ public class MainAPI
     {
         var url = _server + "/api/v1/gate/getallgates";
 
-        var toSend = new
+        string? number = await SecureStorage.GetAsync("PhoneNumber");
+        string? id = await SecureStorage.GetAsync("DeviceId");
+        if (string.IsNullOrEmpty(number) || string.IsNullOrEmpty(id))
         {
-            Number = await SecureStorage.GetAsync("PhoneNumber"),
-            Id = await SecureStorage.GetAsync("DeviceId"),
-        };
-
-        string key = await SecureStorage.GetAsync("ServerKey");
-        if (key == null)
-        {
-            return ("Server key not found", null);
+            return ("Phone number or device id not found", null);
         }
-        var stringContent = CryptographyTools.EncryptString(key, JsonConvert.SerializeObject(toSend));
+
+        string? publicKey = await SecureStorage.GetAsync("ServerKey");
+        string? deviceKey = await SecureStorage.GetAsync("PrivateDeviceKey");
+        if (string.IsNullOrEmpty(publicKey) || string.IsNullOrEmpty(deviceKey))
+        {
+            return ("Server key or device key not found", null);
+        }
+
+        bool outcome;
+        StringContent stringContent;
+        (outcome, stringContent) = CryptographyTools.TotalEncrypt(deviceKey, publicKey, JsonConvert.SerializeObject("Get All Gates Request"), number, id);
+
+        if (!outcome)
+        {
+            return ("Error encrypting data", null);
+        }
 
         HttpResponseMessage response = await _httpClient.PostAsync(url, stringContent);
         var responseContent = await response.Content.ReadAsStringAsync();
@@ -71,9 +91,19 @@ public class MainAPI
         {
             try
             {
-                string devicekey = await SecureStorage.GetAsync("PrivateDeviceKey");
-                string plainText = CryptographyTools.DecryptString(devicekey, responseContent);
-                List<Gate> gates = JsonConvert.DeserializeObject<List<Gate>>(plainText);
+                string? devicekey = await SecureStorage.GetAsync("PrivateDeviceKey");
+                string? serverkey = await SecureStorage.GetAsync("ServerKey");
+                if (string.IsNullOrEmpty(devicekey) || string.IsNullOrEmpty(serverkey))
+                {
+                    return ("Device key not found", null);
+                }
+                string plainText;
+                (outcome, plainText) = CryptographyTools.TotalDecrypt(devicekey, serverkey, responseContent);
+                if (!outcome)
+                {
+                    return (plainText, null);
+                }
+                List<Gate>? gates = JsonConvert.DeserializeObject<List<Gate>>(plainText);
                 return ("success", gates);
             }
             catch (Exception ex)

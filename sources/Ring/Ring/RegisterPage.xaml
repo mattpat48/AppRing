@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Ring.RegisterPage"
              Title="Register"
-             xmlns:ct="clr-namespace:CommunityToolkit.Maui.Behaviors;assembly=CommunityToolkit.Maui"
              xmlns:viewmodel="clr-namespace:Ring.ViewModel"
              x:DataType="viewmodel:RegisterViewModel"
              Shell.NavBarIsVisible="False">

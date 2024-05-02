@@ -1,12 +1,13 @@
 ﻿using Newtonsoft.Json;
 using Ring.Utils;
+using System.Text;
 
 namespace Ring.Services;
 
 public class RegisterAPI
 {
     private readonly HttpClient _httpClient;
-    private readonly string _server;
+    private readonly string? _server;
 
     public RegisterAPI(HttpClient client)
     {
@@ -81,12 +82,15 @@ public class RegisterAPI
             if (geServerKeyResponse == "success")
             {
                 // recupero la chiave pubblica del server salvata in precedenza
-                var serverKey = await SecureStorage.GetAsync("ServerKey");
+                string? serverKey = await SecureStorage.GetAsync("ServerKey");
 
                 // cifro il contenuto con la chiave pubblica del server
                 if (!string.IsNullOrEmpty(serverKey))
                 {
-                    var stringContent = CryptographyTools.EncryptString(serverKey, JsonConvert.SerializeObject(myContent));
+                    bool outcome;
+                    string stringJson;
+                    (outcome, stringJson) = CryptographyTools.EncryptString(serverKey, JsonConvert.SerializeObject(myContent));
+                    StringContent stringContent = new StringContent(stringJson, Encoding.UTF8, "application/json");
 
                     // invio il contenuto cifrato al server
                     HttpResponseMessage response = await _httpClient.PostAsync(url, stringContent);

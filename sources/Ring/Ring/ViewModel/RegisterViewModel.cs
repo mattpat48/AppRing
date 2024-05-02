@@ -78,56 +78,69 @@ public partial class RegisterViewModel : ObservableObject
             PhoneNumber = PhoneNumber.Replace(" ", string.Empty);
             if (PhoneNumber.Length == 10)
             {
-                string storingNumber = SelectedPhonePrefix + PhoneNumber;
-                ErrorText = string.Empty;
-
-                // genero la chiave pubblica e privata
-                using RSA rsa = RSA.Create(2048);
-                string publicKey = rsa.ExportRSAPublicKeyPem();
-                string privateKey = rsa.ExportRSAPrivateKeyPem();
-
-                // genero un id univoco per il dispositivo se non esiste 
-                deviceId = await SecureStorage.GetAsync("DeviceId");
-                if (string.IsNullOrEmpty(deviceId))
+                try
                 {
-                    deviceId = Guid.NewGuid().ToString();
-                }
-                string getServerKeyResponse = await _registerAPI.GetServerKey();
-                if (getServerKeyResponse != "success")
-                {
-                    handleError("Error getting server key.");
-                    return;
-                }
-                await SecureStorage.SetAsync("PublicDeviceKey", publicKey);
-                await SecureStorage.SetAsync("PrivateDeviceKey", privateKey);
-                await SecureStorage.SetAsync("PhoneNumber", storingNumber);
-                await SecureStorage.SetAsync("DeviceId", deviceId);
-                if (RememberLogin == true)
-                    await SecureStorage.SetAsync("RememberLogin", "y");
-                else
-                    await SecureStorage.SetAsync("RememberLogin", "n");
+                    string storingNumber = SelectedPhonePrefix + PhoneNumber;
+                    ErrorText = string.Empty;
 
-                // richiedo la registrazione al server
-                var  signInResponse = await _registerAPI.SignInRequest();
-                if (signInResponse == "success")
-                {
-                    // vado alla pagina di verifica
-                    string phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
-                    var sendSMSResponse = await _verificationAPI.SendSMS(phoneNumber);
-                    if (sendSMSResponse == "success")
+                    // genero la chiave pubblica e privata
+                    using RSA rsa = RSA.Create(2048);
+                    string publicKey = rsa.ExportRSAPublicKeyPem();
+                    string privateKey = rsa.ExportRSAPrivateKeyPem();
+
+                    // genero un id univoco per il dispositivo se non esiste 
+                    deviceId = await SecureStorage.GetAsync("DeviceId");
+                    if (string.IsNullOrEmpty(deviceId))
                     {
-                        var verificationVm = new VerificationViewModel(_registerAPI, _verificationAPI);
-                        var verificationPage = new VerificationPage(verificationVm);
-                        await Shell.Current.Navigation.PushModalAsync(verificationPage);
+                        deviceId = Guid.NewGuid().ToString();
+                    }
+                    string getServerKeyResponse = await _registerAPI.GetServerKey();
+                    if (getServerKeyResponse != "success")
+                    {
+                        handleError("Error getting server key.");
                         return;
+                    }
+                    await SecureStorage.SetAsync("PublicDeviceKey", publicKey);
+                    await SecureStorage.SetAsync("PrivateDeviceKey", privateKey);
+                    await SecureStorage.SetAsync("PhoneNumber", storingNumber);
+                    await SecureStorage.SetAsync("DeviceId", deviceId);
+                    if (RememberLogin == true)
+                        await SecureStorage.SetAsync("RememberLogin", "y");
+                    else
+                        await SecureStorage.SetAsync("RememberLogin", "n");
+
+                    // richiedo la registrazione al server
+                    var  signInResponse = await _registerAPI.SignInRequest();
+                    if (signInResponse == "success")
+                    {
+                        // vado alla pagina di verifica
+                        string? phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
+                        if (phoneNumber == null)
+                        {
+                            handleError("Error while signing in.");
+                            return;
+                        }
+                        var sendSMSResponse = await _verificationAPI.SendSMS(phoneNumber);
+                        if (sendSMSResponse == "success")
+                        {
+                            var verificationVm = new VerificationViewModel(_registerAPI, _verificationAPI);
+                            var verificationPage = new VerificationPage(verificationVm);
+                            await Shell.Current.Navigation.PushModalAsync(verificationPage);
+                            return;
+                        }
+                        else
+                        {
+                            handleError("Error while sending SMS.");
+                            return;
+                        }
                     }
                     else
                     {
-                        handleError("Error while sending SMS.");
+                        handleError("Error while signing in.");
                         return;
                     }
                 }
-                else
+                catch (Exception)
                 {
                     handleError("Error while signing in.");
                     return;

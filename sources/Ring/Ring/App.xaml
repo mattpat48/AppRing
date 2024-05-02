@@ -1,14 +1,160 @@
-﻿<?xml version = "1.0" encoding = "UTF-8" ?>
-<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:local="clr-namespace:Ring"
-             x:Class="Ring.App">
-    <Application.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
-                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </Application.Resources>
-</Application>
+             x:Class="Ring.AddPage"
+             Title="Register"
+             xmlns:viewmodel="clr-namespace:Ring.ViewModel"
+             x:DataType="viewmodel:AddViewModel"
+             Shell.NavBarIsVisible="False">
+
+    <AbsoluteLayout>
+
+        <BoxView
+            AbsoluteLayout.LayoutFlags="All"
+            AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+            Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}" />
+
+        <Frame
+            AbsoluteLayout.LayoutFlags="All"
+            AbsoluteLayout.LayoutBounds="0.5, 0.5, 0.9, 0.9"
+            BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource OffBlack}}"
+            Padding="30"
+            CornerRadius="20">
+
+            <Grid
+                RowDefinitions="Auto, Auto, Auto"
+                ColumnDefinitions="*, *"
+                RowSpacing="10" >
+                <Grid.Shadow>
+                    <Shadow
+                        Radius="40"
+                        Opacity="0.8"
+                        Offset="20,20" 
+                        Brush="Black" />
+                </Grid.Shadow>
+
+                <Frame
+                    BackgroundColor="{StaticResource PrimaryDark}"
+                    CornerRadius="20"
+                    VerticalOptions="CenterAndExpand"
+                    HorizontalOptions="Center"
+                    HasShadow="True"
+                    Grid.Row="0"
+                    Grid.ColumnSpan="2" >
+
+                    <Grid
+                        RowDefinitions="Auto, Auto"
+                        RowSpacing="10">
+
+                        <Label
+                            Padding="5"
+                            Text="Welcome to Ring!"
+                            FontAttributes="Bold"
+                            TextColor="Black"
+                            LineBreakMode="WordWrap"
+                            VerticalOptions="CenterAndExpand"
+                            HorizontalOptions="CenterAndExpand"
+                            Style="{StaticResource Headline}">
+                        </Label>
+
+                        <Label
+                            TextColor="{StaticResource Gray800}"
+                            Text="Please enter your phone number to register."
+                            LineBreakMode="WordWrap"
+                            HorizontalOptions="CenterAndExpand"
+                            VerticalOptions="CenterAndExpand"
+                            Style="{StaticResource SubHeadline}"
+                            Grid.Row="1"
+                            Grid.ColumnSpan="2" />
+                    </Grid>
+
+                </Frame>
+
+                <Frame
+                    BackgroundColor="{StaticResource Gray800}"
+                    BorderColor="Transparent"
+                    HorizontalOptions="Center"
+                    CornerRadius="20"
+                    Grid.Row="1"
+                    Grid.ColumnSpan="2">
+
+
+                    <Grid
+                        RowDefinitions="Auto, Auto, Auto"
+                        RowSpacing="15"
+                        ColumnDefinitions="Auto, Auto"
+                        HorizontalOptions="Center">
+                        <Grid.Shadow>
+                            <Shadow
+                                Radius="20"
+                                Opacity="0.8"
+                                Offset="10,10"
+                                Brush="Black" />
+                        </Grid.Shadow>
+
+                        <Picker
+                            Title="Country"
+                            ItemsSource="{Binding PhonePrefixes}"
+                            SelectedItem="{Binding SelectedPhonePrefix}"
+                            x:Name="countryPicker"
+                            WidthRequest="100"
+                            Margin="10, 0, 0, 10"
+                            Grid.Row="0"
+                            Grid.Column="0"/>
+
+                        <Entry
+                            Placeholder="Phone number"
+                            Keyboard="Telephone"
+                            Text="{Binding PhoneNumber}"
+                            x:Name="phoneNumberEntry"
+                            WidthRequest="120"
+                            Margin="10, 0, 0, 10"
+                            Grid.Row="0"
+                            Grid.Column="1"/>
+
+                        <StackLayout
+                            Grid.Row="1"
+                            Orientation="Horizontal"
+                            Grid.ColumnSpan="2"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center">
+                            <CheckBox
+                                IsChecked="{Binding RememberLogin}" />
+
+                            <Label
+                                Text="Remember me"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center"
+                                LineBreakMode="WordWrap"/>
+                        </StackLayout>
+
+                        <Button
+                            Text="{Binding NextText}"
+                            IsEnabled="{Binding Source={x:Reference phoneNumberEntry}, Path=Text.Length}"
+                            Command="{Binding NextCommand}"
+                            SemanticProperties.Hint="Register your phone number"
+                            HorizontalOptions="CenterAndExpand"
+                            WidthRequest="75"
+                            Grid.Row="2"
+                            Grid.ColumnSpan="2" />
+
+                    </Grid>
+                </Frame>
+
+                <Label
+                    Text="{Binding ErrorText}"
+                    TextColor="Red"
+                    Style="{StaticResource SubHeadline}"
+                    LineBreakMode="TailTruncation"
+                    HorizontalOptions="FillAndExpand"
+                    VerticalOptions="Center"
+                    Grid.Row="2"
+                    Grid.ColumnSpan="2" />
+
+            </Grid>
+
+        </Frame>
+
+    </AbsoluteLayout>
+
+</ContentPage>

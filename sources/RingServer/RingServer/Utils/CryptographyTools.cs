@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -10,85 +9,211 @@ public class CryptographyTools
     // Metodo per criptare i dati da inviare al server
     // @param key: chiave con cui cifrare i dati
     // @param toEncrypt: stringa già serializzata da cifrare
-    public static object EncryptString(string encryptKey, string toEncrypt)
+    public static (bool, object) EncryptString(string encryptKey, object toEncrypt)
     {
-        byte[] encryptedData;
-        byte[] encryptedAesKey;
-        byte[] encryptedAesIV;
-
-        // Importo la chiave pubblica per cifrare i dati
-        using RSA rsa = RSA.Create(2048);
-        rsa.ImportFromPem(encryptKey.ToCharArray());
-
-        // Genero una chiave simmetrica per AES
-        using Aes aes = Aes.Create();
-        aes.GenerateKey();
-        aes.GenerateIV();
-
-        // Cripto i dati usando AES
-        ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
-        using MemoryStream msEncrypt = new();
-        using (CryptoStream csEncrypt = new(msEncrypt, encryptor, CryptoStreamMode.Write))
+        try
         {
-            using StreamWriter swEncrypt = new(csEncrypt);
-            // Scrivo tutti i dati da criptare nel flusso
-            swEncrypt.Write(toEncrypt);
+            byte[] encryptedData;
+            byte[] encryptedAesKey;
+            byte[] encryptedAesIV;
+
+            // Importo la chiave pubblica per cifrare i dati
+            using RSA rsa = RSA.Create(2048);
+            rsa.ImportFromPem(encryptKey.ToCharArray());
+
+            // Genero una chiave simmetrica per AES
+            using Aes aes = Aes.Create();
+            aes.GenerateKey();
+            aes.GenerateIV();
+
+            // Cripto i dati usando AES
+            ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+            using MemoryStream msEncrypt = new();
+            using (CryptoStream csEncrypt = new(msEncrypt, encryptor, CryptoStreamMode.Write))
+            {
+                using StreamWriter swEncrypt = new(csEncrypt);
+                // Scrivo tutti i dati da criptare nel flusso
+                swEncrypt.Write(toEncrypt);
+            }
+
+            // Ottengo i dati cifrati
+            encryptedData = msEncrypt.ToArray();
+            encryptedAesKey = rsa.Encrypt(aes.Key, RSAEncryptionPadding.Pkcs1);
+            encryptedAesIV = rsa.Encrypt(aes.IV, RSAEncryptionPadding.Pkcs1);
+
+            // Converto i dati cifrati in base64
+            string encryptedDataBase64 = Convert.ToBase64String(encryptedData);
+            string encryptedAesKeyBase64 = Convert.ToBase64String(encryptedAesKey);
+            string encryptedAesIVBase64 = Convert.ToBase64String(encryptedAesIV);
+
+            // Creo il contenuto da inviare al server
+            var requestBody = new
+            {
+                EncryptedData = encryptedDataBase64,
+                EncryptedKey = encryptedAesKeyBase64,
+                EncryptedIV = encryptedAesIVBase64
+            };
+            //string jsonRequestBody = JsonConvert.SerializeObject(requestBody);
+            //var stringContent = new StringContent(jsonRequestBody, Encoding.UTF8, "application/json");
+
+            return (true, requestBody);
         }
-
-        // Ottengo i dati cifrati
-        encryptedData = msEncrypt.ToArray();
-        encryptedAesKey = rsa.Encrypt(aes.Key, RSAEncryptionPadding.Pkcs1);
-        encryptedAesIV = rsa.Encrypt(aes.IV, RSAEncryptionPadding.Pkcs1);
-
-        // Converto i dati cifrati in base64
-        string encryptedDataBase64 = Convert.ToBase64String(encryptedData);
-        string encryptedAesKeyBase64 = Convert.ToBase64String(encryptedAesKey);
-        string encryptedAesIVBase64 = Convert.ToBase64String(encryptedAesIV);
-
-        // Creo il contenuto da inviare al server
-        var requestBody = new
+        catch (Exception ex)
         {
-            EncryptedData = encryptedDataBase64,
-            EncryptedKey = encryptedAesKeyBase64,
-            EncryptedIV = encryptedAesIVBase64
-        };
-        //string jsonRequestBody = JsonConvert.SerializeObject(requestBody);
-        //var stringContent = new StringContent(jsonRequestBody, Encoding.UTF8, "application/json");
-
-        return requestBody;
+            return (false, ex.Message);
+        }
     }
 
-    public static string DecryptString(string decryptKey, string requestBody)
+
+    public static (bool, string) SignData(string data, string privateKeyPem)
     {
-        CommonClasses.EncryptedRequest request = JsonConvert.DeserializeObject<CommonClasses.EncryptedRequest>(requestBody);
-
-        // Importo la chiave privata per decifrare i dati
-        using RSA rsa = RSA.Create(2048);
-        rsa.ImportFromPem(decryptKey.ToCharArray());
-
-        // Decifro la chiave e l'IV
-        byte[] key = rsa.Decrypt(Convert.FromBase64String(request.EncryptedKey), RSAEncryptionPadding.Pkcs1);
-        byte[] iv = rsa.Decrypt(Convert.FromBase64String(request.EncryptedIV), RSAEncryptionPadding.Pkcs1);
-
-        byte[] data = Convert.FromBase64String(request.EncryptedData);
-
-        // Decifro i dati usando AES
-        using Aes aes = Aes.Create();
-        aes.Key = key;
-        aes.IV = iv;
-
-        ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
-
-        using (MemoryStream msDecrypt = new MemoryStream(data))
+        try
         {
-            using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+            byte[] dataBytes = Encoding.UTF8.GetBytes(data);
+
+            using RSA rsa = RSA.Create(2048);
+            rsa.ImportFromPem(privateKeyPem.ToCharArray());
+            byte[] signature = rsa.SignData(dataBytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            return (true, Convert.ToBase64String(signature));
+        }
+        catch (Exception ex)
+        {
+            return (false, ex.Message);
+        }
+    }
+
+
+    public static (bool, object?) TotalEncrypt(string privateKey, string publicKey, string content)
+    {
+        bool outcome1, outcome2;
+        object signature, encryptedWithPublicKey;
+
+        try
+        {
+            (outcome1, signature) = SignData(content, privateKey);
+
+            if (!outcome1)
             {
-                using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+                return (outcome1, signature);
+            }
+
+            var payload = new
+            {
+                Data = content,
+                Signature = signature
+            };
+
+            (outcome2, encryptedWithPublicKey) = EncryptString(publicKey, JsonConvert.SerializeObject(payload));
+            if (!outcome2)
+            {
+                return (outcome2, encryptedWithPublicKey);
+            }
+            return (true, encryptedWithPublicKey);
+        }
+        catch (Exception ex)
+        {
+            return (false, ex.Message);
+        }
+    }
+
+
+    public static (bool, string) DecryptString(string decryptKey, string requestBody)
+    {
+        try
+        {
+            CommonClasses.EncryptedRequest? request = JsonConvert.DeserializeObject<CommonClasses.EncryptedRequest>(requestBody);
+            if (request == null)
+            {
+                throw new Exception("Empty Request");
+            }
+
+            // Importo la chiave privata per decifrare i dati
+            using RSA rsa = RSA.Create(2048);
+            rsa.ImportFromPem(decryptKey.ToCharArray());
+
+            // Decifro la chiave e l'IV
+            byte[] key = rsa.Decrypt(Convert.FromBase64String(request.EncryptedKey), RSAEncryptionPadding.Pkcs1);
+            byte[] iv = rsa.Decrypt(Convert.FromBase64String(request.EncryptedIV), RSAEncryptionPadding.Pkcs1);
+
+            byte[] data = Convert.FromBase64String(request.EncryptedData);
+
+            // Decifro i dati usando AES
+            using Aes aes = Aes.Create();
+            aes.Key = key;
+            aes.IV = iv;
+
+            ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+
+            using (MemoryStream msDecrypt = new MemoryStream(data))
+            {
+                using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
                 {
-                    string plaintext = srDecrypt.ReadToEnd();
-                    return plaintext;
+                    using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+                    {
+                        string plaintext = srDecrypt.ReadToEnd();
+                        return (true, plaintext);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            return (false, ex.Message);
+        }
+    }
+
+    public static bool VerifySignature(string data, string signature, string publicKeyPem)
+    {
+        byte[] dataBytes = Encoding.UTF8.GetBytes(data);
+        byte[] signatureBytes = Convert.FromBase64String(signature);
+
+        using (RSA rsa = RSA.Create())
+        {
+            rsa.ImportFromPem(publicKeyPem.ToCharArray());
+            return rsa.VerifyData(dataBytes, signatureBytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        }
+    }
+
+
+    public static (bool, string?, CommonClasses.Identifier?) TotalDecrypt(string privateKey, string content, RingDBContext _dbContext)
+    {
+        bool outcome1, outcome2;
+        string decryptedWithPrivateKey;
+
+        try
+        {
+            (outcome1, decryptedWithPrivateKey) = DecryptString(privateKey, content);
+
+            if (!outcome1)
+            {
+                return (outcome1, decryptedWithPrivateKey, null);
+            }
+
+            var decryptedJson = JsonConvert.DeserializeObject<dynamic>(decryptedWithPrivateKey);
+
+            if (decryptedJson == null)
+            {
+                return (false, "Error deserializing json", null);
+            }
+            string number = decryptedJson.Number;
+            string id = decryptedJson.Id;
+            string data = decryptedJson.Payload.Data;
+            string signature = decryptedJson.Payload.Signature;
+
+            string publicKey = _dbContext.Users.Where(u => u.phoneNumber == number && u.deviceId == id).First().publicKey;
+
+            outcome2 = VerifySignature(data, signature, publicKey);
+
+            if (!outcome2)
+            {
+                return (outcome2, "Data is not signed!", null);
+            }
+
+            return (true, data, new CommonClasses.Identifier(number, id));
+        }
+        catch (Exception ex)
+        {
+            return (false, ex.Message, null);
         }
     }
 }

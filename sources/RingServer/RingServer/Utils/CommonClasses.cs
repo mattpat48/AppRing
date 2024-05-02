@@ -18,19 +18,6 @@ public static class CommonClasses
         }
     }
 
-    // Classe per la richiesta di verifica del codice
-    public class VerifyRequest
-    {
-        public string Code { get; set; }
-        public string Number { get; set; }
-
-        public VerifyRequest(string code, string number)
-        {
-            Code = code;
-            Number = number;
-        }
-    }
-
     // Classe per l'identificazione dell'utente per altro tipo di richieste
     public class Identifier
     {
@@ -43,6 +30,7 @@ public static class CommonClasses
             Id = id;
         }
     }
+
 
     // Classe richiesta criptata
     public class EncryptedRequest
@@ -59,29 +47,17 @@ public static class CommonClasses
         }
     }
 
-    public class AllGatesRequest
+    public class SingleGateRequest
+    {
+        public string Number { get; set; }
+        public string Id { get; set; }
+        public string GateId { get; set; }
+
+        public SingleGateRequest(string number, string id, string gateId)
         {
-            public string Number { get; set; }
-            public string Id { get; set; }
-
-            public AllGatesRequest(string number, string id, string key)
-            {
-                Number = number;
-                Id = id;
-            }
+            Number = number;
+            Id = id;
+            GateId = gateId;
         }
-
-        public class SingleGateRequest
-        {
-            public string Number { get; set; }
-            public string Id { get; set; }
-            public string GateId { get; set; }
-
-            public SingleGateRequest(string number, string id, string gateId)
-            {
-                Number = number;
-                Id = id;
-                GateId = gateId;
-            }
-        }
+    }
 }
