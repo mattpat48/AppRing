@@ -83,10 +83,18 @@ public partial class RegisterViewModel : ObservableObject
                     string storingNumber = SelectedPhonePrefix + PhoneNumber;
                     ErrorText = string.Empty;
 
-                    // genero la chiave pubblica e privata
-                    using RSA rsa = RSA.Create(2048);
-                    string publicKey = rsa.ExportRSAPublicKeyPem();
-                    string privateKey = rsa.ExportRSAPrivateKeyPem();
+                    // genero la chiave pubblica e privata se non esistono
+                    string? existingPublicKey = await SecureStorage.GetAsync("PublicDeviceKey");
+                    string? existingPrivateKey = await SecureStorage.GetAsync("PrivateDeviceKey");
+                    if (string.IsNullOrEmpty(existingPublicKey) || string.IsNullOrEmpty(existingPrivateKey))
+                    {
+                        using RSA rsa = RSA.Create(2048);
+                        string publicKey = rsa.ExportRSAPublicKeyPem();
+                        string privateKey = rsa.ExportRSAPrivateKeyPem();
+
+                        await SecureStorage.SetAsync("PublicDeviceKey", publicKey);
+                        await SecureStorage.SetAsync("PrivateDeviceKey", privateKey);
+                    }
 
                     // genero un id univoco per il dispositivo se non esiste 
                     deviceId = await SecureStorage.GetAsync("DeviceId");
@@ -97,11 +105,10 @@ public partial class RegisterViewModel : ObservableObject
                     string getServerKeyResponse = await _registerAPI.GetServerKey();
                     if (getServerKeyResponse != "success")
                     {
-                        handleError("Error getting server key.");
+                        handleError("Error while retrieving server key.");
                         return;
                     }
-                    await SecureStorage.SetAsync("PublicDeviceKey", publicKey);
-                    await SecureStorage.SetAsync("PrivateDeviceKey", privateKey);
+                    
                     await SecureStorage.SetAsync("PhoneNumber", storingNumber);
                     await SecureStorage.SetAsync("DeviceId", deviceId);
                     if (RememberLogin == true)
@@ -117,7 +124,7 @@ public partial class RegisterViewModel : ObservableObject
                         string? phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
                         if (phoneNumber == null)
                         {
-                            handleError("Error while signing in.");
+                            handleError("Error while retrieving phone number.");
                             return;
                         }
                         var sendSMSResponse = await _verificationAPI.SendSMS(phoneNumber);
@@ -142,13 +149,13 @@ public partial class RegisterViewModel : ObservableObject
                 }
                 catch (Exception)
                 {
-                    handleError("Error while signing in.");
+                    handleError("Internal exception error while signing in.");
                     return;
                 }
             }
             else
             {
-                ErrorText = "Invalid phone number";
+               handleError("Invalid phone number");
                 return;
             }
         }

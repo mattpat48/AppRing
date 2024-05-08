@@ -27,10 +27,15 @@ namespace Ring
             builder.Services.AddTransient<AddPage>();
             builder.Services.AddTransient<AddViewModel>();
 
+            builder.Services.AddTransient<SettingsPage>();
+            builder.Services.AddTransient<SettingsViewModel>();
+
             Environment.SetEnvironmentVariable("MQTT_SERVER", "10.20.100.28");
+            //Environment.SetEnvironmentVariable("MQTT_SERVER", "192.168.1.4");
             Environment.SetEnvironmentVariable("MQTT_PORT", "1883");
 
-            Environment.SetEnvironmentVariable("API_SERVER", "https://localhost:7046");
+            Environment.SetEnvironmentVariable("API_SERVER", "https://10.20.100.50:7046");
+            //Environment.SetEnvironmentVariable("API_SERVER", "https://192.168.1.4:7046");
 
             return builder.Build();
         }

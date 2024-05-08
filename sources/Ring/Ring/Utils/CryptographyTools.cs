@@ -20,6 +20,32 @@ namespace Ring.Utils
             }
         }
 
+        public class Payload
+        {
+            public string Data { get; set; }
+            public string Signature { get; set; }
+
+            public Payload(string data, string signature)
+            {
+                Data = data;
+                Signature = signature;
+            }
+        }
+
+        public class ExtendedIdentifier
+        {
+            public string Number { get; set; }
+            public string Id { get; set; }
+            public Payload Payload { get; set; }
+
+            public ExtendedIdentifier(string number, string id, Payload payload)
+            {
+                Number = number;
+                Id = id;
+                Payload = payload;
+            }
+        }
+
         // Metodo per criptare i dati da inviare al server
         // @param key: chiave con cui cifrare i dati
         // @param toEncrypt: stringa già serializzata da cifrare
@@ -110,18 +136,8 @@ namespace Ring.Utils
                     return (false, new StringContent("Error signing data"));
                 }
 
-                var payload = new
-                {
-                    Data = content,
-                    Signature = signature
-                };
-
-                var toSend = new
-                {
-                    Number = phoneNumber,
-                    Id = id,
-                    Payload = payload
-                };
+                var payload = new Payload(content, signature);
+                var toSend = new ExtendedIdentifier(phoneNumber, id, payload);
 
                 (outcome2, encryptedWithPublicKey) = EncryptString(publicKey, JsonConvert.SerializeObject(toSend));
                 if (!outcome2)

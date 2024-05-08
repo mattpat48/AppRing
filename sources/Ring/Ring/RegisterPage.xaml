@@ -5,6 +5,7 @@
              Title="Register"
              xmlns:viewmodel="clr-namespace:Ring.ViewModel"
              x:DataType="viewmodel:RegisterViewModel"
+             x:Name="registerPage"
              Shell.NavBarIsVisible="False">
 
     <AbsoluteLayout>
@@ -59,7 +60,7 @@
 
                         <Label
                             TextColor="{StaticResource Gray800}"
-                            Text="Please enter your phone number to register."
+                            Text="Please enter your phone number to register or login."
                             LineBreakMode="WordWrap"
                             HorizontalOptions="CenterAndExpand"
                             VerticalOptions="CenterAndExpand"
@@ -94,6 +95,7 @@
 
                         <Picker
                             Title="Country"
+                            IsEnabled="{Binding IsNextEnabled}"
                             ItemsSource="{Binding PhonePrefixes}"
                             SelectedItem="{Binding SelectedPhonePrefix}"
                             x:Name="countryPicker"
@@ -104,6 +106,7 @@
 
                         <Entry
                             Placeholder="Phone number"
+                            IsEnabled="{Binding IsNextEnabled}"
                             Keyboard="Telephone"
                             Text="{Binding PhoneNumber}"
                             x:Name="phoneNumberEntry"
@@ -113,13 +116,14 @@
                             Grid.Column="1"/>
 
                         <StackLayout
+                            IsEnabled="{Binding IsNextEnabled}"
                             Grid.Row="1"
                             Orientation="Horizontal"
                             Grid.ColumnSpan="2"
                             HorizontalOptions="Center"
                             VerticalOptions="Center">
                             <CheckBox
-                                IsChecked="{Binding RememberLogin}" />
+                                IsChecked="{Binding RememberLogin}"/>
 
                             <Label
                                 Text="Remember me"
@@ -145,7 +149,7 @@
                     Text="{Binding ErrorText}"
                     TextColor="Red"
                     Style="{StaticResource SubHeadline}"
-                    LineBreakMode="TailTruncation"
+                    LineBreakMode="WordWrap"
                     HorizontalOptions="FillAndExpand"
                     VerticalOptions="Center"
                     Grid.Row="2"

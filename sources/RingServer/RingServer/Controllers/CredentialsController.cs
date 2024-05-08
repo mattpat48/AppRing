@@ -9,6 +9,7 @@ using Vonage;
 using Microsoft.EntityFrameworkCore;
 using RingServer.Utils;
 using Jose;
+using Microsoft.IdentityModel.Tokens;
 
 namespace RingServer.Controllers
 {
@@ -29,6 +30,7 @@ namespace RingServer.Controllers
 
         // Contesto del database
         private readonly RingDBContext _dbContext;
+
 
         public CredentialsController(IDataProtectionProvider provider, RingDBContext dbContext)
         {
@@ -101,26 +103,56 @@ namespace RingServer.Controllers
                     if (userInfo != null)
                     {
                         // Aggiungo l'utente al database se non esiste
-                        if (_dbContext.Users.All(u => u.phoneNumber != userInfo.Number))
+                        if (_dbContext.Users.All(u => u.phoneNumber != userInfo.Number || u.deviceId != userInfo.Id))
                         {
-                            _dbContext.Users.Add(new User
+                            if (!_dbContext.Users.Where(u => u.phoneNumber == userInfo.Number && u.deviceId != userInfo.Id).ToList().IsNullOrEmpty())
                             {
-                                phoneNumber = userInfo.Number,
-                                deviceId = userInfo.Id,
-                                verificationCode = string.Empty,
-                                verificationExpire = DateTime.MinValue,
-                                lastLogin = DateTime.MinValue,
-                                publicKey = userInfo.PKey,
-                                rememberLogin = userInfo.RememberLogin
-                            });
+                                _dbContext.Users.Add(new User
+                                {
+                                    phoneNumber = userInfo.Number,
+                                    deviceId = userInfo.Id,
+                                    verificationCode = string.Empty,
+                                    verificationExpire = DateTime.MinValue,
+                                    lastLogin = DateTime.MinValue,
+                                    publicKey = userInfo.PKey,
+                                    rememberLogin = userInfo.RememberLogin
+                                });
+
+                                // devo aggiungere tutti i cancelli già presenti nel database a quel numero anche a quel device id
+                                var gates = _dbContext.UsersGates.Where(u => u.phoneNumber == userInfo.Number).ToList();
+                                foreach (var gate in gates)
+                                {
+                                    _dbContext.UsersGates.Add(new UserGate
+                                    {
+                                        usergateId = Guid.NewGuid().ToString(),
+                                        phoneNumber = userInfo.Number,
+                                        deviceId = userInfo.Id,
+                                        gateId = gate.gateId,
+                                        role = gate.role
+                                    });
+                                }
+                            }
+                            else
+                            {
+                                _dbContext.Users.Add(new User
+                                {
+                                    phoneNumber = userInfo.Number,
+                                    deviceId = userInfo.Id,
+                                    verificationCode = string.Empty,
+                                    verificationExpire = DateTime.MinValue,
+                                    lastLogin = DateTime.MinValue,
+                                    publicKey = userInfo.PKey,
+                                    rememberLogin = userInfo.RememberLogin
+                                });
+                            }
                         }
                         // Altrimenti aggiorno i dati dell'utente
                         else
                         {
-                            _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).First().verificationCode = string.Empty;
-                            _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).First().lastLogin = DateTime.MinValue;
-                            _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).First().publicKey = userInfo.PKey;
-                            _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).First().rememberLogin = userInfo.RememberLogin;
+                            _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number && u.deviceId == userInfo.Id).First().verificationCode = string.Empty;
+                            _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number && u.deviceId == userInfo.Id).First().lastLogin = DateTime.MinValue;
+                            _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number && u.deviceId == userInfo.Id).First().publicKey = userInfo.PKey;
+                            _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number && u.deviceId == userInfo.Id).First().rememberLogin = userInfo.RememberLogin;
                         }
 
                         try
@@ -147,7 +179,8 @@ namespace RingServer.Controllers
 
         [HttpPost]
         [Route("/api/v1/auth/sendcode")]
-        public async Task<IActionResult> SendSMS() {
+        public async Task<IActionResult> SendSMS()
+        {
             using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
             {
                 string requestBody = await reader.ReadToEndAsync();
@@ -177,8 +210,8 @@ namespace RingServer.Controllers
 
                         // Genero un codice di verifica e lo salvo nel database con la scadenza
                         string verificationCode = new Random().Next(10000000, 99999999).ToString();
-                        _dbContext.Users.Where(u => u.phoneNumber == to).First().verificationCode = verificationCode;
-                        _dbContext.Users.Where(u => u.phoneNumber == to).First().verificationExpire = DateTime.Now.AddMinutes(5);
+                        _dbContext.Users.Where(u => u.phoneNumber == to && u.deviceId == userInfo.Id).First().verificationCode = verificationCode;
+                        _dbContext.Users.Where(u => u.phoneNumber == to && u.deviceId == userInfo.Id).First().verificationExpire = DateTime.Now.AddMinutes(5);
                         try
                         {
                             await _dbContext.SaveChangesAsync();
@@ -240,8 +273,8 @@ namespace RingServer.Controllers
                         var inserted = JsonConvert.DeserializeObject<string>(plaintext);
 
                         // Prendo il codice di verifica e la scadenza dal database
-                        string verificationCode = _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).Select(u => u.verificationCode).First();
-                        DateTime verificationExpire = _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).Select(u => u.verificationExpire).First();
+                        string verificationCode = _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number && u.deviceId == userInfo.Id).Select(u => u.verificationCode).First();
+                        DateTime verificationExpire = _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number && u.deviceId == userInfo.Id).Select(u => u.verificationExpire).First();
                         
                         // Controllo se il codice è scaduto
                         if (DateTime.Now > verificationExpire)
@@ -252,7 +285,7 @@ namespace RingServer.Controllers
                         else if (inserted == verificationCode)
                         {
                             // Aggiorno il database con l'ultimo accesso
-                            _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number).First().lastLogin = DateTime.Now;
+                            _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number && u.deviceId == userInfo.Id).First().lastLogin = DateTime.Now;
                             try
                             {
                                 await _dbContext.SaveChangesAsync();

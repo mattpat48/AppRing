@@ -5,6 +5,7 @@
              Title="Verification"
              xmlns:viewmodel="clr-namespace:Ring.ViewModel"
              x:DataType="viewmodel:VerificationViewModel"
+             x:Name="verificationPage"
              Shell.NavBarIsVisible="False">
 
     <AbsoluteLayout>
@@ -92,6 +93,7 @@
 
                         <Entry 
                             Placeholder="Code"
+                            IsEnabled="{Binding IsVerifyEnabled}"
                             x:Name="verificationCodeEntry"
                             Text="{Binding VerificationCode}"
                             HorizontalOptions="CenterAndExpand"
@@ -104,7 +106,7 @@
 
                         <Button
                             Text="Verify"
-                            IsEnabled="{Binding Source={x:Reference verificationCodeEntry}, Path=Text.Length}"
+                            IsEnabled="{Binding IsVerifyEnabled}"
                             Command="{Binding VerifyCommand}"
                             SemanticProperties.Hint="Verify your phone number"
                             WidthRequest="100"
@@ -114,6 +116,7 @@
 
                         <Button
                             Text="Resend"
+                            IsEnabled="{Binding IsVerifyEnabled}"
                             Command="{Binding ResendCommand}"
                             SemanticProperties.Hint="Resend verification code"
                             HorizontalOptions="End"

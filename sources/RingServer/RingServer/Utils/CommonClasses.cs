@@ -18,19 +18,6 @@ public static class CommonClasses
         }
     }
 
-    // Classe per l'identificazione dell'utente per altro tipo di richieste
-    public class Identifier
-    {
-        public string Number { get; set; }
-        public string Id { get; set; }
-
-        public Identifier(string number, string id)
-        {
-            Number = number;
-            Id = id;
-        }
-    }
-
 
     // Classe richiesta criptata
     public class EncryptedRequest
@@ -47,17 +34,55 @@ public static class CommonClasses
         }
     }
 
-    public class SingleGateRequest
+    public class AddUserRequest
+    {
+        public string GateId { get; set; }
+        public string ToAdd { get; set; }
+
+        public AddUserRequest(string gateId, string toAdd)
+        {
+            GateId = gateId;
+            ToAdd = toAdd;
+        }
+    }
+
+
+    // Classe per l'identificazione dell'utente per altro tipo di richieste
+    public class Identifier
     {
         public string Number { get; set; }
         public string Id { get; set; }
-        public string GateId { get; set; }
 
-        public SingleGateRequest(string number, string id, string gateId)
+        public Identifier(string number, string id)
         {
             Number = number;
             Id = id;
-            GateId = gateId;
+        }
+    }
+
+    public class Payload
+    {
+        public string Data { get; set; }
+        public string Signature { get; set; }
+
+        public Payload(string data, string signature)
+        {
+            Data = data;
+            Signature = signature;
+        }
+    }
+
+    public class ExtendedIdentifier
+    {
+        public string Number { get; set; }
+        public string Id { get; set; }
+        public Payload Payload { get; set; }
+
+        public ExtendedIdentifier(string number, string id, Payload payload)
+        {
+            Number = number;
+            Id = id;
+            Payload = payload;
         }
     }
 }

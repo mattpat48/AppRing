@@ -24,7 +24,7 @@ public partial class VerificationViewModel : ObservableObject
     public VerificationViewModel(RegisterAPI registerAPI, VerificationAPI verificationAPI)
     {
         VerificationCode = string.Empty;
-        IsVerifyEnabled = false;
+        IsVerifyEnabled = true;
         MessageText = string.Empty;
         ColorText = "White";
         _registerAPI = registerAPI;
@@ -36,6 +36,7 @@ public partial class VerificationViewModel : ObservableObject
     {
         IsVerifyEnabled = false;
         // verifica del codice di verifica
+        VerificationCode = VerificationCode.Replace(" ", string.Empty);
         if (!string.IsNullOrEmpty(VerificationCode) && VerificationCode.Length == 8)
         {
             var response = await _verificationAPI.VerifyCode(VerificationCode);
@@ -49,6 +50,7 @@ public partial class VerificationViewModel : ObservableObject
             }
             else
             {
+                IsVerifyEnabled = true;
                 ColorText = "Red";
                 MessageText = "Verification code does not match!";
                 SecureStorage.Remove("IsVerified");
@@ -57,6 +59,7 @@ public partial class VerificationViewModel : ObservableObject
         }
         else
         {
+            IsVerifyEnabled = true;
             ColorText = "Red";
             MessageText = "Insert a valid code!";
             SecureStorage.Remove("IsVerified");
@@ -68,11 +71,13 @@ public partial class VerificationViewModel : ObservableObject
     [RelayCommand]
     async Task Resend()
     {
+        IsVerifyEnabled = false;
         string? phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
         if (phoneNumber == null)
         {
             ColorText = "Red";
             MessageText = "Phone number not found!";
+            IsVerifyEnabled = true;
             return;
         }
         var sendSMSResponse = await _verificationAPI.SendSMS(phoneNumber);
@@ -80,11 +85,15 @@ public partial class VerificationViewModel : ObservableObject
         {
             ColorText = "White";
             MessageText = "We sent you another code.";
+            IsVerifyEnabled = true;
+            return;
         }
         else
         {
             ColorText = "Red";
             MessageText = "Error while sending SMS.";
+            IsVerifyEnabled = true;
+            return;
         }
     }
 
@@ -92,13 +101,15 @@ public partial class VerificationViewModel : ObservableObject
     [RelayCommand]
     async Task Back()
     {
+        IsVerifyEnabled = false;
         SecureStorage.Remove("ServerKey");
         SecureStorage.Remove("PhoneNumber");
         SecureStorage.Remove("IsVerified");
 
-        var registerVm = new RegisterViewModel(_registerAPI, _verificationAPI);
-        var registerPage = new RegisterPage(registerVm);
-        await Shell.Current.Navigation.PushModalAsync(registerPage);
+        //var registerVm = new RegisterViewModel(_registerAPI, _verificationAPI);
+        //var registerPage = new RegisterPage(registerVm);
+        //await Shell.Current.Navigation.PushModalAsync(registerPage);
+        await Shell.Current.Navigation.PopAsync();
     }
 
 }

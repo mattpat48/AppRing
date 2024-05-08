@@ -11,11 +11,13 @@ public class RingDBContext : DbContext
         modelBuilder.Entity<User>().HasKey(u => new { u.phoneNumber, u.deviceId });
         modelBuilder.Entity<Gate>().HasKey(g => g.gateId);
         modelBuilder.Entity<UserGate>().HasKey(ug => ug.usergateId);
+        modelBuilder.Entity<Log>().HasKey(l => new { l.phoneNumber, l.deviceId, l.gateId, l.date });
     }
 
     public DbSet<User> Users { get; set; }
     public DbSet<Gate> Gates { get; set; }
     public DbSet<UserGate> UsersGates { get; set; }
+    public DbSet<Log> Logs { get; set; }
 }
 
 public class User
@@ -41,4 +43,13 @@ public class UserGate
     public string deviceId { get; set; }
     public string phoneNumber { get; set; }
     public string gateId { get; set; }
+    public string role { get; set; }
+}
+
+public class Log
+{
+    public string phoneNumber { get; set; }
+    public string deviceId { get; set; }
+    public string gateId { get; set; }
+    public DateTime date { get; set; }
 }

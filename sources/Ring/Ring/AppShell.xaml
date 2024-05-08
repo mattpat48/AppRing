@@ -7,14 +7,23 @@
     Shell.FlyoutBehavior="Disabled"
     Title="Ring">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+    <Shell.TitleView>
+        <Grid
+            HorizontalOptions="Center"
+            VerticalOptions="Center">
+            <Label
+                Grid.Column="0"
+                Text="Ring"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                FontAttributes="Bold"
+                FontSize="Large" />
+        </Grid>
+    </Shell.TitleView>
 
     <ShellContent
-        Title="Register"
-        ContentTemplate="{DataTemplate local:RegisterPage}"
-        Route="RegisterPage" />
+        Title="Ring"
+        ContentTemplate="{DataTemplate local:MainPage}"
+        Route="MainPage" />
 
 </Shell>

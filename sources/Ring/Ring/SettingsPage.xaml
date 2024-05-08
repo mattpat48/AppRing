@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://schemas.microsoft.com/dotnet/2021/maui/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewmodel="clr-namespace:Ring.ViewModel"
+             x:DataType="viewmodel:SettingsViewModel"
+             x:Name="settingsPage"
+             x:Class="Ring.SettingsPage"
+             Title="Settings"
+             Shell.NavBarIsVisible="True">
+
+
+    <AbsoluteLayout
+        HorizontalOptions="Center">
+        <Grid
+            Margin="15"
+            RowDefinitions="Auto, Auto, Auto"
+            ColumnDefinitions="Auto"
+            RowSpacing="10"
+            HorizontalOptions="CenterAndExpand">
+            <Grid.Shadow>
+                <Shadow
+                Radius="20"
+                Opacity="0.8"
+                Offset="10,10" 
+                Brush="Black" />
+            </Grid.Shadow>
+
+            <Button
+                x:Name="rmvButton"
+                IsEnabled="True"
+                IsVisible="True"
+                Text="Delete Number"
+                Margin="5"
+                WidthRequest="130"
+                Command="{Binding RemoveNumberCommand}"
+                SemanticProperties.Hint="Remove the number (debug)"
+                HorizontalOptions="Center"
+                Grid.Row="0"/>
+            
+            <Button
+                Text="Close"
+                IsEnabled="True"
+                IsVisible="True"
+                Margin="5"
+                WidthRequest="130"
+                Command="{Binding CloseCommand}"
+                HorizontalOptions="Center"
+                Grid.Row="1"/>
+            
+            <Label
+                Text="{Binding ErrorText}"
+                Grid.Row="2"
+                TextColor="Red"
+                HorizontalOptions="Center"
+                VerticalOptions="Center" />
+        </Grid>
+    </AbsoluteLayout>
+</ContentPage>

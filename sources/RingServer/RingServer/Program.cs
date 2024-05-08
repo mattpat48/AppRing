@@ -1,9 +1,6 @@
-
-using System;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using RingServer.Utils;
 
 namespace RingServer
@@ -38,6 +35,9 @@ namespace RingServer
             builder.Services.AddDbContext<RingDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseConnection")));
 
             var app = builder.Build();
+            app.Urls.Add("https://10.20.100.50:7046");
+            //app.Urls.Add("https://192.168.1.4:7046");
+            app.Urls.Add("https://localhost:7046");
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

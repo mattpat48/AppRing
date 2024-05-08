@@ -1,9 +1,12 @@
+using Ring.ViewModel;
+
 namespace Ring;
 
-public partial class NewPage1 : ContentPage
+public partial class AddPage : ContentPage
 {
-	public NewPage1()
+	public AddPage(AddViewModel viewModel)
 	{
 		InitializeComponent();
+		BindingContext = viewModel;
 	}
 }

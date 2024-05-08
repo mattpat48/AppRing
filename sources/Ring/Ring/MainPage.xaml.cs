@@ -24,7 +24,7 @@ public partial class MainPage : ContentPage
         var viewModel = BindingContext as MainViewModel;
         if (viewModel != null)
         {
-            await viewModel.Disconnect();
+            await viewModel.ResetDefault();
         }
     }
 }

@@ -1,20 +1,29 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://schemas.microsoft.com/dotnet/2021/maui/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              x:Class="Ring.MainPage"
              xmlns:viewmodel="clr-namespace:Ring.ViewModel"
              xmlns:model="clr-namespace:Ring.Utils"
              x:DataType="viewmodel:MainViewModel"
              x:Name="mainPage"
-             Shell.NavBarIsVisible="False">
+             Shell.NavBarIsVisible="True">
+
     <AbsoluteLayout
         HorizontalOptions="Center">
 
+        <AbsoluteLayout.GestureRecognizers>
+            <SwipeGestureRecognizer 
+                Direction="Down"
+                Command="{Binding ReloadCommand}"/>
+        </AbsoluteLayout.GestureRecognizers>
+
         <Grid
-            RowDefinitions="Auto, Auto, Auto, Auto, Auto"
-            ColumnDefinitions="Auto"
+            RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto"
+            ColumnDefinitions="*"
             RowSpacing="20"
-            IsVisible="{Binding IsContentVisible}"
+            IsVisible="True"
             HorizontalOptions="Center"
             VerticalOptions="Center">
             <Grid.Shadow>
@@ -26,71 +35,52 @@
             </Grid.Shadow>
 
             <Frame
-                BackgroundColor="{StaticResource PrimaryDark}"
-                CornerRadius="20"
-                VerticalOptions="CenterAndExpand"
-                HorizontalOptions="Center"
-                HasShadow="True"
-                Grid.Row="0"
-                Grid.ColumnSpan="1"
-                Margin="0, 50, 0, 0">
-
-                <Label
-                    Text="Ring"
-                    TextColor="Black"
-                    FontAttributes="Bold"
-                    Style="{StaticResource Headline}"
-                    SemanticProperties.HeadingLevel="Level1"/>
-
-            </Frame>
-
-            <Frame
                 BackgroundColor="{StaticResource Gray800}"
-                IsVisible="{Binding GateNotSelected}"
-                HorizontalOptions="CenterAndExpand"
+                IsVisible="{Binding HasGates}"
+                IsEnabled="{Binding HasGates}"
+                Margin="15, 0, 15, 0"
                 CornerRadius="20"
-                Grid.Row="1">
+                Grid.Row="1"
+                Grid.ColumnSpan="1">
                 <CollectionView
                     HorizontalOptions="CenterAndExpand"
-                    ItemsSource="{Binding Gates}">
-                    <CollectionView.ItemsLayout>
-                        <GridItemsLayout
-                            Orientation="Vertical"
-                            VerticalItemSpacing="10"
-                            HorizontalItemSpacing="5"
-                            Span="1"/>
-                    </CollectionView.ItemsLayout>
+                    ItemsSource="{Binding Gates}"
+                    ItemsLayout="VerticalList">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="model:Gate">
-                            <Grid
-                                HorizontalOptions="CenterAndExpand"
-                                ColumnSpacing="20"
-                                ColumnDefinitions="Auto, Auto">
 
-                                <Label
-                                    Text="{Binding name}"
-                                    TextColor="White"
-                                    LineBreakMode="WordWrap"
-                                    FontAttributes="Bold"
-                                    FontSize="20"
-                                    HorizontalOptions="Start"
-                                    VerticalOptions="Center"
-                                    Grid.Column="0"/>
+                            <Label
+                                Text="{Binding name}"
+                                Padding="0, 5, 0, 5"
+                                TextColor="White"
+                                FontAttributes="Bold"
+                                FontSize="20"
+                                LineBreakMode="WordWrap"
+                                HorizontalOptions="Start">
 
-                                <Button
-                                    Text="Select"
-                                    Command="{Binding Source={x:Reference Name=mainPage}, Path=BindingContext.SelectGateCommand}"
-                                    CommandParameter="{Binding .}"
-                                    Grid.Column="1"
-                                    HorizontalOptions="End"
-                                    VerticalOptions="Center">
-                                </Button>
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        NumberOfTapsRequired="1"
+                                        Command="{Binding Source={x:Reference Name=mainPage}, Path=BindingContext.SelectGateCommand}"
+                                        CommandParameter="{Binding .}" />
+                                </Label.GestureRecognizers>
 
-                            </Grid>
+                            </Label>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
             </Frame>
+
+            <Label
+                Text="No gates available"
+                IsVisible="{Binding NoGates}"
+                TextColor="White"
+                FontAttributes="Bold"
+                HorizontalOptions="CenterAndExpand"
+                VerticalOptions="CenterAndExpand"
+                Style="{StaticResource SubHeadline}"
+                Grid.Row="1"
+                Grid.ColumnSpan="1"/>
 
             <Frame
                 BackgroundColor="{StaticResource Gray800}"
@@ -99,10 +89,11 @@
                 VerticalOptions="CenterAndExpand"
                 HorizontalOptions="Center"
                 HasShadow="True"
-                Grid.Row="1" >
+                Grid.Row="2"
+                Grid.ColumnSpan="1">
                 <Grid
                     RowDefinitions="Auto, Auto, Auto"
-                    ColumnDefinitions="Auto"
+                    ColumnDefinitions="Auto, Auto"
                     RowSpacing="10"
                     HorizontalOptions="CenterAndExpand">
                     <Grid.Shadow>
@@ -112,16 +103,6 @@
                             Offset="10,10" 
                             Brush="Black" />
                     </Grid.Shadow>
-
-                    <Label
-                        Text="{Binding GateIdDisplay}"
-                        IsVisible="{Binding GateSelected}"
-                        TextColor="White"
-                        FontAttributes="Bold"
-                        HorizontalOptions="CenterAndExpand"
-                        VerticalOptions="CenterAndExpand"
-                        Style="{StaticResource SubHeadline}"
-                        Grid.Row="0"/>
 
                     <Label
                         Text="{Binding GateNameDisplay}"
@@ -131,75 +112,111 @@
                         HorizontalOptions="CenterAndExpand"
                         VerticalOptions="CenterAndExpand"
                         Style="{StaticResource SubHeadline}"
-                        Grid.Row="1"/>
+                        Grid.Row="0"
+                        Grid.ColumnSpan="2"/>
+
+                    <Label
+                        Text="You're an admin of this gate"
+                        IsVisible="{Binding IsAdmin}"
+                        TextColor="Green"
+                        FontAttributes="Bold"
+                        HorizontalOptions="CenterAndExpand"
+                        VerticalOptions="CenterAndExpand"
+                        FontSize="Small"
+                        Grid.Row="1"
+                        Grid.ColumnSpan="2"/>
 
                     <Button
                         x:Name="openButton"
                         Text="Open"
                         Margin="5"
+                        WidthRequest="75"
                         IsEnabled="{Binding IsOpenEnabled}"
                         Command="{Binding OpenCommand}"
                         SemanticProperties.Hint="Open the gate"
-                        HorizontalOptions="Center"
+                        HorizontalOptions="End"
                         Grid.Row="2"
-                        Grid.ColumnSpan="1"/>
+                        Grid.Column="0"/>
+
+                    <Button
+                        x:Name="addButton"
+                        Text="Add User"
+                        Margin="5"
+                        IsEnabled="{Binding IsAddEnabled}"
+                        IsVisible="{Binding IsAddEnabled}"
+                        Command="{Binding AddUserCommand}"
+                        SemanticProperties.Hint="Add a new user to the gate list"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"
+                        Grid.Row="2"
+                        Grid.Column="1"/>
+
                 </Grid>
             </Frame>
-
 
             <Frame
                 BackgroundColor="{StaticResource Gray800}"
-                IsVisible="true"
+                IsVisible="{Binding HasLogs}"
+                IsEnabled="{Binding HasLogs}"
+                Margin="15, 0, 15, 0"
                 CornerRadius="20"
-                VerticalOptions="CenterAndExpand"
-                HorizontalOptions="Center"
-                HasShadow="True"
-                Grid.Row="2" >
-                <Grid
-                    RowDefinitions="Auto, Auto, Auto"
-                    ColumnDefinitions="Auto"
-                    RowSpacing="10"
-                    HorizontalOptions="CenterAndExpand">
-                    <Grid.Shadow>
-                        <Shadow
-                            Radius="20"
-                            Opacity="0.8"
-                            Offset="10,10" 
-                            Brush="Black" />
-                    </Grid.Shadow>
+                Grid.Row="3"
+                Grid.ColumnSpan="1">
+                <CollectionView
+                    HorizontalOptions="CenterAndExpand"
+                    ItemsSource="{Binding Logs}"
+                    ItemsLayout="VerticalList">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="model:Log">
 
-                    <Button
-                        x:Name="deselectGate"
-                        Text="Deselect"
-                        IsEnabled="{Binding GateSelected}"
-                        IsVisible="{Binding GateSelected}"
-                        Margin="5"
-                        Command="{Binding DeselectGateCommand}"
-                        SemanticProperties.Hint="Reload connection to server"
-                        HorizontalOptions="Center"
-                        Grid.Row="0"/>
+                            <Grid
+                                ColumnDefinitions="Auto, Auto"
+                                ColumnSpacing="15">
+                                <Label
+                                    Text="{Binding phoneNumber}"
+                                    Padding="0, 5, 0, 5"
+                                    TextColor="White"
+                                    FontAttributes="Bold"
+                                    FontSize="20"
+                                    LineBreakMode="WordWrap"
+                                    Grid.Column="0"
+                                    HorizontalOptions="Start"/>
 
-                    <Button
-                        x:Name="reloadButton"
-                        Text="Reload"
-                        IsEnabled="{Binding IsReloadEnabled}"
-                        IsVisible="{Binding GateNotSelected}"
-                        Margin="5"
-                        Command="{Binding ReloadCommand}"
-                        SemanticProperties.Hint="Reload connection to server"
-                        HorizontalOptions="Center"
-                        Grid.Row="1"/>
-
-                    <Button
-                        x:Name="rmvButton"
-                        Text="Delete Number"
-                        Margin="5"
-                        Command="{Binding RemoveNumberCommand}"
-                        SemanticProperties.Hint="Remove the number (debug)"
-                        HorizontalOptions="Center"
-                        Grid.Row="2"/>
-                </Grid>
+                                <Label
+                                    Text="{Binding date}"
+                                    Padding="0, 5, 0, 5"
+                                    TextColor="White"
+                                    FontAttributes="Bold"
+                                    FontSize="20"
+                                    LineBreakMode="WordWrap"
+                                    Grid.Column="1"
+                                    HorizontalOptions="Start"/>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
             </Frame>
+
+            <Label
+                Text="No logs available"
+                IsVisible="{Binding NoLogs}"
+                TextColor="White"
+                FontAttributes="Bold"
+                HorizontalOptions="CenterAndExpand"
+                VerticalOptions="CenterAndExpand"
+                Style="{StaticResource SubHeadline}"
+                Grid.Row="3"
+                Grid.ColumnSpan="1"/>
+
+            <Button
+                x:Name="settingsButton"
+                Text="Settings"
+                Margin="5"
+                Command="{Binding GoToSettingsCommand}"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                Grid.Row="4"
+                Grid.Column="1"/>
 
             <Label
                 Text="{Binding MessageText}"
@@ -209,7 +226,9 @@
                 LineBreakMode="WordWrap"
                 HorizontalOptions="CenterAndExpand"
                 VerticalOptions="CenterAndExpand"
-                Grid.Row="3"/>
+                Grid.Row="5"
+                Grid.ColumnSpan="1"
+                SemanticProperties.Hint="Error message"/>
 
             <ActivityIndicator
                 IsRunning="{Binding IsLoading}"
@@ -218,7 +237,8 @@
                 Margin="50"
                 HorizontalOptions="Center"
                 VerticalOptions="Center"
-                Grid.Row="4"
+                Grid.Row="1"
+                Grid.ColumnSpan="1"
                 SemanticProperties.Hint="Activity indicator"/>
 
         </Grid>

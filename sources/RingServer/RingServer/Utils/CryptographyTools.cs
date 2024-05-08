@@ -189,12 +189,13 @@ public class CryptographyTools
                 return (outcome1, decryptedWithPrivateKey, null);
             }
 
-            var decryptedJson = JsonConvert.DeserializeObject<dynamic>(decryptedWithPrivateKey);
+            var decryptedJson = JsonConvert.DeserializeObject<CommonClasses.ExtendedIdentifier>(decryptedWithPrivateKey);
 
             if (decryptedJson == null)
             {
                 return (false, "Error deserializing json", null);
             }
+
             string number = decryptedJson.Number;
             string id = decryptedJson.Id;
             string data = decryptedJson.Payload.Data;

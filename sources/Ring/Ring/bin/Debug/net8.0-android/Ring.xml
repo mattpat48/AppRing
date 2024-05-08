@@ -4,7 +4,53 @@
         <name>Ring</name>
     </assembly>
     <members>
+        <member name="T:Ring.ViewModel.AddViewModel">
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+        </member>
+        <member name="P:Ring.ViewModel.AddViewModel.PhoneNumber">
+            <inheritdoc cref="F:Ring.ViewModel.AddViewModel.phoneNumber"/>
+        </member>
+        <member name="P:Ring.ViewModel.AddViewModel.PhonePrefixes">
+            <inheritdoc cref="F:Ring.ViewModel.AddViewModel.phonePrefixes"/>
+        </member>
+        <member name="P:Ring.ViewModel.AddViewModel.SelectedPhonePrefix">
+            <inheritdoc cref="F:Ring.ViewModel.AddViewModel.selectedPhonePrefix"/>
+        </member>
+        <member name="P:Ring.ViewModel.AddViewModel.IsAddEnabled">
+            <inheritdoc cref="F:Ring.ViewModel.AddViewModel.isAddEnabled"/>
+        </member>
+        <member name="P:Ring.ViewModel.AddViewModel.AddText">
+            <inheritdoc cref="F:Ring.ViewModel.AddViewModel.addText"/>
+        </member>
+        <member name="P:Ring.ViewModel.AddViewModel.GateId">
+            <inheritdoc cref="F:Ring.ViewModel.AddViewModel.gateId"/>
+        </member>
+        <member name="P:Ring.ViewModel.AddViewModel.MessageText">
+            <inheritdoc cref="F:Ring.ViewModel.AddViewModel.messageText"/>
+        </member>
+        <member name="P:Ring.ViewModel.AddViewModel.TextColor">
+            <inheritdoc cref="F:Ring.ViewModel.AddViewModel.textColor"/>
+        </member>
+        <member name="P:Ring.ViewModel.AddViewModel.TitleText">
+            <inheritdoc cref="F:Ring.ViewModel.AddViewModel.titleText"/>
+        </member>
+        <member name="F:Ring.ViewModel.AddViewModel.addCommand">
+            <summary>The backing field for <see cref="P:Ring.ViewModel.AddViewModel.AddCommand"/>.</summary>
+        </member>
+        <member name="P:Ring.ViewModel.AddViewModel.AddCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.AddViewModel.Add"/>.</summary>
+        </member>
+        <member name="F:Ring.ViewModel.AddViewModel.closeCommand">
+            <summary>The backing field for <see cref="P:Ring.ViewModel.AddViewModel.CloseCommand"/>.</summary>
+        </member>
+        <member name="P:Ring.ViewModel.AddViewModel.CloseCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.AddViewModel.Close"/>.</summary>
+        </member>
         <member name="T:Ring.ViewModel.MainViewModel">
+            <inheritdoc/>
+            <inheritdoc/>
             <inheritdoc/>
             <inheritdoc/>
             <inheritdoc/>
@@ -15,14 +61,14 @@
         <member name="P:Ring.ViewModel.MainViewModel.IsLoading">
             <inheritdoc cref="F:Ring.ViewModel.MainViewModel.isLoading"/>
         </member>
-        <member name="P:Ring.ViewModel.MainViewModel.IsContentVisible">
-            <inheritdoc cref="F:Ring.ViewModel.MainViewModel.isContentVisible"/>
-        </member>
         <member name="P:Ring.ViewModel.MainViewModel.IsOpenEnabled">
             <inheritdoc cref="F:Ring.ViewModel.MainViewModel.isOpenEnabled"/>
         </member>
         <member name="P:Ring.ViewModel.MainViewModel.IsReloadEnabled">
             <inheritdoc cref="F:Ring.ViewModel.MainViewModel.isReloadEnabled"/>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.IsAddEnabled">
+            <inheritdoc cref="F:Ring.ViewModel.MainViewModel.isAddEnabled"/>
         </member>
         <member name="P:Ring.ViewModel.MainViewModel.MessageText">
             <inheritdoc cref="F:Ring.ViewModel.MainViewModel.messageText"/>
@@ -30,26 +76,44 @@
         <member name="P:Ring.ViewModel.MainViewModel.TextColor">
             <inheritdoc cref="F:Ring.ViewModel.MainViewModel.textColor"/>
         </member>
-        <member name="P:Ring.ViewModel.MainViewModel.GateIdDisplay">
-            <inheritdoc cref="F:Ring.ViewModel.MainViewModel.gateIdDisplay"/>
-        </member>
         <member name="P:Ring.ViewModel.MainViewModel.GateNameDisplay">
             <inheritdoc cref="F:Ring.ViewModel.MainViewModel.gateNameDisplay"/>
         </member>
         <member name="P:Ring.ViewModel.MainViewModel.GateSelected">
             <inheritdoc cref="F:Ring.ViewModel.MainViewModel.gateSelected"/>
         </member>
-        <member name="P:Ring.ViewModel.MainViewModel.GateNotSelected">
-            <inheritdoc cref="F:Ring.ViewModel.MainViewModel.gateNotSelected"/>
+        <member name="P:Ring.ViewModel.MainViewModel.NoGates">
+            <inheritdoc cref="F:Ring.ViewModel.MainViewModel.noGates"/>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.HasGates">
+            <inheritdoc cref="F:Ring.ViewModel.MainViewModel.hasGates"/>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.NoLogs">
+            <inheritdoc cref="F:Ring.ViewModel.MainViewModel.noLogs"/>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.HasLogs">
+            <inheritdoc cref="F:Ring.ViewModel.MainViewModel.hasLogs"/>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.IsAdmin">
+            <inheritdoc cref="F:Ring.ViewModel.MainViewModel.isAdmin"/>
         </member>
         <member name="P:Ring.ViewModel.MainViewModel.Gates">
             <inheritdoc cref="F:Ring.ViewModel.MainViewModel.gates"/>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.Logs">
+            <inheritdoc cref="F:Ring.ViewModel.MainViewModel.logs"/>
         </member>
         <member name="F:Ring.ViewModel.MainViewModel.selectGateCommand">
             <summary>The backing field for <see cref="P:Ring.ViewModel.MainViewModel.SelectGateCommand"/>.</summary>
         </member>
         <member name="P:Ring.ViewModel.MainViewModel.SelectGateCommand">
-            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IRelayCommand`1"/> instance wrapping <see cref="M:Ring.ViewModel.MainViewModel.SelectGate(Ring.Utils.Gate)"/>.</summary>
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand`1"/> instance wrapping <see cref="M:Ring.ViewModel.MainViewModel.SelectGate(Ring.Utils.Gate)"/>.</summary>
+        </member>
+        <member name="F:Ring.ViewModel.MainViewModel.addUserCommand">
+            <summary>The backing field for <see cref="P:Ring.ViewModel.MainViewModel.AddUserCommand"/>.</summary>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.AddUserCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.MainViewModel.AddUser"/>.</summary>
         </member>
         <member name="F:Ring.ViewModel.MainViewModel.connectCommand">
             <summary>The backing field for <see cref="P:Ring.ViewModel.MainViewModel.ConnectCommand"/>.</summary>
@@ -63,17 +127,23 @@
         <member name="P:Ring.ViewModel.MainViewModel.CheckCommand">
             <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.MainViewModel.Check"/>.</summary>
         </member>
+        <member name="F:Ring.ViewModel.MainViewModel.reloadCommand">
+            <summary>The backing field for <see cref="P:Ring.ViewModel.MainViewModel.ReloadCommand"/>.</summary>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.ReloadCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.MainViewModel.Reload"/>.</summary>
+        </member>
         <member name="F:Ring.ViewModel.MainViewModel.openCommand">
             <summary>The backing field for <see cref="P:Ring.ViewModel.MainViewModel.OpenCommand"/>.</summary>
         </member>
         <member name="P:Ring.ViewModel.MainViewModel.OpenCommand">
             <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.MainViewModel.Open"/>.</summary>
         </member>
-        <member name="F:Ring.ViewModel.MainViewModel.removeNumberCommand">
-            <summary>The backing field for <see cref="P:Ring.ViewModel.MainViewModel.RemoveNumberCommand"/>.</summary>
+        <member name="F:Ring.ViewModel.MainViewModel.goToSettingsCommand">
+            <summary>The backing field for <see cref="P:Ring.ViewModel.MainViewModel.GoToSettingsCommand"/>.</summary>
         </member>
-        <member name="P:Ring.ViewModel.MainViewModel.RemoveNumberCommand">
-            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.MainViewModel.RemoveNumber"/>.</summary>
+        <member name="P:Ring.ViewModel.MainViewModel.GoToSettingsCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.MainViewModel.GoToSettings"/>.</summary>
         </member>
         <member name="T:Ring.ViewModel.RegisterViewModel">
             <inheritdoc/>
@@ -105,6 +175,26 @@
         </member>
         <member name="P:Ring.ViewModel.RegisterViewModel.NextCommand">
             <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.RegisterViewModel.Next"/>.</summary>
+        </member>
+        <member name="T:Ring.ViewModel.SettingsViewModel">
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+        </member>
+        <member name="P:Ring.ViewModel.SettingsViewModel.ErrorText">
+            <inheritdoc cref="F:Ring.ViewModel.SettingsViewModel.errorText"/>
+        </member>
+        <member name="F:Ring.ViewModel.SettingsViewModel.removeNumberCommand">
+            <summary>The backing field for <see cref="P:Ring.ViewModel.SettingsViewModel.RemoveNumberCommand"/>.</summary>
+        </member>
+        <member name="P:Ring.ViewModel.SettingsViewModel.RemoveNumberCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.SettingsViewModel.RemoveNumber"/>.</summary>
+        </member>
+        <member name="F:Ring.ViewModel.SettingsViewModel.closeCommand">
+            <summary>The backing field for <see cref="P:Ring.ViewModel.SettingsViewModel.CloseCommand"/>.</summary>
+        </member>
+        <member name="P:Ring.ViewModel.SettingsViewModel.CloseCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.SettingsViewModel.Close"/>.</summary>
         </member>
         <member name="T:Ring.ViewModel.VerificationViewModel">
             <inheritdoc/>
@@ -268,39 +358,6 @@
             for all properties generated with <see cref="T:CommunityToolkit.Mvvm.ComponentModel.ObservablePropertyAttribute"/>.
             </summary>
         </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsLoading">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsLoading" generated properties.</summary>
-        </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsContentVisible">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsContentVisible" generated properties.</summary>
-        </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsOpenEnabled">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsOpenEnabled" generated properties.</summary>
-        </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsReloadEnabled">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsReloadEnabled" generated properties.</summary>
-        </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.MessageText">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "MessageText" generated properties.</summary>
-        </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.TextColor">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "TextColor" generated properties.</summary>
-        </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.GateIdDisplay">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "GateIdDisplay" generated properties.</summary>
-        </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.GateNameDisplay">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "GateNameDisplay" generated properties.</summary>
-        </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.GateSelected">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "GateSelected" generated properties.</summary>
-        </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.GateNotSelected">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "GateNotSelected" generated properties.</summary>
-        </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.Gates">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "Gates" generated properties.</summary>
-        </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.PhoneNumber">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "PhoneNumber" generated properties.</summary>
         </member>
@@ -309,6 +366,60 @@
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.SelectedPhonePrefix">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "SelectedPhonePrefix" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsAddEnabled">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsAddEnabled" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.AddText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "AddText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.GateId">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "GateId" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.MessageText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "MessageText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.TextColor">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "TextColor" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.TitleText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "TitleText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsLoading">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsLoading" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsOpenEnabled">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsOpenEnabled" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsReloadEnabled">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsReloadEnabled" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.GateNameDisplay">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "GateNameDisplay" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.GateSelected">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "GateSelected" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.NoGates">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "NoGates" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.HasGates">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "HasGates" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.NoLogs">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "NoLogs" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.HasLogs">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "HasLogs" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsAdmin">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsAdmin" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.Gates">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "Gates" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.Logs">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "Logs" generated properties.</summary>
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsNextEnabled">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsNextEnabled" generated properties.</summary>
@@ -337,39 +448,6 @@
             for all properties generated with <see cref="T:CommunityToolkit.Mvvm.ComponentModel.ObservablePropertyAttribute"/>.
             </summary>
         </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsLoading">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsLoading" generated properties.</summary>
-        </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsContentVisible">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsContentVisible" generated properties.</summary>
-        </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsOpenEnabled">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsOpenEnabled" generated properties.</summary>
-        </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsReloadEnabled">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsReloadEnabled" generated properties.</summary>
-        </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.MessageText">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "MessageText" generated properties.</summary>
-        </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.TextColor">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "TextColor" generated properties.</summary>
-        </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.GateIdDisplay">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "GateIdDisplay" generated properties.</summary>
-        </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.GateNameDisplay">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "GateNameDisplay" generated properties.</summary>
-        </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.GateSelected">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "GateSelected" generated properties.</summary>
-        </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.GateNotSelected">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "GateNotSelected" generated properties.</summary>
-        </member>
-        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.Gates">
-            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "Gates" generated properties.</summary>
-        </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.PhoneNumber">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "PhoneNumber" generated properties.</summary>
         </member>
@@ -378,6 +456,60 @@
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.SelectedPhonePrefix">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "SelectedPhonePrefix" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsAddEnabled">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsAddEnabled" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.AddText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "AddText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.GateId">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "GateId" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.MessageText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "MessageText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.TextColor">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "TextColor" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.TitleText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "TitleText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsLoading">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsLoading" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsOpenEnabled">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsOpenEnabled" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsReloadEnabled">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsReloadEnabled" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.GateNameDisplay">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "GateNameDisplay" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.GateSelected">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "GateSelected" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.NoGates">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "NoGates" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.HasGates">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "HasGates" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.NoLogs">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "NoLogs" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.HasLogs">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "HasLogs" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsAdmin">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsAdmin" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.Gates">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "Gates" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.Logs">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "Logs" generated properties.</summary>
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsNextEnabled">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsNextEnabled" generated properties.</summary>

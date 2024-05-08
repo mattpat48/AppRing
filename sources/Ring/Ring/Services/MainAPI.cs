@@ -112,4 +112,158 @@ public class MainAPI
             }
         }
     }
+
+    public async Task<(string, bool?)> IsAdmin(string gateId)
+    {
+        var url = _server + "/api/v1/gate/isadmin";
+
+        string? number = await SecureStorage.GetAsync("PhoneNumber");
+        string? id = await SecureStorage.GetAsync("DeviceId");
+        if (string.IsNullOrEmpty(number) || string.IsNullOrEmpty(id))
+        {
+            return ("Phone number or device id not found", null);
+        }
+
+        string? publicKey = await SecureStorage.GetAsync("ServerKey");
+        string? deviceKey = await SecureStorage.GetAsync("PrivateDeviceKey");
+        if (string.IsNullOrEmpty(publicKey) || string.IsNullOrEmpty(deviceKey))
+        {
+            return ("Server key or device key not found", null);
+        }
+
+        bool outcome;
+        StringContent stringContent;
+        (outcome, stringContent) = CryptographyTools.TotalEncrypt(deviceKey, publicKey, JsonConvert.SerializeObject(gateId), number, id);
+
+        if (!outcome)
+        {
+            return ("Error encrypting data", null);
+        }
+
+        HttpResponseMessage response = await _httpClient.PostAsync(url, stringContent);
+        var responseContent = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return (responseContent, null);
+        }
+        else
+        {
+            if (responseContent == "true")
+            {
+                return ("success", true);
+            }
+            else
+            {
+                return ("success", false);
+            }
+        }
+    }
+
+    public async Task<string> GenerateLog(string gateId)
+    {
+        var url = _server + "/api/v1/gate/generatelog";
+
+        string? number = await SecureStorage.GetAsync("PhoneNumber");
+        string? id = await SecureStorage.GetAsync("DeviceId");
+        if (string.IsNullOrEmpty(number) || string.IsNullOrEmpty(id))
+        {
+            return "Phone number or device id not found";
+        }
+
+        string? publicKey = await SecureStorage.GetAsync("ServerKey");
+        string? deviceKey = await SecureStorage.GetAsync("PrivateDeviceKey");
+        if (string.IsNullOrEmpty(publicKey) || string.IsNullOrEmpty(deviceKey))
+        {
+            return "Server key or device key not found";
+        }
+
+        bool outcome;
+        StringContent stringContent;
+        (outcome, stringContent) = CryptographyTools.TotalEncrypt(deviceKey, publicKey, JsonConvert.SerializeObject(gateId), number, id);
+
+        if (!outcome)
+        {
+            return "Error encrypting data";
+        }
+
+        HttpResponseMessage response = await _httpClient.PostAsync(url, stringContent);
+        var responseContent = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return responseContent;
+        }
+        else
+        {
+            if (responseContent == "true")
+            {
+                return "success";
+            }
+            else
+            {
+                return "success";
+            }
+        }
+    }
+
+    public async Task<(string, List<Log>?)> GetLogs(string gateId)
+    {
+        var url = _server + "/api/v1/gate/getlogs";
+
+        string? number = await SecureStorage.GetAsync("PhoneNumber");
+        string? id = await SecureStorage.GetAsync("DeviceId");
+        if (string.IsNullOrEmpty(number) || string.IsNullOrEmpty(id))
+        {
+            return ("Phone number or device id not found", null);
+        }
+
+        string? publicKey = await SecureStorage.GetAsync("ServerKey");
+        string? deviceKey = await SecureStorage.GetAsync("PrivateDeviceKey");
+        if (string.IsNullOrEmpty(publicKey) || string.IsNullOrEmpty(deviceKey))
+        {
+            return ("Server key or device key not found", null);
+        }
+
+        bool outcome;
+        StringContent stringContent;
+        (outcome, stringContent) = CryptographyTools.TotalEncrypt(deviceKey, publicKey, JsonConvert.SerializeObject(gateId), number, id);
+
+        if (!outcome)
+        {
+            return ("Error encrypting data", null);
+        }
+
+        HttpResponseMessage response = await _httpClient.PostAsync(url, stringContent);
+        var responseContent = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return (responseContent, null);
+        }
+        else
+        {
+            try
+            {
+                string? devicekey = await SecureStorage.GetAsync("PrivateDeviceKey");
+                string? serverkey = await SecureStorage.GetAsync("ServerKey");
+                if (string.IsNullOrEmpty(devicekey) || string.IsNullOrEmpty(serverkey))
+                {
+                    return ("Device key not found", null);
+                }
+                string plainText;
+                (outcome, plainText) = CryptographyTools.TotalDecrypt(devicekey, serverkey, responseContent);
+                if (!outcome)
+                {
+                    return (plainText, null);
+                }
+                List<Log>? logs = JsonConvert.DeserializeObject<List<Log>>(plainText);
+                return ("success", logs);
+            }
+            catch (Exception ex)
+            {
+                return (ex.Message, null);
+            }
+        }
+    }
 }

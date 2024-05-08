@@ -36,21 +36,18 @@ public class RegisterAPI
                 else
                 {
                     SecureStorage.Remove("ServerKey");
-                    SecureStorage.Remove("PhoneNumber");
                     return "Server key not returned";
                 }
             }
             else
             {
                 SecureStorage.Remove("ServerKey");
-                SecureStorage.Remove("PhoneNumber");
                 return responseContent;
             }
         }
         catch (Exception ex)
         {
             SecureStorage.Remove("ServerKey");
-            SecureStorage.Remove("PhoneNumber");
             return ex.Message;
         }
     }

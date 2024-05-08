@@ -1,12 +1,148 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Ring.NewPage1"
-             Title="Add">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+             xmlns:d="http://schemas.microsoft.com/dotnet/2021/maui/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             x:Class="Ring.AddPage"
+             xmlns:viewmodel="clr-namespace:Ring.ViewModel"
+             x:DataType="viewmodel:AddViewModel"
+             x:Name="addPage"
+             Shell.NavBarIsVisible="True">
+
+    <AbsoluteLayout
+        HorizontalOptions="Center">
+
+        <BoxView
+            AbsoluteLayout.LayoutFlags="All"
+            AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+            Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}" />
+
+        <Frame
+            AbsoluteLayout.LayoutFlags="All"
+            AbsoluteLayout.LayoutBounds="0.5, 0.5, 0.9, 0.9"
+            BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource OffBlack}}"
+            Padding="30"
+            CornerRadius="20">
+
+            <Grid
+            RowDefinitions="Auto, Auto, Auto, Auto"
+            ColumnDefinitions="*, *"
+            RowSpacing="10"
+            HorizontalOptions="CenterAndExpand"
+            VerticalOptions="CenterAndExpand">
+                <Grid.Shadow>
+                    <Shadow
+                    Radius="40"
+                    Opacity="0.8"
+                    Offset="20,20" 
+                    Brush="Black" />
+                </Grid.Shadow>
+
+                <Label
+                    Margin="0, 50, 0, 0"
+                    Text="{Binding TitleText}"
+                    FontAttributes="Bold"
+                    TextColor="White"
+                    LineBreakMode="WordWrap"
+                    VerticalOptions="CenterAndExpand"
+                    HorizontalOptions="CenterAndExpand"
+                    Style="{StaticResource Headline}"
+                    Grid.Row="0"
+                    Grid.ColumnSpan="2">
+                </Label>
+
+                <Label
+                    Text="Enter phone number"
+                    TextColor="White"
+                    Style="{StaticResource SubHeadline}"
+                    LineBreakMode="TailTruncation"
+                    HorizontalOptions="FillAndExpand"
+                    VerticalOptions="Center"
+                    Grid.Row="1"
+                    Grid.ColumnSpan="2" />
+
+                <Frame
+                    BackgroundColor="{StaticResource Gray800}"
+                    BorderColor="Transparent"
+                    HorizontalOptions="Center"
+                    CornerRadius="20"
+                    Grid.Row="2"
+                    Grid.ColumnSpan="2">
+
+
+                    <Grid
+                    RowDefinitions="Auto, Auto, Auto"
+                    RowSpacing="15"
+                    ColumnDefinitions="Auto, Auto"
+                    HorizontalOptions="Center">
+                        <Grid.Shadow>
+                            <Shadow
+                            Radius="20"
+                            Opacity="0.8"
+                            Offset="10,10"
+                            Brush="Black" />
+                        </Grid.Shadow>
+
+                        <Picker
+                        Title="Country"
+                        IsEnabled="{Binding IsAddEnabled}"
+                        ItemsSource="{Binding PhonePrefixes}"
+                        SelectedItem="{Binding SelectedPhonePrefix}"
+                        x:Name="countryPicker"
+                        WidthRequest="100"
+                        Margin="10, 0, 0, 10"
+                        Grid.Row="0"
+                        Grid.Column="0"/>
+
+                        <Entry
+                        Placeholder="Phone number"
+                        IsEnabled="{Binding IsAddEnabled}"
+                        Keyboard="Telephone"
+                        Text="{Binding PhoneNumber}"
+                        x:Name="phoneNumberEntry"
+                        WidthRequest="120"
+                        Margin="10, 0, 0, 10"
+                        Grid.Row="0"
+                        Grid.Column="1"/>
+
+                        <Button
+                        Text="{Binding AddText}"
+                        IsEnabled="{Binding IsAddEnabled}"
+                        Command="{Binding AddCommand}"
+                        SemanticProperties.Hint="Phone numbert to add"
+                        HorizontalOptions="CenterAndExpand"
+                        WidthRequest="75"
+                        Grid.Row="1"
+                        Grid.ColumnSpan="2" />
+
+                        <Button
+                        Text="Close"
+                        IsEnabled="True"
+                        IsVisible="True"
+                        Command="{Binding CloseCommand}"
+                        SemanticProperties.Hint="Phone numbert to add"
+                        HorizontalOptions="CenterAndExpand"
+                        WidthRequest="75"
+                        Grid.Row="2"
+                        Grid.ColumnSpan="2" />
+
+                    </Grid>
+                </Frame>
+
+                <Label
+                Text="{Binding MessageText}"
+                TextColor="{Binding TextColor}"
+                Style="{StaticResource SubHeadline}"
+                LineBreakMode="TailTruncation"
+                HorizontalOptions="FillAndExpand"
+                VerticalOptions="Center"
+                Grid.Row="3"
+                Grid.ColumnSpan="2" />
+
+            </Grid>
+
+        </Frame>
+
+    </AbsoluteLayout>
+
 </ContentPage>
