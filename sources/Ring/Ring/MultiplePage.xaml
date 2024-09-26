@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://schemas.microsoft.com/dotnet/2021/maui/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             x:Class="Ring.MultiplePage"
+             xmlns:model="clr-namespace:Ring.Utils"
+             xmlns:viewmodel="clr-namespace:Ring.ViewModel"
+             x:DataType="viewmodel:MultipleViewModel"
+             x:Name="multiplePage"
+             Shell.TabBarIsVisible="False">
+
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior IsVisible="False" />
+    </Shell.BackButtonBehavior>
+
+    <AbsoluteLayout
+        HorizontalOptions="Center">
+
+        <BoxView
+        AbsoluteLayout.LayoutFlags="All"
+        AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+        Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}" />
+
+        <Frame
+        AbsoluteLayout.LayoutFlags="All"
+        AbsoluteLayout.LayoutBounds="0.5, 0.5, 0.9, 0.9"
+        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource OffBlack}}"
+        Padding="30"
+        CornerRadius="20">
+            <Grid
+            
+            RowDefinitions="Auto, Auto, Auto, Auto"
+            ColumnDefinitions="*"
+            RowSpacing="20">
+
+                <Label
+                Text="Multiple devices found"
+                HorizontalTextAlignment="Center"
+                VerticalTextAlignment="Center"
+                FontAttributes="Bold"
+                Grid.Row="0"
+                Grid.Column="0"
+                LineBreakMode="WordWrap"
+                FontSize="Large"
+                HorizontalOptions="FillAndExpand" />
+
+                <Label
+                Text="{Binding DescriptionText}"
+                HorizontalTextAlignment="Center"
+                VerticalTextAlignment="Center"
+                Grid.Row="1"
+                Grid.Column="0"
+                LineBreakMode="WordWrap"
+                FontSize="Medium"
+                HorizontalOptions="Center" />
+
+                <Frame
+                BackgroundColor="{StaticResource Gray800}"
+                HeightRequest="300"
+                Margin="15, 0, 15, 0"
+                CornerRadius="20"
+                Grid.Row="2"
+                Grid.ColumnSpan="1">
+                    <CollectionView
+                    ItemsUpdatingScrollMode="KeepLastItemInView"
+                    HorizontalOptions="FillAndExpand"
+                    VerticalOptions="FillAndExpand"
+                    ItemsSource="{Binding Devices}"
+                    ItemsLayout="VerticalList">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="model:Device">
+                                <Grid
+                                RowDefinitions="Auto"
+                                ColumnDefinitions="*, *">
+                                    <Label
+                                    Text="{Binding deviceModel}"
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Padding="0, 5, 0, 5"
+                                    TextColor="White"
+                                    FontAttributes="Bold"
+                                    FontSize="20"
+                                    LineBreakMode="WordWrap"
+                                    HorizontalOptions="Start"
+                                    VerticalOptions="FillAndExpand"/>
+
+                                    <Button
+                                    IsEnabled="{Binding Source={x:Reference Name=multiplePage}, Path=BindingContext.IsRemoveEnabled}"
+                                    Text="Logout"
+                                    Command="{Binding Source={x:Reference Name=multiplePage}, Path=BindingContext.RemoveDeviceCommand}"
+                                    CommandParameter="{Binding .}"
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    HorizontalOptions="End"
+                                    VerticalOptions="FillAndExpand" />
+                                </Grid>
+
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Frame>
+
+
+                <Button
+                Text="Next"
+                Grid.Row="3"
+                Grid.Column="0"
+                WidthRequest="100"
+                Command="{Binding NextCommand}" />
+            </Grid>
+        </Frame>
+    </AbsoluteLayout>
+</ContentPage>

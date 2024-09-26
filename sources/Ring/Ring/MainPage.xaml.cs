@@ -1,30 +1,32 @@
-﻿using Ring.ViewModel;
+﻿using Ring.Utils;
+using Ring.ViewModel;
 
 namespace Ring;
 
 public partial class MainPage : ContentPage
 {
-    public MainPage(MainViewModel viewModel)
+    
+    private readonly IMyHttpClient _myHttpClient;
+    public MainPage(MainViewModel viewModel, IMyHttpClient myHttpClient)
     {
         InitializeComponent();
         // faccio binding del viewmodel con la pagina
         BindingContext = viewModel;
+        _myHttpClient = myHttpClient;
+
+        HttpClientHandler clientHandler = new HttpClientHandler();
+        clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
+        _myHttpClient.sharedClient = new HttpClient(clientHandler);
+
+        viewModel.AssignHttpClient(_myHttpClient.sharedClient);
+        Shell.SetTabBarIsVisible(this, true);
     }
 
     protected override async void OnAppearing()
     {
         var viewModel = BindingContext as MainViewModel;
         if (viewModel != null) {
-            await viewModel.Check();
-        }
-    }
-
-    protected override async void OnDisappearing()
-    {
-        var viewModel = BindingContext as MainViewModel;
-        if (viewModel != null)
-        {
-            await viewModel.ResetDefault();
+            await viewModel.OnAppearing();
         }
     }
 }

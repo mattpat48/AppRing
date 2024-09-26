@@ -5,10 +5,14 @@
              Title="Verification"
              xmlns:viewmodel="clr-namespace:Ring.ViewModel"
              x:DataType="viewmodel:VerificationViewModel"
-             x:Name="verificationPage"
-             Shell.NavBarIsVisible="False">
+             Shell.TabBarIsVisible="False">
 
-    <AbsoluteLayout>
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior IsVisible="False" />
+    </Shell.BackButtonBehavior>
+
+    <AbsoluteLayout
+        HorizontalOptions="Center">
 
         <BoxView
             AbsoluteLayout.LayoutFlags="All"
@@ -23,7 +27,7 @@
             CornerRadius="20">
 
             <Grid
-                RowDefinitions="Auto, Auto, Auto"
+                RowDefinitions="Auto, Auto"
                 ColumnDefinitions="*, *"
                 RowSpacing="10">
                 <Grid.Shadow>
@@ -137,16 +141,6 @@
 
                     </Grid>
                 </Frame>
-
-                <Label
-                    Text="{Binding MessageText}"
-                    TextColor="{Binding ColorText}"
-                    Style="{StaticResource SubHeadline}"
-                    VerticalOptions="Center"
-                    LineBreakMode="WordWrap"
-                    HorizontalOptions="CenterAndExpand"
-                    Grid.Row="2"
-                    Grid.ColumnSpan="2"/>
 
             </Grid>
                 

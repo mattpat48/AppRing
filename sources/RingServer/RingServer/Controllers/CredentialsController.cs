@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System.Security.Cryptography;
 using System.Text;
 using Vonage.Messaging;
 using Vonage;
@@ -105,45 +103,35 @@ namespace RingServer.Controllers
                         // Aggiungo l'utente al database se non esiste
                         if (_dbContext.Users.All(u => u.phoneNumber != userInfo.Number || u.deviceId != userInfo.Id))
                         {
-                            if (!_dbContext.Users.Where(u => u.phoneNumber == userInfo.Number && u.deviceId != userInfo.Id).ToList().IsNullOrEmpty())
+                            _dbContext.Users.Add(new User
                             {
-                                _dbContext.Users.Add(new User
-                                {
-                                    phoneNumber = userInfo.Number,
-                                    deviceId = userInfo.Id,
-                                    verificationCode = string.Empty,
-                                    verificationExpire = DateTime.MinValue,
-                                    lastLogin = DateTime.MinValue,
-                                    publicKey = userInfo.PKey,
-                                    rememberLogin = userInfo.RememberLogin
-                                });
-
+                                phoneNumber = userInfo.Number,
+                                deviceId = userInfo.Id,
+                                verificationCode = string.Empty,
+                                verificationExpire = DateTime.MinValue,
+                                lastLogin = DateTime.MinValue,
+                                publicKey = userInfo.PKey,
+                                rememberLogin = userInfo.RememberLogin,
+                                deviceModel = userInfo.DeviceModel
+                            });
+                            if (_dbContext.Users.Any(u => u.phoneNumber == userInfo.Number && u.deviceId != userInfo.Id))
+                            {
                                 // devo aggiungere tutti i cancelli già presenti nel database a quel numero anche a quel device id
                                 var gates = _dbContext.UsersGates.Where(u => u.phoneNumber == userInfo.Number).ToList();
-                                foreach (var gate in gates)
+                                if (!gates.IsNullOrEmpty())
                                 {
-                                    _dbContext.UsersGates.Add(new UserGate
+                                    foreach (var gate in gates)
                                     {
-                                        usergateId = Guid.NewGuid().ToString(),
-                                        phoneNumber = userInfo.Number,
-                                        deviceId = userInfo.Id,
-                                        gateId = gate.gateId,
-                                        role = gate.role
-                                    });
+                                        _dbContext.UsersGates.Add(new UserGate
+                                        {
+                                            usergateId = Guid.NewGuid().ToString(),
+                                            phoneNumber = userInfo.Number,
+                                            deviceId = userInfo.Id,
+                                            gateId = gate.gateId,
+                                            role = gate.role
+                                        });
+                                    }
                                 }
-                            }
-                            else
-                            {
-                                _dbContext.Users.Add(new User
-                                {
-                                    phoneNumber = userInfo.Number,
-                                    deviceId = userInfo.Id,
-                                    verificationCode = string.Empty,
-                                    verificationExpire = DateTime.MinValue,
-                                    lastLogin = DateTime.MinValue,
-                                    publicKey = userInfo.PKey,
-                                    rememberLogin = userInfo.RememberLogin
-                                });
                             }
                         }
                         // Altrimenti aggiorno i dati dell'utente
@@ -378,6 +366,181 @@ namespace RingServer.Controllers
                             }
                         }
                     }
+                    catch (Exception e)
+                    {
+                        return BadRequest(e.Message);
+                    }
+                }
+            }
+        }
+
+        [HttpPost]
+        [Route("/api/v1/auth/hasmanydevices")]
+        public async Task<IActionResult> HasManyDevices()
+        {
+            using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                string requestBody = await reader.ReadToEndAsync();
+                if (requestBody == null)
+                {
+                    return BadRequest("Invalid request payload");
+                }
+                else
+                {
+                    try
+                    {
+                        // Decifro il payload ricevuto
+                        string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
+                        string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
+
+                        bool outcome;
+                        string plaintext;
+                        CommonClasses.Identifier userInfo;
+                        (outcome, plaintext, userInfo) = CryptographyTools.TotalDecrypt(privateKeyPem, requestBody, _dbContext);
+                        if (!outcome || string.IsNullOrEmpty(plaintext) || userInfo == null)
+                        {
+                            return BadRequest(plaintext);
+                        }
+
+                        // Controllo se l'utente esiste
+                        if (_dbContext.Users.All(u => u.phoneNumber != userInfo.Number))
+                        {
+                            return BadRequest("User not found");
+                        }
+                        else
+                        {
+                            // Prendo tutti i device id dell'utente
+                            var devices = _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number && u.lastLogin != DateTime.MinValue).Select(u => u.deviceId).ToList();
+                            if (devices.Count > 1)
+                            {
+                                return Ok("true");
+                            }
+                            else
+                            {
+                                return Ok("false");
+                            }
+                        }
+                    }
+
+                    catch (Exception e)
+                    {
+                        return BadRequest(e.Message);
+                    }
+                }
+            }
+        }
+
+        [HttpPost]
+        [Route("/api/v1/auth/getdevices")]
+        public async Task<IActionResult> GetDevices()
+        {
+            using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                string requestBody = await reader.ReadToEndAsync();
+                if (requestBody == null)
+                {
+                    return BadRequest("Invalid request payload");
+                }
+                else
+                {
+                    try
+                    {
+                        // Decifro il payload ricevuto
+                        string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
+                        string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
+
+                        bool outcome;
+                        string plaintext;
+                        CommonClasses.Identifier userInfo;
+                        (outcome, plaintext, userInfo) = CryptographyTools.TotalDecrypt(privateKeyPem, requestBody, _dbContext);
+                        if (!outcome || string.IsNullOrEmpty(plaintext) || userInfo == null)
+                        {
+                            return BadRequest(plaintext);
+                        }
+
+                        // Controllo se l'utente esiste
+                        if (_dbContext.Users.All(u => u.phoneNumber != userInfo.Number))
+                        {
+                            return BadRequest("User not found");
+                        }
+                        else
+                        {
+                            // Prendo tutti i device id dell'utente
+                            var devices = _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number && u.deviceId != userInfo.Id && u.lastLogin != DateTime.MinValue && u.rememberLogin == "y").Select(u => new { u.deviceId, u.deviceModel }).ToList();
+                            var userKey = _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number && u.deviceId == userInfo.Id).Select(u => u.publicKey).First();
+
+                            bool outcome2;
+                            object encryptedDevices;
+                            (outcome2, encryptedDevices) = CryptographyTools.TotalEncrypt(privateKeyPem, userKey, JsonConvert.SerializeObject(devices));
+                            if (!outcome2)
+                            {
+                                return BadRequest("Error encrypting gates");
+                            }
+
+                            return Ok(encryptedDevices);
+                        }
+                    }
+
+                    catch (Exception e)
+                    {
+                        return BadRequest(e.Message);
+                    }
+                }
+            }
+        }
+
+        [HttpPost]
+        [Route("/api/v1/auth/logoutuser")]
+        public async Task<IActionResult> LogoutUser()
+        {
+            using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                string requestBody = await reader.ReadToEndAsync();
+                if (requestBody == null)
+                {
+                    return BadRequest("Invalid request payload");
+                }
+                else
+                {
+                    try
+                    {
+                        // Decifro il payload ricevuto
+                        string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
+                        string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
+
+                        bool outcome;
+                        string plaintext;
+                        CommonClasses.Identifier userInfo;
+                        (outcome, plaintext, userInfo) = CryptographyTools.TotalDecrypt(privateKeyPem, requestBody, _dbContext);
+                        if (!outcome || string.IsNullOrEmpty(plaintext) || userInfo == null)
+                        {
+                            return BadRequest(plaintext);
+                        }
+
+                        var toLogout = JsonConvert.DeserializeObject<string>(plaintext);
+
+                        // Controllo se l'utente esiste
+                        if (_dbContext.Users.All(u => u.phoneNumber != userInfo.Number || u.deviceId != toLogout))
+                        {
+                            return BadRequest("User not found");
+                        }
+                        else
+                        {
+                            // Aggiorno il database con l'ultimo accesso
+                            _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number && u.deviceId == toLogout).First().lastLogin = DateTime.MinValue;
+                            _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number && u.deviceId == toLogout).First().rememberLogin = "n";
+                            try
+                            {
+                                await _dbContext.SaveChangesAsync();
+                            }
+                            catch (Exception ex)
+                            {
+                                return StatusCode(500, ex.Message);
+                            }
+                            return Ok("User logged out");
+                        }
+                    }
+
                     catch (Exception e)
                     {
                         return BadRequest(e.Message);

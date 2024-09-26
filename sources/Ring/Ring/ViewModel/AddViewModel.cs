@@ -1,14 +1,14 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Core;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ring.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ring.ViewModel;
+
+[QueryProperty(nameof(GateId), "GateId")]
+[QueryProperty(nameof(GateName), "GateName")]
+[QueryProperty(nameof(HttpClientProperty), "HttpClient")]
 
 public partial class AddViewModel : ObservableObject
 {
@@ -30,37 +30,56 @@ public partial class AddViewModel : ObservableObject
 
     [ObservableProperty]
     string gateId;
+    [ObservableProperty]
+    string gateName;
 
     // messaggio di errore
-    [ObservableProperty]
-    string messageText;
-    [ObservableProperty]
-    string textColor;
     [ObservableProperty]
     string titleText;
 
     private AddAPI _addAPI;
+    [ObservableProperty]
+    HttpClient httpClientProperty;
 
-    public AddViewModel(AddAPI addAPI, string gateId, string gateName)
+    public AddViewModel()
     {
         PhoneNumber = string.Empty;
+
         PhonePrefixes = new List<string> { "+39", "+44", "+1", "+49", "+33", "+34", "+31", "+32", "+30", "+41", "+43", "+45", "+46", "+47", "+48" };
         SelectedPhonePrefix = "+39";
-        MessageText = string.Empty;
-        TextColor = "White";
-        TitleText = "Add a new user to " + gateName;
+
         isAddEnabled = true;
-        AddText = "Add";
-        _addAPI = addAPI;
-        GateId = gateId;
+        AddText = "Add";   
+    }
+
+    public void OnAppearing()
+    {
+        if (HttpClientProperty != null)
+        {
+            _addAPI = new AddAPI(HttpClientProperty);
+        }
+        TitleText = "Add user to " + GateName;
+        return;
     }
 
     public void handleError(string error)
     {
-        TextColor = "Red";
-        MessageText = error;
+        makeToast(error);
         AddText = "Retry";
         IsAddEnabled = true;
+    }
+
+    public async void makeToast(string message)
+    {
+
+        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+        string text = message;
+        ToastDuration duration = ToastDuration.Short;
+        double fontSize = 14;
+
+        var toast = Toast.Make(text, duration, fontSize);
+        await toast.Show(cancellationTokenSource.Token);
     }
 
     [RelayCommand]
@@ -76,15 +95,13 @@ public partial class AddViewModel : ObservableObject
                 try
                 {
                     string addingNumber = SelectedPhonePrefix + PhoneNumber;
-                    MessageText = string.Empty;
 
                     // richiedo la registrazione al server
                     var addUserResponse = await _addAPI.AddUserRequest(GateId, addingNumber);
                     if (addUserResponse == "success")
                     {
-                        TextColor = "Green";
-                        MessageText = "User Added.";
-                        await Shell.Current.Navigation.PopToRootAsync();
+                        makeToast("User added successfully");
+                        await Shell.Current.GoToAsync("..");
                     }
                     else
                     {
@@ -111,7 +128,7 @@ public partial class AddViewModel : ObservableObject
     async Task Close()
     {
         IsAddEnabled = false;
-        await Shell.Current.Navigation.PopAsync();
+        await Shell.Current.GoToAsync("..");
         return;
     }
 }

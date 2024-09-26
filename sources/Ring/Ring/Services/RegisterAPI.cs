@@ -62,6 +62,7 @@ public class RegisterAPI
         var phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
         var idToSend = await SecureStorage.GetAsync("DeviceId");
         var rememberLogin = await SecureStorage.GetAsync("RememberLogin");
+        var deviceModel = DeviceInfo.Model;
 
         // creo il contenuto da inviare al server
         var myContent = new
@@ -69,7 +70,8 @@ public class RegisterAPI
             PKey = keyToSend,
             Number = phoneNumber,
             Id = idToSend,
-            RememberLogin = rememberLogin
+            RememberLogin = rememberLogin,
+            DeviceModel = deviceModel,
         };
 
         try

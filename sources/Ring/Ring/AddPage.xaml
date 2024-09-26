@@ -6,8 +6,7 @@
              x:Class="Ring.AddPage"
              xmlns:viewmodel="clr-namespace:Ring.ViewModel"
              x:DataType="viewmodel:AddViewModel"
-             x:Name="addPage"
-             Shell.NavBarIsVisible="True">
+             Shell.TabBarIsVisible="False">
 
     <AbsoluteLayout
         HorizontalOptions="Center">
@@ -19,13 +18,13 @@
 
         <Frame
             AbsoluteLayout.LayoutFlags="All"
-            AbsoluteLayout.LayoutBounds="0.5, 0.5, 0.9, 0.9"
+            AbsoluteLayout.LayoutBounds="0.5, 0.5, 0.9, 0.5"
             BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource OffBlack}}"
             Padding="30"
             CornerRadius="20">
 
             <Grid
-            RowDefinitions="Auto, Auto, Auto, Auto"
+            RowDefinitions="Auto, Auto, Auto"
             ColumnDefinitions="*, *"
             RowSpacing="10"
             HorizontalOptions="CenterAndExpand"
@@ -71,9 +70,9 @@
 
 
                     <Grid
-                    RowDefinitions="Auto, Auto, Auto"
-                    RowSpacing="15"
+                    RowDefinitions="Auto, Auto"
                     ColumnDefinitions="Auto, Auto"
+                    RowSpacing="15"
                     HorizontalOptions="Center">
                         <Grid.Shadow>
                             <Shadow
@@ -113,7 +112,7 @@
                         HorizontalOptions="CenterAndExpand"
                         WidthRequest="75"
                         Grid.Row="1"
-                        Grid.ColumnSpan="2" />
+                        Grid.Column="0" />
 
                         <Button
                         Text="Close"
@@ -124,20 +123,10 @@
                         HorizontalOptions="CenterAndExpand"
                         WidthRequest="75"
                         Grid.Row="2"
-                        Grid.ColumnSpan="2" />
+                        Grid.Column="1" />
 
                     </Grid>
                 </Frame>
-
-                <Label
-                Text="{Binding MessageText}"
-                TextColor="{Binding TextColor}"
-                Style="{StaticResource SubHeadline}"
-                LineBreakMode="TailTruncation"
-                HorizontalOptions="FillAndExpand"
-                VerticalOptions="Center"
-                Grid.Row="3"
-                Grid.ColumnSpan="2" />
 
             </Grid>
 

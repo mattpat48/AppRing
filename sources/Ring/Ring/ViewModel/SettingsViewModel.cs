@@ -1,54 +1,43 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Core;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MQTTnet.Client;
-using MQTTnet.Server;
-using Ring.Services;
-
 namespace Ring.ViewModel;
 
 public partial class SettingsViewModel : ObservableObject
 {
 
-    [ObservableProperty]
-    string errorText;
-
-    private RegisterAPI _registerAPI;
-    private VerificationAPI _verificationAPI;
-    private IMqttClient _mqttClient;
-
-    public SettingsViewModel(RegisterAPI registerAPI, VerificationAPI verificationAPI, IMqttClient mqttClient)
+    public SettingsViewModel()
     {
-        errorText = string.Empty;
+        
+    }
 
-        _registerAPI = registerAPI;
-        _verificationAPI = verificationAPI;
-        _mqttClient = mqttClient;
+    public async void makeToast(string message)
+    {
+
+        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+        string text = message;
+        ToastDuration duration = ToastDuration.Short;
+        double fontSize = 14;
+
+        var toast = Toast.Make(text, duration, fontSize);
+        await toast.Show(cancellationTokenSource.Token);
     }
 
     [RelayCommand]
-    async Task RemoveNumber()
+    public async Task RemoveNumber()
     {
         try
         {
             SecureStorage.Remove("PhoneNumber");
-            await _mqttClient.DisconnectAsync();
-            var registerVm = new RegisterViewModel(_registerAPI, _verificationAPI);
-            var registerPage = new RegisterPage(registerVm);
-            await Shell.Current.Navigation.PopToRootAsync();
-            await Shell.Current.Navigation.PushModalAsync(registerPage);
+            Shell.Current.CurrentItem = Shell.Current.Items.FirstOrDefault(item => item.Route == "MainPage");
             return;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            ErrorText = "Error while deleting number.";
+            makeToast("Error while removing the phone number");
             return;
         }
-    }
-
-    [RelayCommand]
-    async Task Close()
-    {
-        await Shell.Current.Navigation.PopAsync();
-        return;
     }
 }

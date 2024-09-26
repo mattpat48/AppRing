@@ -9,4 +9,13 @@ public partial class VerificationPage : ContentPage
 		InitializeComponent();
 		BindingContext = viewModel;
     }
+
+    protected override void OnAppearing()
+    {
+        var viewModel = BindingContext as VerificationViewModel;
+        if (viewModel != null)
+        {
+            viewModel.OnAppearing();
+        }
+    }
 }

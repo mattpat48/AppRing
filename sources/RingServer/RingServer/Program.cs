@@ -32,12 +32,14 @@ namespace RingServer
                 options.Cookie.IsEssential = true; // Mark the session cookie as essential
             });
 
-            builder.Services.AddDbContext<RingDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DatabaseConnection")));
+            // utilizzando SQLServer
+            builder.Services.AddDbContext<RingDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("SQLServerDatabaseConnection")));
+            // utilizzando Azure SQL
+            //builder.Services.AddDbContext<RingDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("AzureSQLDatabaseConnection")));
 
             var app = builder.Build();
-            app.Urls.Add("https://10.20.100.50:7046");
-            //app.Urls.Add("https://192.168.1.4:7046");
-            app.Urls.Add("https://localhost:7046");
+            //app.Urls.Add("https://10.20.100.50:7046");
+            app.Urls.Add("https://192.168.1.14" + ":7046");
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

@@ -2,14 +2,19 @@
 using CommunityToolkit.Mvvm.Input;
 using System.Security.Cryptography;
 using Ring.Services;
+using CommunityToolkit.Maui.Core;
+using CommunityToolkit.Maui.Alerts;
 
 namespace Ring.ViewModel;
 
+[QueryProperty (nameof(HttpClientProperty), "HttpClient")]
 public partial class RegisterViewModel : ObservableObject
 {
     // numero di telefono
     [ObservableProperty]
     string phoneNumber;
+    [ObservableProperty]
+    bool rememberLogin;
 
     // prefisso di nazionalità
     [ObservableProperty]
@@ -17,55 +22,72 @@ public partial class RegisterViewModel : ObservableObject
     [ObservableProperty]
     string selectedPhonePrefix;
 
+    // proprietà per pulsanti e testi
     [ObservableProperty]
     bool isNextEnabled;
     [ObservableProperty]
     string nextText;
 
-    // messaggio di errore
-    [ObservableProperty]
-    string errorText;
+    private string deviceId;
 
-    [ObservableProperty]
-    bool rememberLogin;
-
-    string deviceId;
     private RegisterAPI _registerAPI;
     private VerificationAPI _verificationAPI;
+    [ObservableProperty]
+    HttpClient httpClientProperty;
 
     // costruttore per il viewmodel
-    public RegisterViewModel(RegisterAPI registerAPI, VerificationAPI verificationAPI)
+    public RegisterViewModel()
     {
         PhoneNumber = string.Empty;
+        rememberLogin = false;
+
         PhonePrefixes = new List<string> { "+39", "+44", "+1", "+49", "+33", "+34", "+31", "+32", "+30", "+41", "+43", "+45", "+46", "+47", "+48"};
         SelectedPhonePrefix = "+39";
-        ErrorText = string.Empty;
-        rememberLogin = false;
-        this.deviceId = string.Empty;
-        _registerAPI = registerAPI;
-        _verificationAPI = verificationAPI;
+
         isNextEnabled = true;
         NextText = "Next";
+        
+        this.deviceId = string.Empty;
     }
 
     public void OnAppearing()
     {
-        ErrorText = string.Empty;
-        SecureStorage.Remove("ServerKey");
+        IsNextEnabled = true;
+        NextText = "Next";
+
         SecureStorage.Remove("PhoneNumber");
         SecureStorage.Remove("IsVerified");
         SecureStorage.Remove("RememberLogin");
+        if (HttpClientProperty != null)
+        {
+            _registerAPI = new RegisterAPI(HttpClientProperty);
+            _verificationAPI = new VerificationAPI(HttpClientProperty);
+        }
+        return;
     }
 
     public void handleError(string error)
     {
-        ErrorText = error;
+        makeToast(error);
         NextText = "Retry";
         IsNextEnabled = true;
-        SecureStorage.Remove("ServerKey");
         SecureStorage.Remove("PhoneNumber");
         SecureStorage.Remove("IsVerified");
         SecureStorage.Remove("RememberLogin");
+        return;
+    }
+
+    public async void makeToast(string message)
+    {
+
+        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+        string text = message;
+        ToastDuration duration = ToastDuration.Short;
+        double fontSize = 14;
+
+        var toast = Toast.Make(text, duration, fontSize);
+        await toast.Show(cancellationTokenSource.Token);
     }
 
     [RelayCommand]
@@ -80,8 +102,8 @@ public partial class RegisterViewModel : ObservableObject
             {
                 try
                 {
+                    // compongo il numero che devo salvare in memoria
                     string storingNumber = SelectedPhonePrefix + PhoneNumber;
-                    ErrorText = string.Empty;
 
                     // genero la chiave pubblica e privata se non esistono
                     string? existingPublicKey = await SecureStorage.GetAsync("PublicDeviceKey");
@@ -102,11 +124,15 @@ public partial class RegisterViewModel : ObservableObject
                     {
                         deviceId = Guid.NewGuid().ToString();
                     }
-                    string getServerKeyResponse = await _registerAPI.GetServerKey();
-                    if (getServerKeyResponse != "success")
+                    string? serverKey = await SecureStorage.GetAsync("ServerKey");
+                    if (string.IsNullOrEmpty(serverKey))
                     {
-                        handleError("Error while retrieving server key.");
-                        return;
+                        string getServerKeyResponse = await _registerAPI.GetServerKey();
+                        if (getServerKeyResponse != "success")
+                        {
+                            handleError("Error while retrieving server key.");
+                            return;
+                        }
                     }
                     
                     await SecureStorage.SetAsync("PhoneNumber", storingNumber);
@@ -130,9 +156,14 @@ public partial class RegisterViewModel : ObservableObject
                         var sendSMSResponse = await _verificationAPI.SendSMS(phoneNumber);
                         if (sendSMSResponse == "success")
                         {
-                            var verificationVm = new VerificationViewModel(_registerAPI, _verificationAPI);
-                            var verificationPage = new VerificationPage(verificationVm);
-                            await Shell.Current.Navigation.PushModalAsync(verificationPage);
+                            //var verificationVm = new VerificationViewModel(_registerAPI, _verificationAPI);
+                            //var verificationPage = new VerificationPage(verificationVm);
+                            //await Shell.Current.Navigation.PushModalAsync(verificationPage);
+                            var navigationParameters = new Dictionary<string, object>
+                            {
+                                { "HttpClient", HttpClientProperty}
+                            };
+                            await Shell.Current.GoToAsync(nameof(VerificationPage), navigationParameters);
                             return;
                         }
                         else

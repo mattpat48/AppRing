@@ -5,17 +5,16 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewmodel="clr-namespace:Ring.ViewModel"
              x:DataType="viewmodel:SettingsViewModel"
-             x:Name="settingsPage"
              x:Class="Ring.SettingsPage"
-             Title="Settings"
-             Shell.NavBarIsVisible="True">
+             Shell.TabBarIsVisible="True">
 
 
-    <AbsoluteLayout
+    <Grid
         HorizontalOptions="Center">
+        
         <Grid
             Margin="15"
-            RowDefinitions="Auto, Auto, Auto"
+            RowDefinitions="Auto"
             ColumnDefinitions="Auto"
             RowSpacing="10"
             HorizontalOptions="CenterAndExpand">
@@ -34,27 +33,11 @@
                 Text="Delete Number"
                 Margin="5"
                 WidthRequest="130"
-                Command="{Binding RemoveNumberCommand}"
+                Clicked="RemoveNumber"
                 SemanticProperties.Hint="Remove the number (debug)"
                 HorizontalOptions="Center"
                 Grid.Row="0"/>
             
-            <Button
-                Text="Close"
-                IsEnabled="True"
-                IsVisible="True"
-                Margin="5"
-                WidthRequest="130"
-                Command="{Binding CloseCommand}"
-                HorizontalOptions="Center"
-                Grid.Row="1"/>
-            
-            <Label
-                Text="{Binding ErrorText}"
-                Grid.Row="2"
-                TextColor="Red"
-                HorizontalOptions="Center"
-                VerticalOptions="Center" />
         </Grid>
-    </AbsoluteLayout>
+    </Grid>
 </ContentPage>

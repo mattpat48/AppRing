@@ -8,6 +8,7 @@ public static class CommonClasses
         public string Number { get; set; }
         public string Id { get; set; }
         public string RememberLogin { get; set; }
+        public string DeviceModel { get; set; }
 
         public SignInRequest(string pKey, string number, string id, string rememberLogin)
         {

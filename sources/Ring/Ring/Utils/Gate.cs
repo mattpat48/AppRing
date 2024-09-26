@@ -10,11 +10,15 @@ namespace Ring.Utils
     {
         public string gateId { get; set; }
         public string name { get; set; }
+        public double latitude { get; set; }
+        public double longitude { get; set; }
 
-        public Gate(string gateId, string name)
+        public Gate(string gateId, string name, double latitude, double longitude)
         {
             this.gateId = gateId;
             this.name = name;
+            this.latitude = latitude;
+            this.longitude = longitude;
         }
     }
 }

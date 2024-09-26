@@ -5,10 +5,13 @@
              Title="Register"
              xmlns:viewmodel="clr-namespace:Ring.ViewModel"
              x:DataType="viewmodel:RegisterViewModel"
-             x:Name="registerPage"
-             Shell.NavBarIsVisible="False">
+             Shell.TabBarIsVisible="False">
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior IsVisible="False" />
+    </Shell.BackButtonBehavior>
 
-    <AbsoluteLayout>
+    <AbsoluteLayout
+        HorizontalOptions="Center">
 
         <BoxView
             AbsoluteLayout.LayoutFlags="All"
@@ -23,7 +26,7 @@
             CornerRadius="20">
 
             <Grid
-                RowDefinitions="Auto, Auto, Auto"
+                RowDefinitions="Auto, Auto"
                 ColumnDefinitions="*, *"
                 RowSpacing="10" >
                 <Grid.Shadow>
@@ -78,7 +81,7 @@
                     CornerRadius="20"
                     Grid.Row="1"
                     Grid.ColumnSpan="2">
-                    
+
 
                     <Grid
                         RowDefinitions="Auto, Auto, Auto"
@@ -131,7 +134,7 @@
                                 VerticalOptions="Center"
                                 LineBreakMode="WordWrap"/>
                         </StackLayout>
-                        
+
                         <Button
                             Text="{Binding NextText}"
                             IsEnabled="{Binding Source={x:Reference phoneNumberEntry}, Path=Text.Length}"
@@ -141,20 +144,10 @@
                             WidthRequest="75"
                             Grid.Row="2"
                             Grid.ColumnSpan="2" />
-                        
+
                     </Grid>
                 </Frame>
 
-                <Label
-                    Text="{Binding ErrorText}"
-                    TextColor="Red"
-                    Style="{StaticResource SubHeadline}"
-                    LineBreakMode="WordWrap"
-                    HorizontalOptions="FillAndExpand"
-                    VerticalOptions="Center"
-                    Grid.Row="2"
-                    Grid.ColumnSpan="2" />
-                
             </Grid>
                 
         </Frame>

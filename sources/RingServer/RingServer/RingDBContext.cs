@@ -29,12 +29,15 @@ public class User
     public DateTime verificationExpire { get; set; }
     public DateTime lastLogin { get; set; }
     public string rememberLogin { get; set; }
+    public string deviceModel { get; set; }
 }
 
 public class Gate
 {
     public string gateId { get; set; }
     public string name { get; set; }
+    public double latitude { get; set; }
+    public double longitude { get; set; }
 }
 
 public class UserGate
@@ -48,8 +51,8 @@ public class UserGate
 
 public class Log
 {
-    public string phoneNumber { get; set; }
     public string deviceId { get; set; }
+    public string phoneNumber { get; set; }
     public string gateId { get; set; }
     public DateTime date { get; set; }
 }

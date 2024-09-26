@@ -9,4 +9,13 @@ public partial class AddPage : ContentPage
 		InitializeComponent();
 		BindingContext = viewModel;
 	}
+
+    protected override void OnAppearing()
+    {
+        var viewModel = BindingContext as AddViewModel;
+        if (viewModel != null)
+        {
+            viewModel.OnAppearing();
+        }
+    }
 }
