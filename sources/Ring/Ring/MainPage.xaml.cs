@@ -1,4 +1,5 @@
-﻿using Ring.Utils;
+﻿using Ring.Services;
+using Ring.Utils;
 using Ring.ViewModel;
 
 namespace Ring;
@@ -17,8 +18,9 @@ public partial class MainPage : ContentPage
         HttpClientHandler clientHandler = new HttpClientHandler();
         clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
         _myHttpClient.sharedClient = new HttpClient(clientHandler);
+        _myHttpClient.sharedMainAPI = new MainAPI(_myHttpClient.sharedClient);
 
-        viewModel.AssignHttpClient(_myHttpClient.sharedClient);
+        viewModel.AssignHttpClient(_myHttpClient.sharedClient, _myHttpClient.sharedMainAPI);
         Shell.SetTabBarIsVisible(this, true);
     }
 
@@ -29,4 +31,5 @@ public partial class MainPage : ContentPage
             await viewModel.OnAppearing();
         }
     }
+
 }

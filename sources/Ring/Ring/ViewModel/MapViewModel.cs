@@ -8,6 +8,8 @@ using Newtonsoft.Json;
 using Ring.Utils;
 using System.Net.NetworkInformation;
 using Ring.Services;
+using CommunityToolkit.Mvvm.Input;
+
 namespace Ring.ViewModel;
 
 public partial class MapViewModel : ObservableObject
@@ -15,30 +17,35 @@ public partial class MapViewModel : ObservableObject
 
     public List<Pin> Pins;
     public string _filePath;
+    private MainViewModel _mainViewModel;
 
-    private HttpClient _httpClient;
-    private MainAPI _mainAPI;
+    [ObservableProperty]
+    public bool gateSelected;
+    [ObservableProperty]
+    public bool gateNotSelected;
+    [ObservableProperty]
+    bool isOpenEnabled;
 
-    public MapViewModel()
+    [ObservableProperty]
+    public string selectedGateName;
+    [ObservableProperty]
+    public string selectedGateId;
+
+    public MapViewModel(MainViewModel mainViewModel)
     {
         Pins = new List<Pin>();
         _filePath = Path.Combine(FileSystem.AppDataDirectory, "gates.json");
+        _mainViewModel = mainViewModel;
+
+        GateSelected = false;
+        GateNotSelected = true;
+        IsOpenEnabled = false;
+
+        SelectedGateName = string.Empty;
+        SelectedGateId = string.Empty;
     }
 
-    public async void makeToast(string message)
-    {
-
-        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-
-        string text = message;
-        ToastDuration duration = ToastDuration.Short;
-        double fontSize = 14;
-
-        var toast = Toast.Make(text, duration, fontSize);
-        await toast.Show(cancellationTokenSource.Token);
-    }
-
-    public List<Pin>? SetPins()
+    public async Task<List<Pin>?> SetPins()
     {
         if (!File.Exists(_filePath))
         {
@@ -50,35 +57,105 @@ public partial class MapViewModel : ObservableObject
 
         if (gates == null)
         {
-            makeToast("No gates found");
+            NotificationTools.makeToast("No gates found");
             return null;
         }
 
         Pins = new List<Pin>();
         foreach (Gate gate in gates)
         {
+            string? address = await AddressFromLocation(gate.latitude, gate.longitude);
             Pins.Add(new Pin
             {
                 Label = gate.name,
-                Position = new Position(gate.latitude, gate.longitude)
+                Tag = gate.gateId,
+                Position = new Position(gate.latitude, gate.longitude),
+                Address = address
             });
         }
 
         return Pins;
     }
 
+    private async Task<string?> AddressFromLocation(double latitude, double longitude)
+    {
+        IEnumerable<Placemark> placemarks = await Geocoding.Default.GetPlacemarksAsync(latitude, longitude);
+
+        Placemark? placemark = placemarks?.FirstOrDefault();
+
+        if (placemark != null)
+        {
+            return
+                $"{placemark.Thoroughfare} {placemark.SubThoroughfare}, {placemark.Locality} {placemark.PostalCode}, {placemark.AdminArea}, {placemark.CountryName}";
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     public void AssignHttpClient(HttpClient httpClient)
     {
-        _httpClient = httpClient;
-        _mainAPI = new MainAPI(_httpClient);
+        //_httpClient = httpClient;
+        return;
+    }
+
+    public void OnGateSelected(string name, string id)
+    {
+        GateSelected = true;
+        GateNotSelected = false;
+
+        SelectedGateName = name;
+        SelectedGateId = id;
+
+        return;
+    }
+
+    public void OnGateNotSelected()
+    {
+        GateSelected = false;
+        GateNotSelected = true;
+
+        SelectedGateName = string.Empty;
+        SelectedGateId = string.Empty;
+
+        return;
+    }
+
+    [RelayCommand]
+    async Task OpenGate()
+    {
+        IsOpenEnabled = false;
+        if (SelectedGateId == string.Empty)
+        {
+            NotificationTools.makeToast("Please select a gate");
+            IsOpenEnabled = true;
+            return;
+        }
+
+        string response = await _mainViewModel.Open(SelectedGateId);
+        if (response == "success")
+        {
+            NotificationTools.makeToast("Message sent");
+            IsOpenEnabled = true;
+            return;
+        }
+
+        NotificationTools.makeToast(response);
+        IsOpenEnabled = true;
         return;
     }
 
     public void OnAppearing()
     {
+        GateSelected = false;
+        GateNotSelected = true;
+        IsOpenEnabled = false;
+        SelectedGateName = string.Empty;
+        SelectedGateId = string.Empty;
         if (!NetworkInterface.GetIsNetworkAvailable())
         {
-            makeToast("No internet connection");
+            NotificationTools.makeToast("No internet connection");
         }
     }
 }

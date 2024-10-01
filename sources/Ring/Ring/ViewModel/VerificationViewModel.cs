@@ -3,6 +3,7 @@ using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ring.Services;
+using Ring.Utils;
 using System.Net.Http;
 
 namespace Ring.ViewModel;
@@ -34,19 +35,6 @@ public partial class VerificationViewModel : ObservableObject
         return;
     }
 
-    public async void makeToast(string message)
-    {
-
-        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-
-        string text = message;
-        ToastDuration duration = ToastDuration.Short;
-        double fontSize = 14;
-
-        var toast = Toast.Make(text, duration, fontSize);
-        await toast.Show(cancellationTokenSource.Token);
-    }
-
     [RelayCommand]
     async Task Verify()
     {
@@ -68,15 +56,13 @@ public partial class VerificationViewModel : ObservableObject
                     (hasManyDevicesResponse, manydevs) = await _verificationAPI.HasManyDevices();
                     if (hasManyDevicesResponse != "success")
                     {
-                        makeToast(hasManyDevicesResponse);
+                        NotificationTools.makeToast(hasManyDevicesResponse);
                         IsVerifyEnabled = true;
                         return;
                     }
                     else if (manydevs)
                     {
-                        //var multipleVm = new MultipleViewModel();
-                        //var multiplePage = new MultiplePage(multipleVm);
-                        //await Shell.Current.Navigation.PushModalAsync(multiplePage);
+                        await SecureStorage.SetAsync("MultipleDevices", "y");
                         var phonenumber = await SecureStorage.GetAsync("PhoneNumber");
                         var navigationParameters = new Dictionary<string, object>
                         {
@@ -88,6 +74,7 @@ public partial class VerificationViewModel : ObservableObject
                     }
                     else
                     {
+                        await SecureStorage.SetAsync("MultipleDevices", "n");
                         await Shell.Current.GoToAsync("../..");
                         return;
                     }
@@ -95,7 +82,7 @@ public partial class VerificationViewModel : ObservableObject
                 else
                 {
                     IsVerifyEnabled = true;
-                    makeToast("Invalid code");
+                    NotificationTools.makeToast("Invalid code");
                     SecureStorage.Remove("IsVerified");
                     return;
                 }
@@ -103,7 +90,7 @@ public partial class VerificationViewModel : ObservableObject
             else
             {
                 IsVerifyEnabled = true;
-                makeToast("Invalid code");
+                NotificationTools.makeToast("Invalid code");
                 SecureStorage.Remove("IsVerified");
                 return;
             }
@@ -111,7 +98,7 @@ public partial class VerificationViewModel : ObservableObject
         catch (Exception ex)
         {
             IsVerifyEnabled = true;
-            makeToast(ex.Message);
+            NotificationTools.makeToast(ex.Message);
             SecureStorage.Remove("IsVerified");
             return;
         }
@@ -126,20 +113,20 @@ public partial class VerificationViewModel : ObservableObject
         string? phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
         if (phoneNumber == null)
         {
-            makeToast("Phone number not found");
+            NotificationTools.makeToast("Phone number not found");
             IsVerifyEnabled = true;
             return;
         }
         var sendSMSResponse = await _verificationAPI.SendSMS(phoneNumber);
         if (sendSMSResponse == "success")
         {
-            makeToast("SMS sent successfully");
+            NotificationTools.makeToast("SMS sent successfully");
             IsVerifyEnabled = true;
             return;
         }
         else
         {
-            makeToast("Error while sending SMS");
+            NotificationTools.makeToast("Error while sending SMS");
             IsVerifyEnabled = true;
             return;
         }

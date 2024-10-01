@@ -4,6 +4,7 @@ using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ring.Services;
+using Ring.Utils;
 using System.Collections.ObjectModel;
 
 namespace Ring.ViewModel;
@@ -53,21 +54,8 @@ public partial class MultipleViewModel : ObservableObject
 
     public void handleError(string error)
     {
-        makeToast(error);
+        NotificationTools.makeToast(error);
         return;
-    }
-
-    public async void makeToast(string message)
-    {
-
-        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-
-        string text = message;
-        ToastDuration duration = ToastDuration.Short;
-        double fontSize = 14;
-
-        var toast = Toast.Make(text, duration, fontSize);
-        await toast.Show(cancellationTokenSource.Token);
     }
 
     private async Task GetAllDevices()
@@ -102,7 +90,7 @@ public partial class MultipleViewModel : ObservableObject
         if (toRemoveResponse == "success")
         {
             await GetAllDevices();
-            makeToast("Device removed");
+            NotificationTools.makeToast("Device removed");
         }
         else
         {
@@ -115,7 +103,7 @@ public partial class MultipleViewModel : ObservableObject
     [RelayCommand]
     async Task Next()
     {
-        await Shell.Current.GoToAsync("../../..");
+        await Shell.Current.Navigation.PopToRootAsync();
         return;
     }
 }

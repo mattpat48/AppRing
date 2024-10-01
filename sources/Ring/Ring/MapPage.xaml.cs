@@ -4,19 +4,20 @@ using Mapsui.Projections;
 using Mapsui;
 using Mapsui.Styles;
 using Color = Microsoft.Maui.Graphics.Color;
-using Ring.Utils;
-using Mapsui.Layers;
 using Mapsui.Limiting;
 using System.Net.NetworkInformation;
-using Mapsui.Nts.Extensions;
+using GeolocatorPlugin;
+using GeolocatorPlugin.Abstractions;
 namespace Ring;
 
 public partial class MapPage : ContentPage
 {
     List<Pin>? Pins;
-    MapControl? MapControl;
     private IGeolocation _geolocation;
     private bool _disposed;
+
+    //private CancellationTokenSource _locationUpdateCts;
+    //private const int LocationUpdateInterval = 5000;
 
     public MapPage(MapViewModel viewModel)
     {
@@ -40,10 +41,14 @@ public partial class MapPage : ContentPage
         c.TitleFontSize = 20;
         c.Title = pin.Label;
 
-        c.SubtitleFontSize = 10;
+        c.SubtitleFontSize = 15;
         c.SubtitleFontColor = Color.FromArgb("575757");
         c.SubtitleTextAlignment = TextAlignment.Center;
-        c.Subtitle = pin.Position.Latitude.ToString() + ", " + pin.Position.Longitude.ToString();
+        c.Subtitle = pin.Address;
+
+        c.IsClosableByClick = true;
+        c.ShadowWidth = 5;
+        return;
     }
 
     public async Task createMap()
@@ -69,19 +74,17 @@ public partial class MapPage : ContentPage
 
             var request = new GeolocationRequest(GeolocationAccuracy.Best, TimeSpan.FromSeconds(1));
             var startLocation = await _geolocation.GetLocationAsync(request);
-
-            if (startLocation == null)
-            {
-                return;
-            }
             var lonLat = SphericalMercator.FromLonLat(startLocation.Longitude, startLocation.Latitude);
             var point = new MPoint(lonLat.x, lonLat.y);
-            refreshMap(startLocation);
 
-            map.Navigator.CenterOnAndZoomTo(point, map.Navigator.Resolutions[16]);
-            mapView.MyLocationLayer.UpdateMyLocation(new Position(startLocation.Latitude, startLocation.Longitude), true);
+            if (startLocation != null)
+            {
+
+                map.Navigator.CenterOnAndZoomTo(point, map.Navigator.Resolutions[16]);
+                mapView.MyLocationLayer.UpdateMyLocation(new Mapsui.UI.Maui.Position(startLocation.Latitude, startLocation.Longitude), true);
+            }
             
-            Pins = viewModel.SetPins();
+            Pins = await viewModel.SetPins();
 
             if (Pins == null)
             {
@@ -92,8 +95,10 @@ public partial class MapPage : ContentPage
                 var toAdd = new Pin();
                 toAdd.Label = pin.Label;
                 toAdd.Position = pin.Position;
+                toAdd.Tag = pin.Tag;
                 toAdd.IsVisible = true;
                 toAdd.RotateWithMap = false;
+                toAdd.Address = pin.Address;
                 setPinCallout(toAdd);
                 mapView.Pins.Add(toAdd);
             }
@@ -101,25 +106,34 @@ public partial class MapPage : ContentPage
             {
                 if (e.Pin != null)
                 {
-                    if (e.NumOfTaps == 1)
+                    e.Pin.ShowCallout();
+                    if (e.Pin.Label != null && e.Pin.Tag != null)
                     {
-                        if (e.Pin.Callout.IsVisible)
-                        {
-                            e.Pin.HideCallout();
-                        }
-                        else
-                        {
-                            foreach (var pin in mapView.Pins)
-                            {
-                                pin.HideCallout();
-
-                            }
-                            e.Pin.ShowCallout();
-                        }
+                        viewModel.OnGateSelected(e.Pin.Label, e.Pin.Tag.ToString());
                     }
                 }
 
                 e.Handled = true;
+            };
+            
+            mapView.SelectedPinChanged += (s, e) =>
+            {
+                viewModel.OnGateNotSelected();
+                if (e.SelectedPin != null)
+                {
+                    e.SelectedPin.ShowCallout();
+                    if (e.SelectedPin.Label != null && e.SelectedPin.Tag != null)
+                    {
+                        viewModel.OnGateSelected(e.SelectedPin.Label, e.SelectedPin.Tag.ToString());
+                    }
+                }
+                foreach (var pin in mapView.Pins)
+                {
+                    if (pin != e.SelectedPin)
+                    {
+                        pin.HideCallout();
+                    }
+                }
             };
 
             mapView.MapClicked += (s, e) =>
@@ -131,65 +145,19 @@ public partial class MapPage : ContentPage
                         pin.HideCallout();
                     }
                 }
+                viewModel.OnGateNotSelected();
             };
 
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return;
         }
     }
 
-    public void refreshMap(Location? location)
+    public void refreshMap(double latitude, double longitude)
     {
-        if (mapView.Map == null || location == null)
-        {
-            return;
-        }
-
-        var lonLat = SphericalMercator.FromLonLat(location.Longitude, location.Latitude);
-        var point = new MPoint(lonLat.x, lonLat.y);
-
-        if (mapView.MyLocationLayer == null)
-        {
-            return;
-        }
-
-        mapView.MyLocationLayer.UpdateMyLocation(new Position(location.Latitude, location.Longitude), true);
-
-        // Optionally center map on the user's location
-        mapView.Map.Navigator.CenterOn(point);
-
-        return;
-    }
-
-    // Start tracking location
-    private async Task StartLocationTrackingAsync()
-    {
-        try
-        {
-            var request = new GeolocationListeningRequest(GeolocationAccuracy.Best, TimeSpan.FromSeconds(1));
-            await _geolocation.StartListeningForegroundAsync(request);
-            _geolocation.LocationChanged += (s, e) =>
-            {
-                refreshMap(e.Location);
-            };
-        }
-        catch (Exception ex)
-        {
-        }
-    }
-
-    private void StopLocationTracking()
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        _disposed = true;
-        mapView.MyLocationLayer?.Dispose();
-        _geolocation.StopListeningForeground();
+        mapView.MyLocationLayer.UpdateMyLocation(new Mapsui.UI.Maui.Position(latitude, longitude), true);
         return;
     }
 
@@ -251,6 +219,41 @@ public partial class MapPage : ContentPage
         }
     }
 
+    public async void ToggleGPS(bool toggleOn)
+    {
+        if (toggleOn)
+        {
+            if (await CrossGeolocator.Current.StartListeningAsync(TimeSpan.FromSeconds(1), 3, true, new ListenerSettings
+            {
+                ActivityType = ActivityType.OtherNavigation,
+                AllowBackgroundUpdates = true,
+                DeferLocationUpdates = true,
+                ListenForSignificantChanges = false,
+                PauseLocationUpdatesAutomatically = false,
+            }))
+            {
+                CrossGeolocator.Current.PositionChanged += CrossGeolocator_Current_PositionChanged;
+                CrossGeolocator.Current.PositionError += CrossGeolocator_Current_PositionError;
+            }
+        }
+        else
+        {
+            if (await CrossGeolocator.Current.StopListeningAsync())
+            {
+                CrossGeolocator.Current.PositionChanged -= CrossGeolocator_Current_PositionChanged;
+                CrossGeolocator.Current.PositionError -= CrossGeolocator_Current_PositionError;
+            }
+        }
+    }
+
+    private void CrossGeolocator_Current_PositionError(object? sender, PositionErrorEventArgs e)
+    {
+    }
+
+    private void CrossGeolocator_Current_PositionChanged(object? sender, PositionEventArgs e)
+    {
+        refreshMap(e.Position.Latitude, e.Position.Longitude);
+    }
 
     protected override async void OnAppearing()
 	{
@@ -262,16 +265,17 @@ public partial class MapPage : ContentPage
             {
                 await createMap();
                 labelNoCon.IsVisible = false;
-                mapView.IsVisible = true;
-                mapView.IsEnabled = true;
-                await StartLocationTrackingAsync();
+                mapContainer.IsVisible = true;
+                mapContainer.IsEnabled = true;
+                //await StartLocationTrackingAsync();
+                ToggleGPS(true);
                 return;
             }
             else
             {
                 labelNoCon.IsVisible = true;
-                mapView.IsEnabled = false;
-                mapView.IsVisible = false;
+                mapContainer.IsEnabled = false;
+                mapContainer.IsVisible = false;
                 return;
             }
         }
@@ -280,7 +284,8 @@ public partial class MapPage : ContentPage
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-        StopLocationTracking();
+        //StopLocationTracking();
+        ToggleGPS(false);
     }
 
     private void refresh_Swiped(object sender, EventArgs e)
@@ -288,8 +293,8 @@ public partial class MapPage : ContentPage
         if (NetworkInterface.GetIsNetworkAvailable())
         {
             labelNoCon.IsVisible = false;
-            mapView.IsVisible = true;
-            mapView.IsEnabled = true;
+            mapContainer.IsVisible = true;
+            mapContainer.IsEnabled = true;
             return;
         }
     }

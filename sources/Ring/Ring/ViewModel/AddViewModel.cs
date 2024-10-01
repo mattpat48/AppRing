@@ -3,6 +3,7 @@ using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ring.Services;
+using Ring.Utils;
 
 namespace Ring.ViewModel;
 
@@ -64,22 +65,9 @@ public partial class AddViewModel : ObservableObject
 
     public void handleError(string error)
     {
-        makeToast(error);
+        NotificationTools.makeToast(error);
         AddText = "Retry";
         IsAddEnabled = true;
-    }
-
-    public async void makeToast(string message)
-    {
-
-        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-
-        string text = message;
-        ToastDuration duration = ToastDuration.Short;
-        double fontSize = 14;
-
-        var toast = Toast.Make(text, duration, fontSize);
-        await toast.Show(cancellationTokenSource.Token);
     }
 
     [RelayCommand]
@@ -100,7 +88,7 @@ public partial class AddViewModel : ObservableObject
                     var addUserResponse = await _addAPI.AddUserRequest(GateId, addingNumber);
                     if (addUserResponse == "success")
                     {
-                        makeToast("User added successfully");
+                        NotificationTools.makeToast("User added successfully");
                         await Shell.Current.GoToAsync("..");
                     }
                     else

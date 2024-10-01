@@ -5,39 +5,41 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewmodel="clr-namespace:Ring.ViewModel"
              x:DataType="viewmodel:SettingsViewModel"
+             xmlns:model="clr-namespace:Ring.Utils"
              x:Class="Ring.SettingsPage"
              Shell.TabBarIsVisible="True">
 
-
     <Grid
-        HorizontalOptions="Center">
-        
-        <Grid
-            Margin="15"
-            RowDefinitions="Auto"
-            ColumnDefinitions="Auto"
-            RowSpacing="10"
-            HorizontalOptions="CenterAndExpand">
-            <Grid.Shadow>
-                <Shadow
+        Margin="15"
+        RowDefinitions="Auto, Auto, Auto"
+        ColumnDefinitions="*"
+        RowSpacing="10"
+        HorizontalOptions="CenterAndExpand">
+        <Grid.Shadow>
+            <Shadow
                 Radius="20"
                 Opacity="0.8"
                 Offset="10,10" 
                 Brush="Black" />
-            </Grid.Shadow>
+        </Grid.Shadow>
 
-            <Button
-                x:Name="rmvButton"
-                IsEnabled="True"
-                IsVisible="True"
-                Text="Delete Number"
-                Margin="5"
-                WidthRequest="130"
-                Clicked="RemoveNumber"
-                SemanticProperties.Hint="Remove the number (debug)"
-                HorizontalOptions="Center"
-                Grid.Row="0"/>
+        <Button
+            Text="Delete number"
+            Margin="5"
+            WidthRequest="130"
+            Command="{Binding RemoveNumberCommand}"
+            SemanticProperties.Hint="Remove the number (debug)"
+            HorizontalOptions="Center"
+            Grid.Row="0"/>
             
-        </Grid>
+        <Button
+            Text="Your devices"
+            Margin="5"
+            WidthRequest="130"
+            Command="{Binding MultipleDevicesCommand}"
+            SemanticProperties.Hint="Remove the number (debug)"
+            HorizontalOptions="Center"
+            Grid.Row="1"/>
+
     </Grid>
 </ContentPage>

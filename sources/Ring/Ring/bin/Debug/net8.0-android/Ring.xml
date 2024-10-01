@@ -132,11 +132,36 @@
         <member name="P:Ring.ViewModel.MainViewModel.CheckCommand">
             <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.MainViewModel.Check"/>.</summary>
         </member>
-        <member name="F:Ring.ViewModel.MainViewModel.openCommand">
-            <summary>The backing field for <see cref="P:Ring.ViewModel.MainViewModel.OpenCommand"/>.</summary>
+        <member name="F:Ring.ViewModel.MainViewModel.openClickedCommand">
+            <summary>The backing field for <see cref="P:Ring.ViewModel.MainViewModel.OpenClickedCommand"/>.</summary>
         </member>
-        <member name="P:Ring.ViewModel.MainViewModel.OpenCommand">
-            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.MainViewModel.Open"/>.</summary>
+        <member name="P:Ring.ViewModel.MainViewModel.OpenClickedCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.MainViewModel.OpenClicked"/>.</summary>
+        </member>
+        <member name="T:Ring.ViewModel.MapViewModel">
+            <inheritdoc/>
+            <inheritdoc/>
+        </member>
+        <member name="P:Ring.ViewModel.MapViewModel.GateSelected">
+            <inheritdoc cref="F:Ring.ViewModel.MapViewModel.gateSelected"/>
+        </member>
+        <member name="P:Ring.ViewModel.MapViewModel.GateNotSelected">
+            <inheritdoc cref="F:Ring.ViewModel.MapViewModel.gateNotSelected"/>
+        </member>
+        <member name="P:Ring.ViewModel.MapViewModel.IsOpenEnabled">
+            <inheritdoc cref="F:Ring.ViewModel.MapViewModel.isOpenEnabled"/>
+        </member>
+        <member name="P:Ring.ViewModel.MapViewModel.SelectedGateName">
+            <inheritdoc cref="F:Ring.ViewModel.MapViewModel.selectedGateName"/>
+        </member>
+        <member name="P:Ring.ViewModel.MapViewModel.SelectedGateId">
+            <inheritdoc cref="F:Ring.ViewModel.MapViewModel.selectedGateId"/>
+        </member>
+        <member name="F:Ring.ViewModel.MapViewModel.openGateCommand">
+            <summary>The backing field for <see cref="P:Ring.ViewModel.MapViewModel.OpenGateCommand"/>.</summary>
+        </member>
+        <member name="P:Ring.ViewModel.MapViewModel.OpenGateCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.MapViewModel.OpenGate"/>.</summary>
         </member>
         <member name="T:Ring.ViewModel.MultipleViewModel">
             <inheritdoc/>
@@ -203,12 +228,19 @@
         </member>
         <member name="T:Ring.ViewModel.SettingsViewModel">
             <inheritdoc/>
+            <inheritdoc/>
         </member>
         <member name="F:Ring.ViewModel.SettingsViewModel.removeNumberCommand">
             <summary>The backing field for <see cref="P:Ring.ViewModel.SettingsViewModel.RemoveNumberCommand"/>.</summary>
         </member>
         <member name="P:Ring.ViewModel.SettingsViewModel.RemoveNumberCommand">
-            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.SettingsViewModel.RemoveNumber"/>.</summary>
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.SettingsViewModel.RemoveNumber"/>.</summary>
+        </member>
+        <member name="F:Ring.ViewModel.SettingsViewModel.multipleDevicesCommand">
+            <summary>The backing field for <see cref="P:Ring.ViewModel.SettingsViewModel.MultipleDevicesCommand"/>.</summary>
+        </member>
+        <member name="P:Ring.ViewModel.SettingsViewModel.MultipleDevicesCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.SettingsViewModel.MultipleDevices"/>.</summary>
         </member>
         <member name="T:Ring.ViewModel.VerificationViewModel">
             <inheritdoc/>
@@ -318,6 +350,15 @@
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.Logs">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "Logs" generated properties.</summary>
         </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.GateNotSelected">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "GateNotSelected" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.SelectedGateName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "SelectedGateName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.SelectedGateId">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "SelectedGateId" generated properties.</summary>
+        </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.DescriptionText">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "DescriptionText" generated properties.</summary>
         </member>
@@ -416,6 +457,15 @@
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.Logs">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "Logs" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.GateNotSelected">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "GateNotSelected" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.SelectedGateName">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "SelectedGateName" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.SelectedGateId">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "SelectedGateId" generated properties.</summary>
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.DescriptionText">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "DescriptionText" generated properties.</summary>

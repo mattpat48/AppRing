@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ring.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,4 +9,5 @@ namespace Ring.Utils;
 public interface IMyHttpClient
 {
     HttpClient sharedClient { get; set; }
+    MainAPI sharedMainAPI { get; set; }
 }

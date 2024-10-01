@@ -3,6 +3,7 @@ using Ring.ViewModel;
 using CommunityToolkit.Maui;
 using Ring.Utils;
 using SkiaSharp.Views.Maui.Controls.Hosting;
+using Plugin.LocalNotification;
 
 namespace Ring
 {
@@ -18,7 +19,8 @@ namespace Ring
             }).UseMauiCommunityToolkit(options =>
             {
                 options.SetShouldEnableSnackbarOnWindows(true);
-            }).UseSkiaSharp();
+            }).UseSkiaSharp()
+            .UseLocalNotification();
 
             builder.Services.AddSingleton<MainPage>();
             builder.Services.AddSingleton<MainViewModel>();

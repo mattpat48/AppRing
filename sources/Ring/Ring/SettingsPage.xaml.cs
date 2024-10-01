@@ -1,22 +1,17 @@
+using Ring.Utils;
 using Ring.ViewModel;
 
 namespace Ring;
 
 public partial class SettingsPage : ContentPage
 {
-    public SettingsPage(SettingsViewModel viewModel)
+    private readonly IMyHttpClient _myHttpClient;
+    public SettingsPage(SettingsViewModel viewModel, IMyHttpClient myHttpClient)
     {
         InitializeComponent();
         BindingContext = viewModel;
-    }
 
-    public async void RemoveNumber(object sender, EventArgs e)
-    {
-        var viewModel = BindingContext as SettingsViewModel;
-        if (viewModel != null)
-        {
-            Shell.SetTabBarIsVisible(this, false);
-            await viewModel.RemoveNumber();
-        }
+        _myHttpClient = myHttpClient;
+        viewModel.AssignHttpClient(_myHttpClient.sharedClient);
     }
 }

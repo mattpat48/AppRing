@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using Ring.Services;
 using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Maui.Alerts;
+using Ring.Utils;
 
 namespace Ring.ViewModel;
 
@@ -68,26 +69,13 @@ public partial class RegisterViewModel : ObservableObject
 
     public void handleError(string error)
     {
-        makeToast(error);
+        NotificationTools.makeToast(error);
         NextText = "Retry";
         IsNextEnabled = true;
         SecureStorage.Remove("PhoneNumber");
         SecureStorage.Remove("IsVerified");
         SecureStorage.Remove("RememberLogin");
         return;
-    }
-
-    public async void makeToast(string message)
-    {
-
-        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-
-        string text = message;
-        ToastDuration duration = ToastDuration.Short;
-        double fontSize = 14;
-
-        var toast = Toast.Make(text, duration, fontSize);
-        await toast.Show(cancellationTokenSource.Token);
     }
 
     [RelayCommand]
