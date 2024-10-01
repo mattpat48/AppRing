@@ -405,7 +405,7 @@ public partial class MainViewModel : ObservableObject
             if (string.IsNullOrEmpty(phoneNumber) || string.IsNullOrEmpty(isVerified) || string.Compare(isVerified, "n") == 0)
             {
                 IsLoading = false;
-
+                MqttListenerManager.StopService();
                 await ResetDefault();
                 var navigationParameters = new Dictionary<string, object>
                 {
@@ -421,7 +421,7 @@ public partial class MainViewModel : ObservableObject
                 {
                     if (!GateSelected) await GetGates();
                     IsContentVisible = true;
-                    if (mqttClient == null || mqttClient.IsConnected)
+                    if (mqttClient == null || !mqttClient.IsConnected)
                     {
                         bool connected = await Connect();
                         if (!connected)
@@ -434,6 +434,7 @@ public partial class MainViewModel : ObservableObject
 
                     IsLoading = false;
                     NotConnected = false;
+                    MqttListenerManager.StartService();
                     return;
                 }
                 else

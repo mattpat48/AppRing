@@ -10,7 +10,7 @@ namespace Ring
     [Activity(Theme = "@style/Maui.SplashTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | ConfigChanges.Density)]
     public class MainActivity : MauiAppCompatActivity
     {
-        public static MainActivity? ActivityCurrent { get; set; }
+        public static MainActivity? ActivityCurrent { get; private set; }
         public MainActivity()
         {
             ActivityCurrent = this;
@@ -19,9 +19,21 @@ namespace Ring
         protected override void OnCreate(Bundle? savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-
+            ActivityCurrent = this;
             CreateNotificationChannel();
+        }
+
+        public void StartMqttService()
+        {
             var intent = new Intent(this, typeof(MqttListenerService));
+            intent.SetAction("START_MQTT");
+            StartService(intent);
+        }
+
+        public void StopMqttService()
+        {
+            var intent = new Intent(this, typeof(MqttListenerService));
+            intent.SetAction("STOP_MQTT");
             StartService(intent);
         }
 

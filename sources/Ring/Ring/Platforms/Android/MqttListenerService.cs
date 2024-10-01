@@ -7,6 +7,7 @@ using System.Text;
 using Ring.Utils;
 using Newtonsoft.Json;
 using System.Text.Json;
+using MQTTnet.Server;
 
 namespace Ring.Platforms.Android
 {
@@ -16,6 +17,7 @@ namespace Ring.Platforms.Android
         private MqttFactory? mqttServer;
         private IMqttClient? mqttClient;
         private MqttClientOptions? options;
+        private bool _isConnected = false;
 
         private string? _gatesPath;
         private string? storedPhoneNumber;
@@ -104,6 +106,25 @@ namespace Ring.Platforms.Android
             return Task.CompletedTask;
         }
 
+        public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
+        {
+            // Ricevi comandi dall'Intent
+            var action = intent?.Action;
+            if (action == "START_MQTT")
+            {
+                StartForegroundService();
+                ConnectMqttBroker();
+            }
+            else if (action == "STOP_MQTT")
+            {
+                DisconnectMqttBroker();
+                StopForeground(true);
+                StopSelf();
+            }
+
+            return StartCommandResult.Sticky;
+        }
+
         private void StartForegroundService()
         {
             #pragma warning disable CA1416
@@ -117,17 +138,25 @@ namespace Ring.Platforms.Android
 
         private async void ConnectMqttBroker()
         {
+            if (_isConnected) return;
+
             try
             {
-                if (mqttClient == null || options == null)
-                {
-                    return;
-                }
                 await mqttClient.ConnectAsync(options);
+                _isConnected = true;
                 await mqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("ringRequest/request").Build());
             }
             catch (Exception)
             {
+            }
+        }
+
+        private async void DisconnectMqttBroker()
+        {
+            if (_isConnected)
+            {
+                await mqttClient.DisconnectAsync();
+                _isConnected = false;
             }
         }
 
