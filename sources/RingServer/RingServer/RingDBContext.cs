@@ -42,8 +42,7 @@ public class Gate
 
 public class UserGate
 {
-    public string usergateId { get; set; }
-    public string deviceId { get; set; }
+    public int usergateId { get; set; }
     public string phoneNumber { get; set; }
     public string gateId { get; set; }
     public string role { get; set; }

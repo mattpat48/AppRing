@@ -134,6 +134,7 @@ public partial class MainViewModel : ObservableObject
         NotificationTools.makeToast(message);
         IsOpenEnabled = false;
         IsLoading = false;
+        NotConnected = true;
         return;
     }
 
@@ -591,7 +592,7 @@ public partial class MainViewModel : ObservableObject
 
     public async Task ResetDefault()
     {
-        if (mqttClient.IsConnected) await Disconnect();
+        if (mqttClient != null && mqttClient.IsConnected) await Disconnect();
         using (var writer = new StreamWriter(_gatesPath, false))
         {
             await writer.WriteAsync("{}");

@@ -114,25 +114,6 @@ namespace RingServer.Controllers
                                 rememberLogin = userInfo.RememberLogin,
                                 deviceModel = userInfo.DeviceModel
                             });
-                            if (_dbContext.Users.Any(u => u.phoneNumber == userInfo.Number && u.deviceId != userInfo.Id))
-                            {
-                                // devo aggiungere tutti i cancelli già presenti nel database a quel numero anche a quel device id
-                                var gates = _dbContext.UsersGates.Where(u => u.phoneNumber == userInfo.Number).ToList();
-                                if (!gates.IsNullOrEmpty())
-                                {
-                                    foreach (var gate in gates)
-                                    {
-                                        _dbContext.UsersGates.Add(new UserGate
-                                        {
-                                            usergateId = Guid.NewGuid().ToString(),
-                                            phoneNumber = userInfo.Number,
-                                            deviceId = userInfo.Id,
-                                            gateId = gate.gateId,
-                                            role = gate.role
-                                        });
-                                    }
-                                }
-                            }
                         }
                         // Altrimenti aggiorno i dati dell'utente
                         else

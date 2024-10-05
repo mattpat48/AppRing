@@ -34,6 +34,8 @@ public partial class AddViewModel : ObservableObject
     [ObservableProperty]
     string gateName;
 
+    List<string>? users;
+
     // messaggio di errore
     [ObservableProperty]
     string titleText;
@@ -50,16 +52,19 @@ public partial class AddViewModel : ObservableObject
         SelectedPhonePrefix = "+39";
 
         isAddEnabled = true;
-        AddText = "Add";   
+        AddText = "Add";
+
+        users = new List<string>();
     }
 
-    public void OnAppearing()
+    public async void OnAppearing()
     {
         if (HttpClientProperty != null)
         {
             _addAPI = new AddAPI(HttpClientProperty);
         }
         TitleText = "Add user to " + GateName;
+
         return;
     }
 
@@ -82,7 +87,22 @@ public partial class AddViewModel : ObservableObject
             {
                 try
                 {
+                    string getUsersPerGateResponse;
+                    (getUsersPerGateResponse, users) = await _addAPI.GetUsersPerGate(GateId);
+
+                    if (getUsersPerGateResponse != "success")
+                    {
+                        handleError(getUsersPerGateResponse);
+                        return;
+                    }
+
                     string addingNumber = SelectedPhonePrefix + PhoneNumber;
+
+                    if (users != null && users.Contains(addingNumber))
+                    {
+                        handleError("User already added.");
+                        return;
+                    }
 
                     // richiedo la registrazione al server
                     var addUserResponse = await _addAPI.AddUserRequest(GateId, addingNumber);

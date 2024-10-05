@@ -19,7 +19,6 @@ namespace Ring.Platforms.Android
         private MqttClientOptions? options;
         private bool _isConnected = false;
 
-        private string? _gatesPath;
         private string? storedPhoneNumber;
         private string? storedDeviceId;
 
@@ -29,8 +28,6 @@ namespace Ring.Platforms.Android
 
             mqttServer = new MqttFactory();
             mqttClient = mqttServer.CreateMqttClient();
-
-            _gatesPath = Path.Combine(FileSystem.AppDataDirectory, "gates.json");
 
             // Configurazione del client MQTT
             string? mqttServerAddress = System.Environment.GetEnvironmentVariable("MQTT_SERVER");
@@ -64,7 +61,7 @@ namespace Ring.Platforms.Android
             string? deviceId;
             string? message = Encoding.UTF8.GetString(e.ApplicationMessage.PayloadSegment);
 
-            string gatesJson = File.ReadAllText(_gatesPath);
+            string gatesJson = File.ReadAllText(Path.Combine(FileSystem.AppDataDirectory, "gates.json"));
             gates = JsonConvert.DeserializeObject<List<Gate>>(gatesJson);
 
             if (gates == null)
@@ -106,7 +103,7 @@ namespace Ring.Platforms.Android
             return Task.CompletedTask;
         }
 
-        public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
+        public override StartCommandResult OnStartCommand(Intent? intent, StartCommandFlags flags, int startId)
         {
             // Ricevi comandi dall'Intent
             var action = intent?.Action;
@@ -138,7 +135,7 @@ namespace Ring.Platforms.Android
 
         private async void ConnectMqttBroker()
         {
-            if (_isConnected) return;
+            if (_isConnected || mqttClient == null) return;
 
             try
             {

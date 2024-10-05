@@ -57,7 +57,7 @@ namespace RingServer.Controllers
                         return BadRequest("Invalid request payload");
                     }
 
-                    string[] gatesIds = _dbContext.UsersGates.Where(ug => ug.phoneNumber == userInfo.Number && ug.deviceId == userInfo.Id).Select(ug => ug.gateId).ToArray();
+                    string[] gatesIds = _dbContext.UsersGates.Where(ug => ug.phoneNumber == userInfo.Number).Select(ug => ug.gateId).ToArray();
 
                     if (gatesIds == null)
                     {
@@ -178,12 +178,10 @@ namespace RingServer.Controllers
 
                     foreach (User user in usersToAdd)
                     {
-                        if (!_dbContext.UsersGates.Any(ug => ug.phoneNumber == user.phoneNumber && ug.deviceId == user.deviceId && ug.gateId == addUserRequest.GateId))
+                        if (!_dbContext.UsersGates.Any(ug => ug.phoneNumber == user.phoneNumber && ug.gateId == addUserRequest.GateId))
                         {
                             _dbContext.UsersGates.Add(new UserGate
                             {
-                                usergateId = Guid.NewGuid().ToString(),
-                                deviceId = user.deviceId,
                                 phoneNumber = user.phoneNumber,
                                 gateId = addUserRequest.GateId,
                                 role = "u"
@@ -301,6 +299,62 @@ namespace RingServer.Controllers
                     }
 
                     return Ok(encryptedLogs);
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+            }
+        }
+
+        [HttpPost]
+        [Route("/api/v1/gate/getuserspergate")]
+        public async Task<IActionResult> GetUsersPerGate()
+        {
+            using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                var requestBody = await reader.ReadToEndAsync();
+                if (requestBody == null)
+                {
+                    return BadRequest("Outer invalid request payload");
+                }
+
+                try
+                {
+                    string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
+                    string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
+
+                    bool outcome;
+                    string plaintext;
+                    CommonClasses.Identifier userInfo;
+                    (outcome, plaintext, userInfo) = CryptographyTools.TotalDecrypt(privateKeyPem, requestBody, _dbContext);
+                    if (!outcome || string.IsNullOrEmpty(plaintext) || userInfo == null)
+                    {
+                        return BadRequest("Invalid request payload");
+                    }
+
+                    string gateId = JsonConvert.DeserializeObject<string>(plaintext);
+
+                    if (string.IsNullOrEmpty(gateId))
+                    {
+                        return BadRequest("Empty gate id");
+                    }
+
+                    List<UserGate> users = _dbContext.UsersGates.Where(ug => ug.gateId == gateId).ToList();
+
+                    List<string> usersNumbers = users.Select(u => u.phoneNumber).ToList();
+
+                    string userKey = _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number && u.deviceId == userInfo.Id).First().publicKey;
+
+                    bool outcome2;
+                    object encryptedUsers;
+                    (outcome2, encryptedUsers) = CryptographyTools.TotalEncrypt(privateKeyPem, userKey, JsonConvert.SerializeObject(usersNumbers));
+                    if (!outcome2)
+                    {
+                        return BadRequest("Error encrypting gates");
+                    }
+
+                    return Ok(encryptedUsers);
                 }
                 catch (Exception ex)
                 {
