@@ -24,9 +24,7 @@ public partial class SettingsViewModel : ObservableObject
         try
         {
             SecureStorage.Remove("PhoneNumber");
-            //Shell.Current.GoToAsync($"///{nameof(MainPage)}");
-            //Shell.Current.CurrentPage.Navigation.PopToRootAsync();
-            //Shell.Current.Navigation.PopToRootAsync();
+            SecureStorage.Remove("MultipleDevices");
             Shell.Current.GoToAsync($"{nameof(MainPage)}");
             return;
         }

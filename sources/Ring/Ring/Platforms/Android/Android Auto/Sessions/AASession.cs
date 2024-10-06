@@ -13,8 +13,7 @@ namespace Ring.Platforms.Android.Android_Auto.Sessions
     {
         public override Screen OnCreateScreen(Intent p0)
         {
-            // TODO: chiedere i permessi per la posizione
-            return new AAScreenMenu(CarContext);
+            return new AAGatesGrid(CarContext);
         }
     }
 }

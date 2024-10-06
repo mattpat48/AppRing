@@ -64,34 +64,16 @@ public partial class MapViewModel : ObservableObject
         Pins = new List<Pin>();
         foreach (Gate gate in gates)
         {
-            string? address = await AddressFromLocation(gate.latitude, gate.longitude);
             Pins.Add(new Pin
             {
                 Label = gate.name,
                 Tag = gate.gateId,
                 Position = new Position(gate.latitude, gate.longitude),
-                Address = address
+                Address = gate.address
             });
         }
 
         return Pins;
-    }
-
-    private async Task<string?> AddressFromLocation(double latitude, double longitude)
-    {
-        IEnumerable<Placemark> placemarks = await Geocoding.Default.GetPlacemarksAsync(latitude, longitude);
-
-        Placemark? placemark = placemarks?.FirstOrDefault();
-
-        if (placemark != null)
-        {
-            return
-                $"{placemark.Thoroughfare} {placemark.SubThoroughfare}, {placemark.Locality} {placemark.PostalCode}, {placemark.AdminArea}, {placemark.CountryName}";
-        }
-        else
-        {
-            return null;
-        }
     }
 
     public void AssignHttpClient(HttpClient httpClient)

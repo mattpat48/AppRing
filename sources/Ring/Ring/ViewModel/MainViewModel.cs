@@ -111,6 +111,7 @@ public partial class MainViewModel : ObservableObject
         IsLoading = true;
         NotConnected = false;
         IsContentVisible = false;
+        HasLogs = false;
         await Check();
         await GetGates();
         var location = await Geolocation.GetLocationAsync(new GeolocationRequest
@@ -155,6 +156,11 @@ public partial class MainViewModel : ObservableObject
                 NoGates = true;
                 return;
             }
+
+            foreach (var gate in gatesReturned)
+            {
+                gate.address = await AddressFromLocation(gate.latitude, gate.longitude);
+            }
             Gates = gatesReturned.ToObservableCollection();
 
             var json = JsonConvert.SerializeObject(gatesReturned);
@@ -184,10 +190,48 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    private async Task<string?> AddressFromLocation(double latitude, double longitude)
+    {
+        IEnumerable<Placemark> placemarks = await Geocoding.Default.GetPlacemarksAsync(latitude, longitude);
+
+        Placemark? placemark = placemarks?.FirstOrDefault();
+
+        if (placemark != null)
+        {
+            return
+                $"{placemark.Thoroughfare} {placemark.SubThoroughfare}, {placemark.Locality} {placemark.PostalCode}, {placemark.AdminArea}, {placemark.CountryName}";
+        }
+        else
+        {
+            return null;
+        }
+    }
+    
+
     async Task<bool> GetLogs()
     {
         string getLogsResponse;
         List<Log>? logsReturned;
+
+        string logsToAddPath = Path.Combine(FileSystem.AppDataDirectory, "logsToUpdate.json");
+        if (File.Exists(logsToAddPath))
+        {
+            var toAdd = JsonConvert.DeserializeObject<List<Log>>(File.ReadAllText(logsToAddPath));
+            if (toAdd != null && toAdd.Count() > 0)
+            {
+                string logsUpdatedResponse = await _mainAPI.ManuallyAddLogs(toAdd);
+                if (logsUpdatedResponse != "success")
+                {
+                    handleError("Error while updating logs.");
+                    HasLogs = false;
+                }
+                else
+                {
+                    File.Delete(logsToAddPath);
+                }
+            }
+        }
+
         try
         {
             if (selectedGate == null)
@@ -294,7 +338,7 @@ public partial class MainViewModel : ObservableObject
 
 
     [RelayCommand]
-    private async Task<bool> Connect()
+    public async Task<bool> Connect()
     {
         IsOpenEnabled = false;
 

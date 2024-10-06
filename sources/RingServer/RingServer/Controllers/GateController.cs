@@ -227,7 +227,7 @@ namespace RingServer.Controllers
                         return BadRequest("Invalid request payload");
                     }
 
-                    string gateId = JsonConvert.DeserializeObject<String>(plaintext);
+                    string gateId = JsonConvert.DeserializeObject<string>(plaintext);
 
                     if (gateId == null)
                     {
@@ -240,6 +240,71 @@ namespace RingServer.Controllers
                         gateId = gateId,
                         date = DateTime.Now
                     });
+
+                    await _dbContext.SaveChangesAsync();
+
+                    return Ok("Log Generated");
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+            }
+        }
+
+
+        [HttpPost]
+        [Route("/api/v1/gate/manuallyaddlogs")]
+        public async Task<IActionResult> ManuallyAddLogs()
+        {
+            using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                var requestBody = await reader.ReadToEndAsync();
+                if (requestBody == null)
+                {
+                    return BadRequest("Outer invalid request payload");
+                }
+
+                try
+                {
+                    string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
+                    string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
+
+                    bool outcome;
+                    string plaintext;
+                    CommonClasses.Identifier userInfo;
+                    (outcome, plaintext, userInfo) = CryptographyTools.TotalDecrypt(privateKeyPem, requestBody, _dbContext);
+                    if (!outcome || string.IsNullOrEmpty(plaintext) || userInfo == null)
+                    {
+                        return BadRequest("Invalid request payload");
+                    }
+
+                    List<Log> manuallyAddLogRequest = JsonConvert.DeserializeObject<List<Log>>(plaintext);
+
+                    if (manuallyAddLogRequest == null)
+                    {
+                        return BadRequest("Invalid request payload");
+                    }
+
+                    foreach (var log in manuallyAddLogRequest)
+                    {
+                        if (!_dbContext.Gates.Any(g => g.gateId == log.gateId))
+                        {
+                            return BadRequest("Gate not found");
+                        }
+                        if (!_dbContext.Users.Any(u => u.phoneNumber == log.phoneNumber))
+                        {
+                            return BadRequest("User not found");
+                        }
+
+                        _dbContext.Logs.Add(new Log
+                        {
+                            phoneNumber = log.phoneNumber,
+                            deviceId = log.deviceId,
+                            gateId = log.gateId,
+                            date = log.date
+                        });
+                    }
 
                     await _dbContext.SaveChangesAsync();
 

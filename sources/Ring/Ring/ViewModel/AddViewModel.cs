@@ -57,7 +57,7 @@ public partial class AddViewModel : ObservableObject
         users = new List<string>();
     }
 
-    public async void OnAppearing()
+    public void OnAppearing()
     {
         if (HttpClientProperty != null)
         {

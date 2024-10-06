@@ -12,6 +12,7 @@ namespace Ring.Utils
         public string name { get; set; }
         public double latitude { get; set; }
         public double longitude { get; set; }
+        public string address { get; set; }
 
         public Gate(string gateId, string name, double latitude, double longitude)
         {
@@ -19,6 +20,8 @@ namespace Ring.Utils
             this.name = name;
             this.latitude = latitude;
             this.longitude = longitude;
+            this.address = "";
+
         }
     }
 }
