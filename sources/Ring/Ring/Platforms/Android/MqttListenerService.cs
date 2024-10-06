@@ -98,7 +98,7 @@ namespace Ring.Platforms.Android
                         NotificationTools.SendNotification($"{gate.name} has been opened", $"You have opened the gate from another device");
                     }
                 }
-            }    
+            }
 
             return Task.CompletedTask;
         }

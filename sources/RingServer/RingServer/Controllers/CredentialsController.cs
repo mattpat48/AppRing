@@ -412,8 +412,8 @@ namespace RingServer.Controllers
         }
 
         [HttpPost]
-        [Route("/api/v1/auth/getdevices")]
-        public async Task<IActionResult> GetDevices()
+        [Route("/api/v1/auth/getalldevices")]
+        public async Task<IActionResult> GetAllDevices()
         {
             using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
             {

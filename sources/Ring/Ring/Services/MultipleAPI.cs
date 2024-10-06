@@ -16,7 +16,7 @@ public class MultipleAPI
     public async Task<(string, List<Utils.Device>?)> GetAllDevices()
     {
         // compongo l'url della richiesta
-        var url = _server + "/api/v1/auth/getdevices";
+        var url = _server + "/api/v1/auth/getalldevices";
 
         // prendo le info per identificarmi
         string? number = await SecureStorage.GetAsync("PhoneNumber");

@@ -60,14 +60,14 @@ public partial class MultipleViewModel : ObservableObject
 
     private async Task GetAllDevices()
     {
-        string response;
-        List<Utils.Device> devicesReturned;
+        string? response;
+        List<Utils.Device>? devicesReturned;
         (response, devicesReturned) = await _multipleAPI.GetAllDevices();
         if (response == "success")
         {
             if (devicesReturned == null || devicesReturned.Count == 0)
             {
-                handleError("Error: there should be devices but no device was found");
+                Devices = new ObservableCollection<Utils.Device>();
             }
             else if (devicesReturned != null && devicesReturned.Count > 0)
             {
