@@ -4,10 +4,13 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:Ring"
-    Title="Ring">
+    Title="Ring"
+    Padding="0"
+    BackgroundColor="{StaticResource Primary}">
 
     <Shell.TitleView>
         <Grid
+            HorizontalOptions="FillAndExpand"
             RowDefinitions="*"
             ColumnDefinitions="*, *"
             ColumnSpacing="10">

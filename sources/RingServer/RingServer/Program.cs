@@ -39,7 +39,7 @@ namespace RingServer
 
             var app = builder.Build();
             //app.Urls.Add("https://10.20.100.50:7046");
-            app.Urls.Add("https://192.168.1.14" + ":7046");
+            app.Urls.Add("https://192.168.111.150" + ":7046");
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

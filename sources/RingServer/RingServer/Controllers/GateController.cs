@@ -180,11 +180,12 @@ namespace RingServer.Controllers
                     {
                         if (!_dbContext.UsersGates.Any(ug => ug.phoneNumber == user.phoneNumber && ug.gateId == addUserRequest.GateId))
                         {
+                            var role = addUserRequest.MakeAdmin ? "a" : "u";
                             _dbContext.UsersGates.Add(new UserGate
                             {
                                 phoneNumber = user.phoneNumber,
                                 gateId = addUserRequest.GateId,
-                                role = "u"
+                                role = role
                             });
                         }
                     }
@@ -240,6 +241,8 @@ namespace RingServer.Controllers
                         gateId = gateId,
                         date = DateTime.Now
                     });
+
+                    _dbContext.Gates.Where(g => g.gateId == gateId).First().lastOpened = DateTime.Now;
 
                     await _dbContext.SaveChangesAsync();
 
@@ -420,6 +423,88 @@ namespace RingServer.Controllers
                     }
 
                     return Ok(encryptedUsers);
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+            }
+        }
+
+        [HttpPost]
+        [Route("/api/v1/gate/removeuserfromgate")]
+        public async Task<IActionResult> RemoveUserFromGate()
+        {
+            using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                var requestBody = await reader.ReadToEndAsync();
+                if (requestBody == null)
+                {
+                    return BadRequest("Outer invalid request payload");
+                }
+
+                try
+                {
+                    string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
+                    string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
+
+                    bool outcome;
+                    string plaintext;
+                    CommonClasses.Identifier userInfo;
+                    (outcome, plaintext, userInfo) = CryptographyTools.TotalDecrypt(privateKeyPem, requestBody, _dbContext);
+                    if (!outcome || string.IsNullOrEmpty(plaintext) || userInfo == null)
+                    {
+                        return BadRequest("Invalid request payload");
+                    }
+
+                    CommonClasses.RemoveUserRequest removeUserRequest = JsonConvert.DeserializeObject<CommonClasses.RemoveUserRequest>(plaintext);
+
+                    if (removeUserRequest == null)
+                    {
+                        return BadRequest("Invalid request payload");
+                    }
+
+                    string requesterRole = _dbContext.UsersGates.Where(u => u.phoneNumber == userInfo.Number && u.gateId == removeUserRequest.GateId).First().role;
+
+                    if (requesterRole != "a")
+                    {
+                        return BadRequest("User is not an admin");
+                    }
+
+                    if (!_dbContext.Gates.Any(g => g.gateId == removeUserRequest.GateId))
+                    {
+                        return BadRequest("Gate not found");
+                    }
+                    if (!_dbContext.Users.Any(u => u.phoneNumber == removeUserRequest.ToRemove))
+                    {
+                        return BadRequest("User not found");
+                    }
+
+                    List<UserGate>? usersToRemove = _dbContext.UsersGates.Where(u => u.phoneNumber == removeUserRequest.ToRemove && u.gateId == removeUserRequest.GateId).ToList();
+
+                    foreach (var userToRemove in usersToRemove)
+                    {
+                        if (userToRemove == null)
+                        {
+                            return BadRequest("User not found in gate");
+                        }
+                        else if (userToRemove.role == "a")
+                        {
+                            return BadRequest("Cannot remove admin from gate");
+                        }
+                        else if (userToRemove.phoneNumber == userInfo.Number)
+                        {
+                            return BadRequest("Cannot remove yourself from gate");
+                        }
+                        else
+                        {
+                            _dbContext.UsersGates.Remove(userToRemove);
+                        }
+                    }
+
+                    _dbContext.SaveChanges();
+
+                    return Ok("User removed from gate");
                 }
                 catch (Exception ex)
                 {

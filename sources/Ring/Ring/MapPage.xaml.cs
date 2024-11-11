@@ -8,23 +8,30 @@ using Mapsui.Limiting;
 using System.Net.NetworkInformation;
 using GeolocatorPlugin;
 using GeolocatorPlugin.Abstractions;
+using Ring.Shared;
 namespace Ring;
 
 public partial class MapPage : ContentPage
 {
     List<Pin>? Pins;
     private IGeolocation _geolocation;
-    private bool _disposed;
+    private readonly IMyHttpClient _myHttpClient;
+    private readonly IMyMqttClient _myMqttClient;
+    private DateTime lastOpenCall = DateTime.MinValue;
 
     //private CancellationTokenSource _locationUpdateCts;
     //private const int LocationUpdateInterval = 5000;
 
-    public MapPage(MapViewModel viewModel)
+    public MapPage(MapViewModel viewModel, IMyHttpClient myHttpClient, IMyMqttClient myMqttClient)
     {
         InitializeComponent();
         BindingContext = viewModel;
 
         _geolocation = Geolocation.Default;
+        _myMqttClient = myMqttClient;
+        _myHttpClient = myHttpClient;
+        viewModel.AssignHttpClient(_myHttpClient.sharedClient, _myHttpClient.sharedMainAPI);
+        viewModel.AssignMqttClient(_myMqttClient.sharedMqttClient, _myMqttClient.sharedOptions);
     }
 
     public void setPinCallout(Pin pin)
@@ -223,6 +230,10 @@ public partial class MapPage : ContentPage
     {
         if (toggleOn)
         {
+            if (CrossGeolocator.Current.IsListening)
+            {
+                return;
+            }
             if (await CrossGeolocator.Current.StartListeningAsync(TimeSpan.FromSeconds(1), 3, true, new ListenerSettings
             {
                 ActivityType = ActivityType.OtherNavigation,
@@ -238,6 +249,10 @@ public partial class MapPage : ContentPage
         }
         else
         {
+            if (!CrossGeolocator.Current.IsListening)
+            {
+                return;
+            }
             if (await CrossGeolocator.Current.StopListeningAsync())
             {
                 CrossGeolocator.Current.PositionChanged -= CrossGeolocator_Current_PositionChanged;
@@ -250,9 +265,15 @@ public partial class MapPage : ContentPage
     {
     }
 
-    private void CrossGeolocator_Current_PositionChanged(object? sender, PositionEventArgs e)
+    private async void CrossGeolocator_Current_PositionChanged(object? sender, PositionEventArgs e)
     {
         refreshMap(e.Position.Latitude, e.Position.Longitude);
+        var viewModel = BindingContext as MapViewModel;
+        if ((DateTime.Now - lastOpenCall).TotalMinutes >= 1)
+        {
+            lastOpenCall = DateTime.Now;
+            await viewModel.OnLocationChanged(e.Position.Latitude, e.Position.Longitude);
+        }
     }
 
     protected override async void OnAppearing()
@@ -263,11 +284,11 @@ public partial class MapPage : ContentPage
         {
             if (NetworkInterface.GetIsNetworkAvailable() || await IsGpsEnabledAsync() == false)
             {
+                await viewModel.OnAppearing();
                 await createMap();
                 labelNoCon.IsVisible = false;
                 mapContainer.IsVisible = true;
                 mapContainer.IsEnabled = true;
-                //await StartLocationTrackingAsync();
                 ToggleGPS(true);
                 return;
             }
@@ -284,7 +305,6 @@ public partial class MapPage : ContentPage
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-        //StopLocationTracking();
         ToggleGPS(false);
     }
 

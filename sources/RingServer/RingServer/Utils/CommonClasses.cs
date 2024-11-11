@@ -39,11 +39,25 @@ public static class CommonClasses
     {
         public string GateId { get; set; }
         public string ToAdd { get; set; }
+        public bool MakeAdmin { get; set; }
 
-        public AddUserRequest(string gateId, string toAdd)
+        public AddUserRequest(string gateId, string toAdd, bool makeAdmin)
         {
             GateId = gateId;
             ToAdd = toAdd;
+            MakeAdmin = makeAdmin;
+        }
+    }
+
+    public class RemoveUserRequest
+    {
+        public string GateId { get; set; }
+        public string ToRemove { get; set; }
+
+        public RemoveUserRequest(string gateId, string toRemove)
+        {
+            GateId = gateId;
+            ToRemove = toRemove;
         }
     }
 

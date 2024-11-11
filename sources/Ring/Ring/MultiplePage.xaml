@@ -18,93 +18,114 @@
         HorizontalOptions="Center">
 
         <BoxView
-        AbsoluteLayout.LayoutFlags="All"
-        AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
-        Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}" />
+            AbsoluteLayout.LayoutFlags="All"
+            AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+            Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}" />
 
         <Frame
-        AbsoluteLayout.LayoutFlags="All"
-        AbsoluteLayout.LayoutBounds="0.5, 0.5, 0.9, 0.9"
-        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource OffBlack}}"
-        Padding="30"
-        CornerRadius="20">
-            <Grid
+            AbsoluteLayout.LayoutFlags="All"
+            AbsoluteLayout.LayoutBounds="0.5, 0.5, 0.9, 0.9"
+            BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource OffBlack}}"
+            Padding="30"
+            CornerRadius="20">
             
-            RowDefinitions="Auto, Auto, Auto, Auto"
-            ColumnDefinitions="*"
-            RowSpacing="20">
-
+            <Grid
+                RowDefinitions="*, *"
+                ColumnDefinitions="*"
+                RowSpacing="20">
+                
                 <Label
-                Text="Multiple devices found"
-                HorizontalTextAlignment="Center"
-                VerticalTextAlignment="Center"
-                FontAttributes="Bold"
-                Grid.Row="0"
-                Grid.Column="0"
-                LineBreakMode="WordWrap"
-                FontSize="Large"
-                HorizontalOptions="FillAndExpand" />
-
-                <Label
-                Text="{Binding DescriptionText}"
-                HorizontalTextAlignment="Center"
-                VerticalTextAlignment="Center"
-                Grid.Row="1"
-                Grid.Column="0"
-                LineBreakMode="WordWrap"
-                FontSize="Medium"
-                HorizontalOptions="Center" />
-
-                <Frame
-                    BackgroundColor="{StaticResource Gray800}"
-                    HeightRequest="300"
-                    Margin="15, 0, 15, 0"
-                    CornerRadius="20"
-                    Grid.Row="2"
-                    Grid.ColumnSpan="1">
-                    <CollectionView
-                        ItemsUpdatingScrollMode="KeepLastItemInView"
-                        HorizontalOptions="FillAndExpand"
-                        VerticalOptions="FillAndExpand"
-                        ItemsSource="{Binding Devices}"
-                        ItemsLayout="VerticalList">
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="model:Device">
-                                <Grid
-                                    ColumnDefinitions="*, *"
-                                    Margin="0, 5, 0, 5">
-                                    <Label
-                                        Text="{Binding deviceModel}"
-                                        Grid.Column="0"
-                                        Padding="0, 5, 0, 5"
-                                        TextColor="White"
-                                        FontAttributes="Bold"
-                                        FontSize="20"
-                                        LineBreakMode="WordWrap"
-                                        HorizontalOptions="Start"
-                                        VerticalOptions="FillAndExpand"/>
-
-                                    <Button
-                                        IsEnabled="{Binding Source={x:Reference Name=multiplePage}, Path=BindingContext.IsRemoveEnabled}"
-                                        Text="Logout"
-                                        Command="{Binding Source={x:Reference Name=multiplePage}, Path=BindingContext.RemoveDeviceCommand}"
-                                        CommandParameter="{Binding .}"
-                                        Grid.Column="1"
-                                        HorizontalOptions="End"
-                                        VerticalOptions="FillAndExpand" />
-                                </Grid>
-
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                </Frame>
-
-
-                <Button
-                    Text="Done"
-                    Grid.Row="3"
+                    IsVisible="{Binding HasNoDevices}"
+                    Text="You don't have any other devices."
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center"
+                    VerticalOptions="End"
+                    FontAttributes="Bold"
+                    Grid.Row="0"
                     Grid.Column="0"
+                    LineBreakMode="WordWrap"
+                    FontSize="Large"
+                    HorizontalOptions="FillAndExpand" />
+                
+                <Grid
+                    IsVisible="{Binding HasMultipleDevices}"
+                    VerticalOptions="End"
+                    Grid.Row="0"
+                    RowDefinitions="Auto, Auto, Auto, Auto"
+                    ColumnDefinitions="*"
+                    RowSpacing="20">
+
+                    <Label
+                        Text="Multiple devices found"
+                        HorizontalTextAlignment="Center"
+                        VerticalTextAlignment="Center"
+                        FontAttributes="Bold"
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        LineBreakMode="WordWrap"
+                        FontSize="Large"
+                        HorizontalOptions="FillAndExpand" />
+
+                    <Label
+                        Text="{Binding DescriptionText}"
+                        HorizontalTextAlignment="Center"
+                        VerticalTextAlignment="Center"
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        LineBreakMode="WordWrap"
+                        FontSize="Medium"
+                        HorizontalOptions="Center" />
+
+                    <Frame
+                        BackgroundColor="{StaticResource Gray800}"
+                        HeightRequest="300"
+                        Margin="15, 0, 15, 0"
+                        CornerRadius="20"
+                        Grid.Row="2"
+                        Grid.ColumnSpan="1">
+                        <CollectionView
+                            ItemsUpdatingScrollMode="KeepLastItemInView"
+                            HorizontalOptions="FillAndExpand"
+                            VerticalOptions="FillAndExpand"
+                            ItemsSource="{Binding Devices}"
+                            ItemsLayout="VerticalList">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="model:Device">
+                                    <Grid
+                                        ColumnDefinitions="*, *"
+                                        Margin="0, 5, 0, 5">
+                                        <Label
+                                            Text="{Binding deviceModel}"
+                                            Grid.Column="0"
+                                            Padding="0, 5, 0, 5"
+                                            TextColor="White"
+                                            FontAttributes="Bold"
+                                            FontSize="20"
+                                            LineBreakMode="WordWrap"
+                                            HorizontalOptions="Start"
+                                            VerticalOptions="FillAndExpand"/>
+
+                                        <Button
+                                            IsEnabled="{Binding Source={x:Reference Name=multiplePage}, Path=BindingContext.IsRemoveEnabled}"
+                                            Text="Logout"
+                                            Command="{Binding Source={x:Reference Name=multiplePage}, Path=BindingContext.RemoveDeviceCommand}"
+                                            CommandParameter="{Binding .}"
+                                            Grid.Column="1"
+                                            HorizontalOptions="End"
+                                            VerticalOptions="FillAndExpand" />
+                                    </Grid>
+
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </Frame>
+                </Grid>
+                <Button
+                    VerticalOptions="Start"
+                    Text="Done"
+                    Grid.Row="1"
                     WidthRequest="100"
+                    HeightRequest="50"
                     Command="{Binding NextCommand}" />
             </Grid>
         </Frame>

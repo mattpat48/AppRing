@@ -2,8 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using System.Security.Cryptography;
 using Ring.Services;
-using CommunityToolkit.Maui.Core;
-using CommunityToolkit.Maui.Alerts;
 using Ring.Utils;
 
 namespace Ring.ViewModel;

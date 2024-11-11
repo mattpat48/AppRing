@@ -1,14 +1,12 @@
-﻿using CommunityToolkit.Maui.Alerts;
-using CommunityToolkit.Maui.Core;
-using CommunityToolkit.Mvvm.ComponentModel;
-using Mapsui.Projections;
-using Mapsui;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Mapsui.UI.Maui;
 using Newtonsoft.Json;
 using Ring.Utils;
 using System.Net.NetworkInformation;
 using Ring.Services;
 using CommunityToolkit.Mvvm.Input;
+using Ring.Shared;
+using MQTTnet.Client;
 
 namespace Ring.ViewModel;
 
@@ -16,6 +14,7 @@ public partial class MapViewModel : ObservableObject
 {
 
     public List<Pin> Pins;
+    public List<Gate> Gates;
     public string _filePath;
     private MainViewModel _mainViewModel;
 
@@ -31,9 +30,19 @@ public partial class MapViewModel : ObservableObject
     [ObservableProperty]
     public string selectedGateId;
 
+    private HttpClient _httpClient;
+    private MainAPI _mainAPI;
+
+    private IMqttClient _mqttClient;
+    private MqttClientOptions _options;
+
+    private const double EarthRadiusMeters = 6371000;
+    private const double RadiusToOpenGate = 10;
+
     public MapViewModel(MainViewModel mainViewModel)
     {
         Pins = new List<Pin>();
+        Gates = new List<Gate>();
         _filePath = Path.Combine(FileSystem.AppDataDirectory, "gates.json");
         _mainViewModel = mainViewModel;
 
@@ -53,16 +62,16 @@ public partial class MapViewModel : ObservableObject
         }
 
         string json = File.ReadAllText(_filePath);
-        List<Gate>? gates = JsonConvert.DeserializeObject<List<Gate>>(json);
+        Gates = JsonConvert.DeserializeObject<List<Gate>>(json);
 
-        if (gates == null)
+        if (Gates == null || Gates.Count() == 0)
         {
             NotificationTools.makeToast("No gates found");
             return null;
         }
 
         Pins = new List<Pin>();
-        foreach (Gate gate in gates)
+        foreach (Gate gate in Gates)
         {
             Pins.Add(new Pin
             {
@@ -76,10 +85,16 @@ public partial class MapViewModel : ObservableObject
         return Pins;
     }
 
-    public void AssignHttpClient(HttpClient httpClient)
+    internal void AssignHttpClient(HttpClient sharedClient, MainAPI sharedMainAPI)
     {
-        //_httpClient = httpClient;
-        return;
+        _httpClient = sharedClient;
+        _mainAPI = sharedMainAPI;
+    }
+
+    public void AssignMqttClient(IMqttClient sharedMqttClient, MqttClientOptions sharedOptions)
+    {
+        _mqttClient = sharedMqttClient;
+        _options = sharedOptions;
     }
 
     public void OnGateSelected(string name, string id)
@@ -105,39 +120,94 @@ public partial class MapViewModel : ObservableObject
     }
 
     [RelayCommand]
-    async Task OpenGate()
+    async Task OpenGate(Gate? autoGate = null)
     {
+        string toOpenGateId;
+        string toOpenGateName;
+        if (autoGate == null)
+        {
+            toOpenGateId = SelectedGateId;
+            toOpenGateName = SelectedGateName;
+        }
+        else
+        {
+            toOpenGateId = autoGate.gateId;
+            toOpenGateName = autoGate.name;
+        }
         IsOpenEnabled = false;
-        if (SelectedGateId == string.Empty)
+
+        if (autoGate != null && autoGate.autoOpen == "n")
         {
-            NotificationTools.makeToast("Please select a gate");
+            NotificationTools.makeToast("This gate is not set to auto-open");
             IsOpenEnabled = true;
             return;
         }
 
-        string response = await _mainViewModel.Open(SelectedGateId);
-        if (response == "success")
+        string response = await MqttManager.Open(_mqttClient, _options, toOpenGateId);
+        if (response != "success")
         {
-            NotificationTools.makeToast("Message sent");
+            NotificationTools.makeToast(response);
             IsOpenEnabled = true;
             return;
         }
-
-        NotificationTools.makeToast(response);
-        IsOpenEnabled = true;
-        return;
+        else
+        {
+            string logResponse = await MqttManager.LogPostOpen(_mainAPI, toOpenGateId, toOpenGateName);
+            if (logResponse != "success")
+            {
+                NotificationTools.makeToast(logResponse);
+                IsOpenEnabled = true;
+                return;
+            }
+            string json = File.ReadAllText(_filePath);
+            Gates = JsonConvert.DeserializeObject<List<Gate>>(json);
+            IsOpenEnabled = true;
+            return;
+        }
     }
 
-    public void OnAppearing()
+    public async Task OnLocationChanged(double lat, double lon)
     {
-        GateSelected = false;
-        GateNotSelected = true;
-        IsOpenEnabled = false;
-        SelectedGateName = string.Empty;
-        SelectedGateId = string.Empty;
-        if (!NetworkInterface.GetIsNetworkAvailable())
+        foreach (var gate in Gates)
         {
-            NotificationTools.makeToast("No internet connection");
+            double distance = CalculateDistance(lat, lon, gate.latitude, gate.longitude);
+            if (distance <= 15 && gate.autoOpen == "y")
+            {
+                await OpenGate(autoGate: gate);
+            }
+        }
+    }
+
+    private double CalculateDistance(double userLat, double userLon, double gateLat, double gateLon)
+    {
+        var sCoord = new Location(userLat, userLon);
+        var eCoord = new Location(gateLat, gateLon);
+
+        return sCoord.CalculateDistance(eCoord, DistanceUnits.Kilometers) * 1000;
+    }
+
+    public async Task OnAppearing()
+    {
+        try
+        {
+            GateSelected = false;
+            GateNotSelected = true;
+            IsOpenEnabled = false;
+            SelectedGateName = string.Empty;
+            SelectedGateId = string.Empty;
+            if (!NetworkInterface.GetIsNetworkAvailable())
+            {
+                NotificationTools.makeToast("No internet connection");
+            }
+            var location = await Geolocation.GetLocationAsync(new GeolocationRequest
+            {
+                DesiredAccuracy = GeolocationAccuracy.Medium,
+                Timeout = TimeSpan.FromSeconds(10)
+            });
+        }
+        catch (Exception ex)
+        {
+            NotificationTools.makeToast(ex.Message);
         }
     }
 }

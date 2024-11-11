@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Maui.Alerts;
-using CommunityToolkit.Maui.Core;
-using CommunityToolkit.Maui.Core.Extensions;
+﻿using CommunityToolkit.Maui.Core.Extensions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ring.Services;
@@ -14,17 +12,19 @@ namespace Ring.ViewModel;
 
 public partial class MultipleViewModel : ObservableObject
 {
-
     // messaggio di errore
     [ObservableProperty]
     string descriptionText;
-
     // numero di telefono
     [ObservableProperty]
     string phoneNumber;
-
     [ObservableProperty]
     bool isRemoveEnabled;
+
+    [ObservableProperty]
+    bool hasMultipleDevices;
+    [ObservableProperty]
+    bool hasNoDevices;
 
     [ObservableProperty]
     ObservableCollection<Utils.Device> devices;
@@ -38,6 +38,7 @@ public partial class MultipleViewModel : ObservableObject
        DescriptionText = string.Empty;
        phoneNumber = string.Empty;
        isRemoveEnabled = true;
+
        devices = new ObservableCollection<Utils.Device>();
     }
 
@@ -68,10 +69,14 @@ public partial class MultipleViewModel : ObservableObject
             if (devicesReturned == null || devicesReturned.Count == 0)
             {
                 Devices = new ObservableCollection<Utils.Device>();
+                HasMultipleDevices = false;
+                HasNoDevices = true;
             }
             else if (devicesReturned != null && devicesReturned.Count > 0)
             {
                 Devices = devicesReturned.ToObservableCollection();
+                HasNoDevices = false;
+                HasMultipleDevices = true;
             }
         }
         else

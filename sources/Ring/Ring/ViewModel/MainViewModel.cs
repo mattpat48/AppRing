@@ -1,16 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Maui.Alerts;
-using MQTTnet;
 using MQTTnet.Client;
 using Ring.Services;
 using Ring.Utils;
 using Newtonsoft.Json;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Maui.Core.Extensions;
-using System.Globalization;
-using CommunityToolkit.Maui.Core;
 using System.Net.NetworkInformation;
+using Ring.Shared;
 
 namespace Ring.ViewModel;
 
@@ -28,7 +25,7 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     bool isOpenEnabled;
     [ObservableProperty]
-    bool isAddEnabled;
+    bool isUsersEnabled;
 
     [ObservableProperty]
     string gateNameDisplay;
@@ -50,10 +47,9 @@ public partial class MainViewModel : ObservableObject
     bool notConnected;
 
     // server, client e opzioni per scambio mqtt
-    private MqttFactory mqttServer;
-    private IMqttClient mqttClient;
-    private MqttClientOptions? options;
-
+    private IMqttClient _mqttClient;
+    private MqttClientOptions _options;
+   
     private HttpClient _httpClient;
     private MainAPI _mainAPI;
     private RegisterAPI _registerAPI;
@@ -88,12 +84,11 @@ public partial class MainViewModel : ObservableObject
         NotConnected = false;
 
         Gates = new List<Gate>().ToObservableCollection();
-        selectedGate = new Gate(string.Empty, string.Empty, 0, 0);
+        selectedGate = new Gate(string.Empty, string.Empty, 0, 0, "n", DateTime.MinValue);
 
         Logs = new List<Log>().ToObservableCollection();
 
         _gatesPath = Path.Combine(FileSystem.AppDataDirectory, "gates.json");
-        
     }
 
     public void AssignHttpClient(HttpClient httpClient, MainAPI mainAPI)
@@ -104,39 +99,66 @@ public partial class MainViewModel : ObservableObject
         return;
     }
 
+    public void AssignMqttClient(IMqttClient sharedMqttClient, MqttClientOptions options)
+    {
+        _mqttClient = sharedMqttClient;
+        _options = options;
+        return;
+    }
+
 
     [RelayCommand]
     async Task Reload()
     {
-        IsLoading = true;
-        NotConnected = false;
-        IsContentVisible = false;
-        HasLogs = false;
-        await Check();
-        await GetGates();
-        var location = await Geolocation.GetLocationAsync(new GeolocationRequest
+        try
         {
-            DesiredAccuracy = GeolocationAccuracy.Medium,
-            Timeout = TimeSpan.FromSeconds(10)
-        });
-        if (!NetworkInterface.GetIsNetworkAvailable() || location == null)
-        {
-            NotConnected = true;
+            var location = await Geolocation.GetLocationAsync(new GeolocationRequest
+            {
+                DesiredAccuracy = GeolocationAccuracy.Medium,
+                Timeout = TimeSpan.FromSeconds(10)
+            });
+            if (!NetworkInterface.GetIsNetworkAvailable() || location == null)
+            {
+                IsContentVisible = false;
+                NotConnected = true;
+                return;
+            }
+            IsLoading = true;
+            NotConnected = false;
             IsContentVisible = false;
+            GateSelected = false;
+            HasLogs = false;
+            await Check();
+            await GetGates();
+            IsLoading = false;
+            IsContentVisible = true;
             return;
         }
-        IsLoading = false;
-        IsContentVisible = true;
-        return;
+        catch (Exception ex)
+        {
+            handleError(ex.Message);
+            return;
+        }
     }
 
     public void handleError(string message)
     {
-        NotificationTools.makeToast(message);
         IsOpenEnabled = false;
+        NotificationTools.makeToast(message);
         IsLoading = false;
-        NotConnected = true;
+        IsGateLoading = false;
+        IsOpenEnabled = true;
         return;
+    }
+
+    public void resetShown()
+    {
+        GateSelected = false;
+        selectedGate = new Gate(string.Empty, string.Empty, 0, 0, "n", DateTime.MinValue);
+        NoGates = false;
+        HasGates = false;
+        NoLogs = false;
+        HasLogs = false;
     }
 
     async Task GetGates()
@@ -149,6 +171,7 @@ public partial class MainViewModel : ObservableObject
             if (getGatesResponse != "success")
             {
                 handleError("Error while retrieving gates.");
+                resetShown();
                 return;
             }
             else if (gatesReturned == null || gatesReturned.Count() == 0)
@@ -186,6 +209,7 @@ public partial class MainViewModel : ObservableObject
         catch (Exception)
         {
             handleError("Internal exception error while getting gates.");
+            resetShown();
             return;
         }
     }
@@ -224,6 +248,7 @@ public partial class MainViewModel : ObservableObject
                 {
                     handleError("Error while updating logs.");
                     HasLogs = false;
+                    NoLogs = false;
                 }
                 else
                 {
@@ -243,6 +268,7 @@ public partial class MainViewModel : ObservableObject
             if (getLogsResponse != "success")
             {
                 handleError("Error while retrieving logs.");
+                NoLogs = false;
                 HasLogs = false;
                 return false;
             }
@@ -253,6 +279,7 @@ public partial class MainViewModel : ObservableObject
                     .OrderByDescending(x => x.date.Date)
                     .ThenByDescending(x => x.date.TimeOfDay)
                     .ToObservableCollection();
+                NoLogs = false;
                 HasLogs = true;
                 return true;
             }
@@ -264,6 +291,8 @@ public partial class MainViewModel : ObservableObject
         catch (Exception)
         {
             handleError("Error while retrieving logs.");
+            NoLogs = false;
+            HasLogs = false;
             return false;
         }
     }
@@ -285,15 +314,16 @@ public partial class MainViewModel : ObservableObject
         if (isAdminResponse != "success")
         {
             handleError("Error while checking admin permissions.");
+            resetShown();
             return;
         }
         if (IsAdmin == false || IsAdmin == null)
         {
-            IsAddEnabled = false;
+            IsUsersEnabled = false;
         }
         else
         {
-            IsAddEnabled = true;
+            IsUsersEnabled = true;
         }
 
         IsOpenEnabled = true;
@@ -318,9 +348,9 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task AddUser()
+    public async Task ManageUsers()
     {
-        IsAddEnabled = false;
+        IsUsersEnabled = false;
         IsOpenEnabled = false;
 
         var navigationParameters = new Dictionary<string, object>
@@ -329,92 +359,11 @@ public partial class MainViewModel : ObservableObject
             { "GateName", selectedGate.name},
             { "HttpClient", _httpClient}
         };
-        await Shell.Current.GoToAsync(nameof(AddPage), navigationParameters);
+        await Shell.Current.GoToAsync(nameof(UsersPage), navigationParameters);
 
-        IsAddEnabled = true;
+        IsUsersEnabled = true;
         IsOpenEnabled = true;
         return;
-    }
-
-
-    [RelayCommand]
-    public async Task<bool> Connect()
-    {
-        IsOpenEnabled = false;
-
-        if (mqttClient == null || !mqttClient.IsConnected)
-        {
-            try
-            {
-                if (mqttClient == null)
-                {
-                    mqttServer = new MqttFactory();
-                    mqttClient = mqttServer.CreateMqttClient();
-
-                    string? mqttServerAddress = Environment.GetEnvironmentVariable("MQTT_SERVER");
-                    string? mqttServerPort = Environment.GetEnvironmentVariable("MQTT_PORT");
-                    if (string.IsNullOrEmpty(mqttServerAddress) || string.IsNullOrEmpty(mqttServerPort))
-                    {
-                        handleError("MQTT server address or port not found.");
-                        IsContentVisible = false;
-                        NotConnected = true;
-                        return false;
-                    }
-
-                    string? number = await SecureStorage.GetAsync("PhoneNumber");
-                    string? deviceId = await SecureStorage.GetAsync("DeviceId");
-
-                    options = new MqttClientOptionsBuilder()
-                        // ATTENZIONE: inserire l'indirizzo IP del server MQTT
-                        .WithClientId(number + " / " + deviceId + " sender")
-                        .WithTcpServer(mqttServerAddress, int.Parse(mqttServerPort))
-                        .WithCredentials("user", "ringuser")
-                        .Build();
-                }
-
-                MqttClientConnectResult connectionResult = await mqttClient.ConnectAsync(options);
-                MqttClientConnectResultCode connectionResultCode = connectionResult.ResultCode;
-
-                if (connectionResultCode == MqttClientConnectResultCode.Success)
-                {
-                    MqttClientSubscribeResult subscribeResult =
-                        await mqttClient.SubscribeAsync(
-                            new MqttTopicFilterBuilder()
-                            .WithTopic("ringRequest/request")
-                            .Build()
-                        );
-                    MqttClientSubscribeResultCode subscribeResultCode = subscribeResult.Items.First().ResultCode;
-                    if (subscribeResultCode == MqttClientSubscribeResultCode.GrantedQoS0)
-                    {
-                        IsOpenEnabled = true;
-                        IsLoading = false;
-                    }
-                    else
-                    {
-                        handleError("Subscription failed");
-                        IsContentVisible = false;
-                        NotConnected = true;
-                        return false;
-                    }
-                }
-                else
-                {
-                    handleError("Connection failed");
-                    IsContentVisible = false;
-                    NotConnected = true;
-                    return false;
-                }
-
-            }
-            catch (Exception)
-            {
-                handleError("Internal error while connecting to MQTT server.");
-                IsContentVisible = false;
-                NotConnected = true;
-                return false;
-            }
-        }
-        return mqttClient.IsConnected;
     }
 
 
@@ -422,7 +371,7 @@ public partial class MainViewModel : ObservableObject
     {
         try
         {
-            await mqttClient.DisconnectAsync();
+            await _mqttClient.DisconnectAsync();
         }
         catch (Exception ex)
         {
@@ -433,13 +382,13 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     public async Task Check()
     {
-        
         try
         {
             string getServerKeyResponse = await _registerAPI.GetServerKey();
             if (getServerKeyResponse != "success")
             {
                 handleError(getServerKeyResponse);
+                resetShown();
                 IsLoading = false;
                 IsContentVisible = false;
                 NotConnected = true;
@@ -450,7 +399,10 @@ public partial class MainViewModel : ObservableObject
             if (string.IsNullOrEmpty(phoneNumber) || string.IsNullOrEmpty(isVerified) || string.Compare(isVerified, "n") == 0)
             {
                 IsLoading = false;
-                MqttListenerManager.StopService();
+                if (_mqttClient != null)
+                {
+                    MqttManager.StopService();
+                }
                 await ResetDefault();
                 var navigationParameters = new Dictionary<string, object>
                 {
@@ -466,28 +418,22 @@ public partial class MainViewModel : ObservableObject
                 {
                     if (!GateSelected) await GetGates();
                     IsContentVisible = true;
-                    if (mqttClient == null || !mqttClient.IsConnected)
+                    if (_mqttClient == null || !_mqttClient.IsConnected)
                     {
-                        bool connected = await Connect();
-                        if (!connected)
-                        {
-                            IsContentVisible = false;
-                            NotConnected = true;
-                            return;
-                        }
+                        MqttManager.StartService();
                     }
 
                     IsLoading = false;
                     NotConnected = false;
-                    MqttListenerManager.StartService();
                     return;
                 }
                 else
                 {
-                    //var registerVm = new RegisterViewModel(_registerAPI, _verificationAPI);
-                    //var registerPage = new RegisterPage(registerVm);
-                    //await Shell.Current.Navigation.PushModalAsync(registerPage);
-
+                    if (_mqttClient != null)
+                    {
+                        MqttManager.StopService();
+                    }
+                    await ResetDefault();
                     var navigationParameters = new Dictionary<string, object>
                     {
                         { "HttpClient", _httpClient}
@@ -499,6 +445,10 @@ public partial class MainViewModel : ObservableObject
         }
         catch (Exception ex)
         {
+            NoGates = false;
+            HasGates = false;
+            NoLogs = false;
+            HasLogs = false;
             handleError(ex.Message);
             return;
         }
@@ -507,142 +457,34 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     public async Task OpenClicked()
     {
-        await Open(selectedGate.gateId);
-        return;
-    }
-
-    public async Task<string> Open(string selectedId)
-    {
-        bool connected = await Connect();
-        if (!connected)
+        string openResult = await MqttManager.Open(_mqttClient, _options, selectedGate.gateId);
+        if (openResult != "success")
         {
-            return "Not connected to MQTT server";
+            handleError(openResult);
+            return;
         }
-        Location? location;
-
-        try
+        else
         {
-            
-            var locationGranted = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
-            if (locationGranted != PermissionStatus.Granted)
+            string logResponse = await MqttManager.LogPostOpen(_mainAPI, selectedGate.gateId, selectedGate.name);
+            if (logResponse != "success")
             {
-                await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+                handleError(logResponse);
+                return;
             }
-            if (await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>() == PermissionStatus.Granted)
-            {
-                location = await Geolocation.GetLocationAsync();
-            }
-            else
-            {
-                NotificationTools.makeToast("Location permission not granted");
-                return "Location permission not granted";
-            }
-            
-            //location = new Location(45.4642, 9.1900);
-
-            if (location != null)
-            {
-                
-                var package = new
-                {
-                    id = await SecureStorage.GetAsync("DeviceId"),
-                    phoneNumber = await SecureStorage.GetAsync("PhoneNumber"),
-                    datetime = DateTime.Now,
-                    lat = location.Latitude + "," + location.Longitude,
-                    language = CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
-                    gate = selectedId,
-                };
-
-                IsOpenEnabled = false;
-
-                // TEMP UNAVAIBLE
-                /*
-                string? privateDeviceKey = await SecureStorage.GetAsync("PrivateDeviceKey");
-                string? publicServerKey = await SecureStorage.GetAsync("ServerKey");
-                if (string.IsNullOrEmpty(privateDeviceKey) || string.IsNullOrEmpty(publicServerKey))
-                {
-                    handleError("Keys not found.");
-                    return;
-                }
-                string? phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
-                string? deviceId = await SecureStorage.GetAsync("DeviceId");
-                if (string.IsNullOrEmpty(phoneNumber) || string.IsNullOrEmpty(deviceId))
-                {
-                    handleError("Phone number or device id not found.");
-                    return;
-                }
-
-                
-                bool outcome;
-                StringContent encrypted;
-                (outcome, encrypted) = CryptographyTools.TotalEncrypt(privateDeviceKey, publicServerKey, JsonConvert.SerializeObject(package), phoneNumber, deviceId);
-
-                if (!outcome)
-                {
-                    handleError("Error while encrypting data.");
-                    return;
-                }
-                */
-
-                var message = new MqttApplicationMessageBuilder()
-                    .WithTopic("ringRequest/request")
-                    .WithPayload(JsonConvert.SerializeObject(package))
-                    .Build();
-                try
-                {
-                    MqttClientPublishResult publishResult = await mqttClient.PublishAsync(message);
-                    MqttClientPublishReasonCode publishResultCode = publishResult.ReasonCode;
-
-                    if (publishResultCode == MqttClientPublishReasonCode.Success)
-                    {
-                        string generateLogResponse = await _mainAPI.GenerateLog(selectedGate.gateId);
-                        if (generateLogResponse != "success")
-                        {
-                            handleError(generateLogResponse);
-                        }
-                        await GetLogs();
-                        IsOpenEnabled = true;
-                        NotificationTools.makeToast("Message sent");
-                        return "success";
-                    }
-                    else
-                    {
-                        NotificationTools.makeToast("Error while sending message");
-                        IsOpenEnabled = true;
-                        return "Error while sending message";
-                    }
-                }
-                catch (Exception)
-                {
-                    NotificationTools.makeToast("Internal error while sending message");
-                    IsOpenEnabled = true;
-                    return "Internal error while sending message";
-                }
-            }
-            else
-            {
-                NotificationTools.makeToast("Location not found");
-                IsOpenEnabled = true;
-                return "Location not found";
-            }
-        }
-        catch (Exception)
-        {
-            NotificationTools.makeToast("Error while sending Open message");
-            IsOpenEnabled = true;
-            return "Error while sending Open message";
+            await GetLogs();
+            return;
         }
     }
 
     public async Task ResetDefault()
     {
-        if (mqttClient != null && mqttClient.IsConnected) await Disconnect();
+        if (_mqttClient != null && _mqttClient.IsConnected) await Disconnect();
         using (var writer = new StreamWriter(_gatesPath, false))
         {
             await writer.WriteAsync("{}");
         }
         Gates = new List<Gate>().ToObservableCollection();
-        selectedGate = new Gate(string.Empty, string.Empty, 0, 0);
+        selectedGate = new Gate(string.Empty, string.Empty, 0, 0, "n", DateTime.MinValue);
         GateNameDisplay = string.Empty;
         GateSelected = false;
         NoGates = false;
@@ -653,27 +495,43 @@ public partial class MainViewModel : ObservableObject
 
     public async Task OnAppearing()
     {
-        IsContentVisible = false;
-        var location = await Geolocation.GetLocationAsync(new GeolocationRequest
+        try
         {
-            DesiredAccuracy = GeolocationAccuracy.Medium,
-            Timeout = TimeSpan.FromSeconds(10)
-        });
-        if (!NetworkInterface.GetIsNetworkAvailable() || location == null)
-        {
-            NotConnected = true;
             IsContentVisible = false;
-            return;        
+            PermissionStatus locationStatus = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
+            if (locationStatus != PermissionStatus.Granted)
+            {
+                await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+            }
+            var location = await Geolocation.GetLocationAsync(new GeolocationRequest
+            {
+                DesiredAccuracy = GeolocationAccuracy.Medium,
+                Timeout = TimeSpan.FromSeconds(10)
+            });
+            if (!NetworkInterface.GetIsNetworkAvailable() || location == null)
+            {
+                IsContentVisible = false;
+                NotConnected = true;
+                return;
+            }
+            PermissionStatus notificationStatus = await Permissions.CheckStatusAsync<Permissions.PostNotifications>();
+            if (notificationStatus != PermissionStatus.Granted)
+            {
+                await Permissions.RequestAsync<Permissions.PostNotifications>();
+            }
+            IsLoading = true;
+            await Check();
+            IsLoading = false;
+            IsContentVisible = true;
         }
-        PermissionStatus notificationStatus = await Permissions.CheckStatusAsync<Permissions.PostNotifications>();
-        if (notificationStatus != PermissionStatus.Granted)
+        catch (Exception ex)
         {
-            await Permissions.RequestAsync<Permissions.PostNotifications>();
+            handleError(ex.Message);
+            resetShown();
+            IsContentVisible = false;
+            NotConnected = true;
+            return;
         }
-        IsLoading = true;
-        await Check();
-        IsLoading = false;
-        IsContentVisible = true;
         return;
     }
 }

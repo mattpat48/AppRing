@@ -13,15 +13,18 @@ namespace Ring.Utils
         public double latitude { get; set; }
         public double longitude { get; set; }
         public string address { get; set; }
+        public string autoOpen { get; set; }
+        public DateTime lastOpened { get; set; }
 
-        public Gate(string gateId, string name, double latitude, double longitude)
+        public Gate(string gateId, string name, double latitude, double longitude, string autoOpen, DateTime lastOpened)
         {
             this.gateId = gateId;
             this.name = name;
             this.latitude = latitude;
             this.longitude = longitude;
             this.address = "";
-
+            this.autoOpen = autoOpen;
+            this.lastOpened = lastOpened;
         }
     }
 }

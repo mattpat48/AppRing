@@ -30,11 +30,17 @@
         <member name="P:Ring.ViewModel.AddViewModel.GateName">
             <inheritdoc cref="F:Ring.ViewModel.AddViewModel.gateName"/>
         </member>
+        <member name="P:Ring.ViewModel.AddViewModel.MakeAdmin">
+            <inheritdoc cref="F:Ring.ViewModel.AddViewModel.makeAdmin"/>
+        </member>
         <member name="P:Ring.ViewModel.AddViewModel.TitleText">
             <inheritdoc cref="F:Ring.ViewModel.AddViewModel.titleText"/>
         </member>
         <member name="P:Ring.ViewModel.AddViewModel.HttpClientProperty">
             <inheritdoc cref="F:Ring.ViewModel.AddViewModel.httpClientProperty"/>
+        </member>
+        <member name="P:Ring.ViewModel.AddViewModel.UsersAPI">
+            <inheritdoc cref="F:Ring.ViewModel.AddViewModel.usersAPI"/>
         </member>
         <member name="F:Ring.ViewModel.AddViewModel.addCommand">
             <summary>The backing field for <see cref="P:Ring.ViewModel.AddViewModel.AddCommand"/>.</summary>
@@ -55,7 +61,6 @@
             <inheritdoc/>
             <inheritdoc/>
             <inheritdoc/>
-            <inheritdoc/>
         </member>
         <member name="P:Ring.ViewModel.MainViewModel.IsLoading">
             <inheritdoc cref="F:Ring.ViewModel.MainViewModel.isLoading"/>
@@ -69,8 +74,8 @@
         <member name="P:Ring.ViewModel.MainViewModel.IsOpenEnabled">
             <inheritdoc cref="F:Ring.ViewModel.MainViewModel.isOpenEnabled"/>
         </member>
-        <member name="P:Ring.ViewModel.MainViewModel.IsAddEnabled">
-            <inheritdoc cref="F:Ring.ViewModel.MainViewModel.isAddEnabled"/>
+        <member name="P:Ring.ViewModel.MainViewModel.IsUsersEnabled">
+            <inheritdoc cref="F:Ring.ViewModel.MainViewModel.isUsersEnabled"/>
         </member>
         <member name="P:Ring.ViewModel.MainViewModel.GateNameDisplay">
             <inheritdoc cref="F:Ring.ViewModel.MainViewModel.gateNameDisplay"/>
@@ -114,17 +119,11 @@
         <member name="P:Ring.ViewModel.MainViewModel.SelectGateCommand">
             <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand`1"/> instance wrapping <see cref="M:Ring.ViewModel.MainViewModel.SelectGate(Ring.Utils.Gate)"/>.</summary>
         </member>
-        <member name="F:Ring.ViewModel.MainViewModel.addUserCommand">
-            <summary>The backing field for <see cref="P:Ring.ViewModel.MainViewModel.AddUserCommand"/>.</summary>
+        <member name="F:Ring.ViewModel.MainViewModel.manageUsersCommand">
+            <summary>The backing field for <see cref="P:Ring.ViewModel.MainViewModel.ManageUsersCommand"/>.</summary>
         </member>
-        <member name="P:Ring.ViewModel.MainViewModel.AddUserCommand">
-            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.MainViewModel.AddUser"/>.</summary>
-        </member>
-        <member name="F:Ring.ViewModel.MainViewModel.connectCommand">
-            <summary>The backing field for <see cref="P:Ring.ViewModel.MainViewModel.ConnectCommand"/>.</summary>
-        </member>
-        <member name="P:Ring.ViewModel.MainViewModel.ConnectCommand">
-            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.MainViewModel.Connect"/>.</summary>
+        <member name="P:Ring.ViewModel.MainViewModel.ManageUsersCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.MainViewModel.ManageUsers"/>.</summary>
         </member>
         <member name="F:Ring.ViewModel.MainViewModel.checkCommand">
             <summary>The backing field for <see cref="P:Ring.ViewModel.MainViewModel.CheckCommand"/>.</summary>
@@ -161,7 +160,7 @@
             <summary>The backing field for <see cref="P:Ring.ViewModel.MapViewModel.OpenGateCommand"/>.</summary>
         </member>
         <member name="P:Ring.ViewModel.MapViewModel.OpenGateCommand">
-            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.MapViewModel.OpenGate"/>.</summary>
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand`1"/> instance wrapping <see cref="M:Ring.ViewModel.MapViewModel.OpenGate(Ring.Utils.Gate)"/>.</summary>
         </member>
         <member name="T:Ring.ViewModel.MultipleViewModel">
             <inheritdoc/>
@@ -176,6 +175,12 @@
         </member>
         <member name="P:Ring.ViewModel.MultipleViewModel.IsRemoveEnabled">
             <inheritdoc cref="F:Ring.ViewModel.MultipleViewModel.isRemoveEnabled"/>
+        </member>
+        <member name="P:Ring.ViewModel.MultipleViewModel.HasMultipleDevices">
+            <inheritdoc cref="F:Ring.ViewModel.MultipleViewModel.hasMultipleDevices"/>
+        </member>
+        <member name="P:Ring.ViewModel.MultipleViewModel.HasNoDevices">
+            <inheritdoc cref="F:Ring.ViewModel.MultipleViewModel.hasNoDevices"/>
         </member>
         <member name="P:Ring.ViewModel.MultipleViewModel.Devices">
             <inheritdoc cref="F:Ring.ViewModel.MultipleViewModel.devices"/>
@@ -242,6 +247,41 @@
         <member name="P:Ring.ViewModel.SettingsViewModel.MultipleDevicesCommand">
             <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.SettingsViewModel.MultipleDevices"/>.</summary>
         </member>
+        <member name="T:Ring.ViewModel.UsersViewModel">
+            <inheritdoc/>
+            <inheritdoc/>
+            <inheritdoc/>
+        </member>
+        <member name="P:Ring.ViewModel.UsersViewModel.GateId">
+            <inheritdoc cref="F:Ring.ViewModel.UsersViewModel.gateId"/>
+        </member>
+        <member name="P:Ring.ViewModel.UsersViewModel.GateName">
+            <inheritdoc cref="F:Ring.ViewModel.UsersViewModel.gateName"/>
+        </member>
+        <member name="P:Ring.ViewModel.UsersViewModel.TitleText">
+            <inheritdoc cref="F:Ring.ViewModel.UsersViewModel.titleText"/>
+        </member>
+        <member name="P:Ring.ViewModel.UsersViewModel.IsRemoveEnabled">
+            <inheritdoc cref="F:Ring.ViewModel.UsersViewModel.isRemoveEnabled"/>
+        </member>
+        <member name="P:Ring.ViewModel.UsersViewModel.Users">
+            <inheritdoc cref="F:Ring.ViewModel.UsersViewModel.users"/>
+        </member>
+        <member name="P:Ring.ViewModel.UsersViewModel.HttpClientProperty">
+            <inheritdoc cref="F:Ring.ViewModel.UsersViewModel.httpClientProperty"/>
+        </member>
+        <member name="F:Ring.ViewModel.UsersViewModel.addUserCommand">
+            <summary>The backing field for <see cref="P:Ring.ViewModel.UsersViewModel.AddUserCommand"/>.</summary>
+        </member>
+        <member name="P:Ring.ViewModel.UsersViewModel.AddUserCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.UsersViewModel.AddUser"/>.</summary>
+        </member>
+        <member name="F:Ring.ViewModel.UsersViewModel.removeUserCommand">
+            <summary>The backing field for <see cref="P:Ring.ViewModel.UsersViewModel.RemoveUserCommand"/>.</summary>
+        </member>
+        <member name="P:Ring.ViewModel.UsersViewModel.RemoveUserCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand`1"/> instance wrapping <see cref="M:Ring.ViewModel.UsersViewModel.RemoveUser(System.String)"/>.</summary>
+        </member>
         <member name="T:Ring.ViewModel.VerificationViewModel">
             <inheritdoc/>
             <inheritdoc/>
@@ -302,11 +342,17 @@
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.GateName">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "GateName" generated properties.</summary>
         </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.MakeAdmin">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "MakeAdmin" generated properties.</summary>
+        </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.TitleText">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "TitleText" generated properties.</summary>
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.HttpClientProperty">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "HttpClientProperty" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.UsersAPI">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "UsersAPI" generated properties.</summary>
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsLoading">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsLoading" generated properties.</summary>
@@ -319,6 +365,9 @@
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsOpenEnabled">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsOpenEnabled" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsUsersEnabled">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsUsersEnabled" generated properties.</summary>
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.GateNameDisplay">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "GateNameDisplay" generated properties.</summary>
@@ -365,6 +414,12 @@
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.IsRemoveEnabled">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "IsRemoveEnabled" generated properties.</summary>
         </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.HasMultipleDevices">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "HasMultipleDevices" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.HasNoDevices">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "HasNoDevices" generated properties.</summary>
+        </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.Devices">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "Devices" generated properties.</summary>
         </member>
@@ -376,6 +431,9 @@
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.NextText">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "NextText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.Users">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "Users" generated properties.</summary>
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.VerificationCode">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "VerificationCode" generated properties.</summary>
@@ -410,11 +468,17 @@
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.GateName">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "GateName" generated properties.</summary>
         </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.MakeAdmin">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "MakeAdmin" generated properties.</summary>
+        </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.TitleText">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "TitleText" generated properties.</summary>
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.HttpClientProperty">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "HttpClientProperty" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.UsersAPI">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "UsersAPI" generated properties.</summary>
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsLoading">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsLoading" generated properties.</summary>
@@ -427,6 +491,9 @@
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsOpenEnabled">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsOpenEnabled" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsUsersEnabled">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsUsersEnabled" generated properties.</summary>
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.GateNameDisplay">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "GateNameDisplay" generated properties.</summary>
@@ -473,6 +540,12 @@
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.IsRemoveEnabled">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "IsRemoveEnabled" generated properties.</summary>
         </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.HasMultipleDevices">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "HasMultipleDevices" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.HasNoDevices">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "HasNoDevices" generated properties.</summary>
+        </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.Devices">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "Devices" generated properties.</summary>
         </member>
@@ -484,6 +557,9 @@
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.NextText">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "NextText" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.Users">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "Users" generated properties.</summary>
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.VerificationCode">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "VerificationCode" generated properties.</summary>

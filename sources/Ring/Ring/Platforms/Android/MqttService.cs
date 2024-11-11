@@ -5,6 +5,7 @@ using MQTTnet;
 using MQTTnet.Client;
 using System.Text;
 using Ring.Utils;
+using Ring.Shared;
 using Newtonsoft.Json;
 using System.Text.Json;
 using MQTTnet.Server;
@@ -12,9 +13,8 @@ using MQTTnet.Server;
 namespace Ring.Platforms.Android
 {
     [Service]
-    public class MqttListenerService : Service
+    public class MqttService : Service
     {
-        private MqttFactory? mqttServer;
         private IMqttClient? mqttClient;
         private MqttClientOptions? options;
         private bool _isConnected = false;
@@ -26,8 +26,8 @@ namespace Ring.Platforms.Android
         {
             base.OnCreate();
 
-            mqttServer = new MqttFactory();
-            mqttClient = mqttServer.CreateMqttClient();
+            var sharedMqttClient = MqttHelper.GetService<IMyMqttClient>();
+            mqttClient = sharedMqttClient.sharedMqttClient; 
 
             // Configurazione del client MQTT
             string? mqttServerAddress = System.Environment.GetEnvironmentVariable("MQTT_SERVER");
@@ -42,7 +42,7 @@ namespace Ring.Platforms.Android
 
             options = new MqttClientOptionsBuilder()
                 // ATTENZIONE: inserire l'indirizzo IP del server MQTT
-                .WithClientId(storedPhoneNumber + " / " + storedDeviceId + " listener")
+                .WithClientId(storedPhoneNumber + "_" + storedDeviceId + "_smartphone")
                 .WithTcpServer(mqttServerAddress, int.Parse(mqttServerPort))
                 .WithCredentials("user", "ringuser")
                 .Build();
@@ -110,7 +110,7 @@ namespace Ring.Platforms.Android
             if (action == "START_MQTT")
             {
                 StartForegroundService();
-                ConnectMqttBroker();
+                //ConnectMqttBroker();
             }
             else if (action == "STOP_MQTT")
             {
@@ -124,13 +124,19 @@ namespace Ring.Platforms.Android
 
         private void StartForegroundService()
         {
-            #pragma warning disable CA1416
-            var notification = new Notification.Builder(this, "mqtt_channel")
-                .SetContentText("You will receive notification when gates are opened")
-                .SetSmallIcon(Resource.Drawable.gate_icon)
-                .Build();
+            try
+            {
+#pragma warning disable CA1416
+                var notification = new Notification.Builder(this, "mqtt_channel")
+                    .SetContentText("You will receive notification when gates are opened")
+                    .SetSmallIcon(Resource.Drawable.gate_icon)
+                    .Build();
 
-            StartForeground(1, notification);
+                StartForeground(1, notification);
+            }
+            catch (Exception)
+            {
+            }
         }
 
         private async void ConnectMqttBroker()
@@ -140,11 +146,20 @@ namespace Ring.Platforms.Android
             try
             {
                 await mqttClient.ConnectAsync(options);
-                _isConnected = true;
-                await mqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("ringRequest/request").Build());
+                _isConnected = mqttClient.IsConnected;
+                if (_isConnected)
+                {
+                    NotificationTools.makeToast("Connected to MQTT broker");
+                    await mqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("ringRequest/request").Build());
+                }
+                else
+                {
+                    NotificationTools.makeToast("Couldn't connect to MQTT broker");
+                }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                NotificationTools.makeToast("Error while connecting to MQTT broker");
             }
         }
 

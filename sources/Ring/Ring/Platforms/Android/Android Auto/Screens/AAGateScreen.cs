@@ -2,6 +2,7 @@
 using AndroidX.Car.App.Model;
 using AndroidX.Core.Graphics.Drawable;
 using Ring.Platforms.Android.Android_Auto.OnClickListeners;
+using Ring.Shared;
 using Ring.Utils;
 using Action = AndroidX.Car.App.Model.Action;
 
@@ -10,9 +11,11 @@ namespace Ring.Platforms.Android.Android_Auto.Screens
     public class AAGateScreen : Screen
     {
         private Gate _gate;
-        public AAGateScreen(CarContext carContext, Gate gate) : base(carContext)
+        private IMyMqttClient? _mqttClient;
+        public AAGateScreen(CarContext carContext, Gate gate, IMyMqttClient? mqttClient) : base(carContext)
         {
             _gate = gate;
+            _mqttClient = mqttClient;
         }
 
         public override ITemplate OnGetTemplate()
@@ -23,7 +26,7 @@ namespace Ring.Platforms.Android.Android_Auto.Screens
             var openAction = new Action.Builder()
                 .SetTitle("Open")
                 .SetBackgroundColor(CarColor.Green)
-                .SetOnClickListener(new GateOnClickListener(CarContext, ScreenManager, _gate))
+                .SetOnClickListener(new GateOnClickListener(CarContext, ScreenManager, _gate, _mqttClient))
                 .Build();
 
             return new MessageTemplate.Builder(_gate.address)

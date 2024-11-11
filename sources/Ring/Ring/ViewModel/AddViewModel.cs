@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Maui.Alerts;
-using CommunityToolkit.Maui.Core;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ring.Services;
 using Ring.Utils;
@@ -10,6 +8,7 @@ namespace Ring.ViewModel;
 [QueryProperty(nameof(GateId), "GateId")]
 [QueryProperty(nameof(GateName), "GateName")]
 [QueryProperty(nameof(HttpClientProperty), "HttpClient")]
+[QueryProperty(nameof(UsersAPI), "UsersAPI")]
 
 public partial class AddViewModel : ObservableObject
 {
@@ -33,6 +32,8 @@ public partial class AddViewModel : ObservableObject
     string gateId;
     [ObservableProperty]
     string gateName;
+    [ObservableProperty]
+    bool makeAdmin;
 
     List<string>? users;
 
@@ -40,9 +41,10 @@ public partial class AddViewModel : ObservableObject
     [ObservableProperty]
     string titleText;
 
-    private AddAPI _addAPI;
     [ObservableProperty]
     HttpClient httpClientProperty;
+    [ObservableProperty]
+    private UsersAPI usersAPI;
 
     public AddViewModel()
     {
@@ -59,10 +61,6 @@ public partial class AddViewModel : ObservableObject
 
     public void OnAppearing()
     {
-        if (HttpClientProperty != null)
-        {
-            _addAPI = new AddAPI(HttpClientProperty);
-        }
         TitleText = "Add user to " + GateName;
 
         return;
@@ -88,7 +86,7 @@ public partial class AddViewModel : ObservableObject
                 try
                 {
                     string getUsersPerGateResponse;
-                    (getUsersPerGateResponse, users) = await _addAPI.GetUsersPerGate(GateId);
+                    (getUsersPerGateResponse, users) = await UsersAPI.GetUsersPerGate(GateId);
 
                     if (getUsersPerGateResponse != "success")
                     {
@@ -105,7 +103,7 @@ public partial class AddViewModel : ObservableObject
                     }
 
                     // richiedo la registrazione al server
-                    var addUserResponse = await _addAPI.AddUserRequest(GateId, addingNumber);
+                    var addUserResponse = await UsersAPI.AddUserRequest(GateId, addingNumber, MakeAdmin);
                     if (addUserResponse == "success")
                     {
                         NotificationTools.makeToast("User added successfully");

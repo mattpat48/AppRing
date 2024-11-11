@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using Ring.ViewModel;
 using CommunityToolkit.Maui;
-using Ring.Utils;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 using Plugin.LocalNotification;
+using Ring.Shared;
 
 namespace Ring
 {
@@ -25,8 +25,6 @@ namespace Ring
             builder.Services.AddSingleton<MainPage>();
             builder.Services.AddSingleton<MainViewModel>();
 
-            builder.Services.AddSingleton<IMyHttpClient, MyHttpClient>();
-
             builder.Services.AddTransient<RegisterPage>();
             builder.Services.AddTransient<RegisterViewModel>();
 
@@ -35,6 +33,9 @@ namespace Ring
 
             builder.Services.AddTransient<MultiplePage>();
             builder.Services.AddTransient<MultipleViewModel>();
+
+            builder.Services.AddTransient<UsersPage>();
+            builder.Services.AddTransient<UsersViewModel>();
 
             builder.Services.AddTransient<AddPage>();
             builder.Services.AddTransient<AddViewModel>();
@@ -45,12 +46,15 @@ namespace Ring
             builder.Services.AddTransient<MapPage>();
             builder.Services.AddTransient<MapViewModel>();
 
-            //Environment.SetEnvironmentVariable("MQTT_SERVER", "10.20.100.28");
-            Environment.SetEnvironmentVariable("MQTT_SERVER", "192.168.1.48");
+            builder.Services.AddSingleton<IMyHttpClient, MyHttpClient>();
+            builder.Services.AddSingleton<IMyMqttClient, MyMqttClient>();
+
             Environment.SetEnvironmentVariable("MQTT_PORT", "1883");
+            //Environment.SetEnvironmentVariable("MQTT_SERVER", "10.20.100.50");
+            Environment.SetEnvironmentVariable("MQTT_SERVER", "vainnhomeserver.ddns.net");
 
             //Environment.SetEnvironmentVariable("API_SERVER", "https://10.20.100.50:7046");
-            Environment.SetEnvironmentVariable("API_SERVER", "https://192.168.1.14:7046");
+            Environment.SetEnvironmentVariable("API_SERVER", "https://192.168.111.150:7046");
 
             return builder.Build();
         }

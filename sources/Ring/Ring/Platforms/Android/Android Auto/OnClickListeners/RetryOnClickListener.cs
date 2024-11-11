@@ -1,6 +1,7 @@
 ﻿using AndroidX.Car.App;
 using AndroidX.Car.App.Model;
 using Ring.Platforms.Android.Android_Auto.Screens;
+using Ring.Shared;
 
 namespace Ring.Platforms.Android.Android_Auto.OnClickListeners
 {
@@ -8,11 +9,13 @@ namespace Ring.Platforms.Android.Android_Auto.OnClickListeners
     {
         private readonly CarContext _carContext;
         private readonly ScreenManager _screenManager;
+        private readonly IMyMqttClient _mqttClient;
 
-        public RetryOnClickListener(CarContext carContext, ScreenManager screenManager)
+        public RetryOnClickListener(CarContext carContext, ScreenManager screenManager, IMyMqttClient myMqttClient)
         {
             _carContext = carContext;
             _screenManager = screenManager;
+            _mqttClient = myMqttClient;
         }
         public void OnClick()
         {
@@ -24,7 +27,7 @@ namespace Ring.Platforms.Android.Android_Auto.OnClickListeners
             else
             {
                 _screenManager.PopToRoot();
-                _screenManager.Push(new AAGatesGrid(_carContext));
+                _screenManager.Push(new AAGatesGrid(_carContext, _mqttClient));
                 return;
             }
         }

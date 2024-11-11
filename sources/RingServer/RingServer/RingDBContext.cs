@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Reflection.Metadata;
 
 public class RingDBContext : DbContext
 {
@@ -22,8 +23,8 @@ public class RingDBContext : DbContext
 
 public class User
 {
-    public string deviceId { get; set; }
     public string phoneNumber { get; set; }
+    public string deviceId { get; set; }
     public string publicKey { get; set; }
     public string verificationCode { get; set; }
     public DateTime verificationExpire { get; set; }
@@ -38,6 +39,10 @@ public class Gate
     public string name { get; set; }
     public double latitude { get; set; }
     public double longitude { get; set; }
+    public string? address { get; set; }
+    public string autoOpen { get; set; }
+    public DateTime lastOpened { get; set; }
+    public string publicKey { get; set; }
 }
 
 public class UserGate

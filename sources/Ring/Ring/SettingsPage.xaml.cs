@@ -1,4 +1,4 @@
-using Ring.Utils;
+using Ring.Shared;
 using Ring.ViewModel;
 
 namespace Ring;

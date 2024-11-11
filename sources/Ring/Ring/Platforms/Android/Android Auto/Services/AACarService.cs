@@ -1,7 +1,10 @@
 ﻿using Android.App;
 using AndroidX.Car.App;
 using AndroidX.Car.App.Validation;
+using MQTTnet;
+using MQTTnet.Client;
 using Ring.Platforms.Android.Android_Auto.Sessions;
+using Ring.Shared;
 
 namespace Ring.Platforms.Android.Android_Auto.Services
 {
@@ -16,7 +19,19 @@ namespace Ring.Platforms.Android.Android_Auto.Services
 
         public override Session OnCreateSession()
         {
-            return new AASession();
+            var sharedMqttClient = new MyMqttClient();
+            string? storedPhoneNumber = SecureStorage.GetAsync("PhoneNumber").Result;
+            string? storedDeviceId = SecureStorage.GetAsync("DeviceId").Result;
+            string? mqttServerAddress = System.Environment.GetEnvironmentVariable("MQTT_SERVER");
+            string? mqttServerPort = System.Environment.GetEnvironmentVariable("MQTT_PORT");
+
+            sharedMqttClient.sharedMqttClient = new MqttFactory().CreateMqttClient();
+            sharedMqttClient.sharedOptions = new MqttClientOptionsBuilder()
+                .WithTcpServer(mqttServerAddress, int.Parse(mqttServerPort))
+                .WithClientId(storedPhoneNumber + "_" + storedDeviceId + "_automotive")
+                .WithCredentials("user", "ringuser")
+                .Build();
+            return new AASession(sharedMqttClient);
         }
     }
 }

@@ -1,8 +1,10 @@
 ﻿using AndroidX.Car.App;
 using AndroidX.Car.App.Model;
 using AndroidX.Core.Graphics.Drawable;
+using MQTTnet.Client;
 using Newtonsoft.Json;
 using Ring.Platforms.Android.Android_Auto.OnClickListeners;
+using Ring.Shared;
 using Ring.Utils;
 using Xamarin.Google.Crypto.Tink.Signature;
 using Action = AndroidX.Car.App.Model.Action;
@@ -12,9 +14,11 @@ namespace Ring.Platforms.Android.Android_Auto.Screens
     public class AAGatesGrid : Screen
     {
         private List<Gate>? _gates;
-        public AAGatesGrid(CarContext carContext) : base(carContext)
+        private readonly IMyMqttClient? _mqttClient;
+        public AAGatesGrid(CarContext carContext, IMyMqttClient mqttClient) : base(carContext)
         {
             _gates = new List<Gate>();
+            _mqttClient = mqttClient;
         }
 
         public override ITemplate OnGetTemplate()
@@ -35,7 +39,7 @@ namespace Ring.Platforms.Android.Android_Auto.Screens
             var retryAction = new Action.Builder()
                 .SetTitle("Retry")
                 .SetBackgroundColor(CarColor.Blue)
-                .SetOnClickListener(new RetryOnClickListener(CarContext, ScreenManager))
+                .SetOnClickListener(new RetryOnClickListener(CarContext, ScreenManager, _mqttClient))
                 .Build();
 
             return new MessageTemplate.Builder("No phone number found on device: login from your smartphone and try again.")
@@ -67,7 +71,7 @@ namespace Ring.Platforms.Android.Android_Auto.Screens
                 var gridItem = new GridItem.Builder()
                     .SetTitle($"{gate.name}")
                     .SetImage(carIcon)
-                    .SetOnClickListener(new NavigationOnClickListener(CarContext, ScreenManager, Enums.AAScreen.GateScreen, gate))
+                    .SetOnClickListener(new NavigationOnClickListener(CarContext, ScreenManager, Enums.AAScreen.GateScreen, gate, _mqttClient))
                     .Build();
 
                 gridItemListBuilder.AddItem(gridItem);

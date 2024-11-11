@@ -3,6 +3,7 @@ using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using AndroidX.Work;
+using MQTTnet.Client;
 using Ring.Platforms.Android;
 
 namespace Ring
@@ -25,14 +26,14 @@ namespace Ring
 
         public void StartMqttService()
         {
-            var intent = new Intent(this, typeof(MqttListenerService));
+            var intent = new Intent(this, typeof(MqttService));
             intent.SetAction("START_MQTT");
             StartService(intent);
         }
 
         public void StopMqttService()
         {
-            var intent = new Intent(this, typeof(MqttListenerService));
+            var intent = new Intent(this, typeof(MqttService));
             intent.SetAction("STOP_MQTT");
             StartService(intent);
         }

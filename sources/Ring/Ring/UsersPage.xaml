@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://schemas.microsoft.com/dotnet/2021/maui/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             x:Class="Ring.UsersPage"
+             xmlns:model="clr-namespace:Ring.Utils"
+             xmlns:viewmodel="clr-namespace:Ring.ViewModel"
+             x:DataType="viewmodel:UsersViewModel"
+             x:Name="usersPage"
+             Shell.TabBarIsVisible="False">
+    
+    <AbsoluteLayout
+        HorizontalOptions="Center">
+
+        <BoxView
+            AbsoluteLayout.LayoutFlags="All"
+            AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+            Color="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Black}}" />
+
+        <Frame
+            AbsoluteLayout.LayoutFlags="All"
+            AbsoluteLayout.LayoutBounds="0.5, 0.5, 0.9, 0.6"
+            BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource OffBlack}}"
+            Padding="30"
+            CornerRadius="20">
+            <Grid
+                RowDefinitions="Auto, Auto, Auto"
+                ColumnDefinitions="*"
+                RowSpacing="30">
+
+                <Label
+                    Text="{Binding TitleText}"
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center"
+                    FontAttributes="Bold"
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    LineBreakMode="WordWrap"
+                    FontSize="Large"
+                    HorizontalOptions="FillAndExpand" />
+
+                <Frame
+                    BackgroundColor="{StaticResource Gray800}"
+                    HeightRequest="300"
+                    Margin="15, 0, 15, 0"
+                    CornerRadius="20"
+                    Grid.Row="1"
+                    Grid.ColumnSpan="1">
+                    <CollectionView
+                            ItemsUpdatingScrollMode="KeepLastItemInView"
+                            HorizontalOptions="FillAndExpand"
+                            VerticalOptions="FillAndExpand"
+                            ItemsSource="{Binding Users}"
+                            ItemsLayout="VerticalList">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid
+                                    ColumnDefinitions="*, *"
+                                    Margin="0, 5, 0, 5">
+                                    <Label
+                                        Text="{Binding .}"
+                                        Grid.Column="0"
+                                        Padding="0, 5, 0, 5"
+                                        TextColor="White"
+                                        FontAttributes="Bold"
+                                        FontSize="15"
+                                        LineBreakMode="WordWrap"
+                                        HorizontalOptions="Start"
+                                        VerticalOptions="Center"/>
+
+                                    <Button
+                                        IsEnabled="{Binding Source={x:Reference Name=usersPage}, Path=BindingContext.IsRemoveEnabled}"
+                                        Text="Remove"
+                                        Command="{Binding Source={x:Reference Name=usersPage}, Path=BindingContext.RemoveUserCommand}"
+                                        CommandParameter="{Binding .}"
+                                        Grid.Column="1"
+                                        HorizontalOptions="End"
+                                        VerticalOptions="FillAndExpand" />
+                                </Grid>
+
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Frame>
+
+                <Button
+                    Text="Add"
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    WidthRequest="100"
+                    Command="{Binding AddUserCommand}" />
+            </Grid>
+        </Frame>
+    </AbsoluteLayout>
+</ContentPage>
