@@ -32,6 +32,135 @@ namespace RingServer.Controllers
         }
 
         [HttpPost]
+        [Route("/api/v1/gate/addgatekey")]
+        public async Task<IActionResult> AddGateKey()
+        {
+            using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                var requestBody = await reader.ReadToEndAsync();
+                if (requestBody == null)
+                {
+                    return BadRequest("Outer invalid request payload");
+                }
+                try
+                {
+                    var toAdd = new
+                    {
+                        id = "",
+                        key = ""
+                    };
+
+                    toAdd = JsonConvert.DeserializeAnonymousType(requestBody, toAdd);
+
+                    if (toAdd == null || string.IsNullOrEmpty(toAdd.id) || string.IsNullOrEmpty(toAdd.key))
+                    {
+                        return BadRequest("Invalid request payload");
+                    }
+
+                    _dbContext.Gates.Where(g => g.gateId == toAdd.id).First().publicKey = toAdd.key;
+                    await _dbContext.SaveChangesAsync();
+
+                    return Ok("Key added to gate");
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+            }
+        }
+
+        [HttpPost]
+        [Route("/api/v1/gate/getgatekey")]
+        public async Task<IActionResult> GetGateKey()
+        {
+            using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                var requestBody = await reader.ReadToEndAsync();
+                if (requestBody == null)
+                {
+                    return BadRequest("Outer invalid request payload");
+                }
+
+                try
+                {
+                    string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
+                    string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
+
+                    bool outcome;
+                    string plaintext;
+                    CommonClasses.Identifier userInfo;
+                    (outcome, plaintext, userInfo) = CryptographyTools.TotalDecrypt(privateKeyPem, requestBody, _dbContext);
+                    if (!outcome || string.IsNullOrEmpty(plaintext) || userInfo == null)
+                    {
+                        return BadRequest("Invalid request payload");
+                    }
+
+                    string gateId = JsonConvert.DeserializeObject<string>(plaintext);
+
+                    if (string.IsNullOrEmpty(gateId))
+                    {
+                        return BadRequest("Empty Gate ID");
+                    }
+
+                    string gateKey = _dbContext.Gates.Where(g => g.gateId == gateId).First().publicKey;
+
+                    string userKey = _dbContext.Users.Where(u => u.phoneNumber == userInfo.Number && u.deviceId == userInfo.Id).First().publicKey;
+
+                    bool outcome2;
+                    object encryptedKey;
+                    (outcome2, encryptedKey) = CryptographyTools.TotalEncrypt(privateKeyPem, userKey, gateKey);
+                    if (!outcome2)
+                    {
+                        return BadRequest("Error encrypting key");
+                    }
+
+                    return Ok(encryptedKey);
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+            }
+        }
+
+        [HttpPost]
+        [Route("/api/v1/gate/getgatekeynoauth")]
+        public async Task<IActionResult> GetGateKeyNoAuth()
+        {
+            using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                var requestBody = await reader.ReadToEndAsync();
+                if (requestBody == null)
+                {
+                    return BadRequest("Outer invalid request payload");
+                }
+
+                try
+                {
+                    if (string.IsNullOrEmpty(requestBody))
+                    {
+                        return BadRequest("Invalid request payload");
+                    }
+
+                    string gateId = JsonConvert.DeserializeObject<string>(requestBody);
+
+                    if (string.IsNullOrEmpty(gateId))
+                    {
+                        return BadRequest("Empty Gate ID");
+                    }
+
+                    string gateKey = _dbContext.Gates.Where(g => g.gateId == gateId).First().publicKey;
+
+                    return Ok(gateKey);
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+            }
+        }
+
+        [HttpPost]
         [Route("/api/v1/gate/getallgates")]
         public async Task<IActionResult> GetAllGates()
         {
@@ -235,7 +364,7 @@ namespace RingServer.Controllers
                         return BadRequest("Empty Gate ID");
                     }
 
-                    _dbContext.Logs.Add(new Log{
+                    _dbContext.Logs.Add(new Log {
                         phoneNumber = userInfo.Number,
                         deviceId = userInfo.Id,
                         gateId = gateId,
@@ -510,6 +639,161 @@ namespace RingServer.Controllers
                 {
                     return BadRequest(ex.Message);
                 }
+            }
+        }
+
+
+        [HttpPost]
+        [Route("/api/v1/gate/getautoopen")]
+        public async Task<IActionResult> GetAutoOpen()
+        {
+            using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                var requestBody = await reader.ReadToEndAsync();
+                if (requestBody == null)
+                {
+                    return BadRequest("Outer invalid request payload");
+                }
+
+                try
+                {
+                    string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
+                    string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
+
+                    bool outcome;
+                    string plaintext;
+                    CommonClasses.Identifier userInfo;
+                    (outcome, plaintext, userInfo) = CryptographyTools.TotalDecrypt(privateKeyPem, requestBody, _dbContext);
+                    if (!outcome || string.IsNullOrEmpty(plaintext) || userInfo == null)
+                    {
+                        return BadRequest("Invalid request payload");
+                    }
+
+                    string gateId = JsonConvert.DeserializeObject<string>(plaintext);
+
+                    if (string.IsNullOrEmpty(gateId))
+                    {
+                        return BadRequest("Empty Gate ID");
+                    }
+
+                    string autoOpen = _dbContext.UsersGates.Where(ug => ug.phoneNumber == userInfo.Number && ug.gateId == gateId).First().autoOpen;
+
+                    return Ok(autoOpen);
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+            }
+        }
+
+        [HttpPost]
+        [Route("/api/v1/gate/toggleautoopen")]
+        public async Task<IActionResult> ToggleAutoOpen()
+        {
+            using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                var requestBody = await reader.ReadToEndAsync();
+                if (requestBody == null)
+                {
+                    return BadRequest("Outer invalid request payload");
+                }
+
+                try
+                {
+                    string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
+                    string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
+
+                    bool outcome;
+                    string plaintext;
+                    CommonClasses.Identifier userInfo;
+                    (outcome, plaintext, userInfo) = CryptographyTools.TotalDecrypt(privateKeyPem, requestBody, _dbContext);
+                    if (!outcome || string.IsNullOrEmpty(plaintext) || userInfo == null)
+                    {
+                        return BadRequest("Invalid request payload");
+                    }
+
+                    string gateId = JsonConvert.DeserializeObject<string>(plaintext);
+
+                    if (string.IsNullOrEmpty(gateId))
+                    {
+                        return BadRequest("Empty Gate ID");
+                    }
+
+                    string autoOpen = _dbContext.UsersGates.Where(ug => ug.phoneNumber == userInfo.Number && ug.gateId == gateId).First().autoOpen;
+                    if (string.IsNullOrEmpty(autoOpen))
+                    {
+                        return BadRequest("No auto open setting found");
+                    }
+
+                    if (autoOpen == "y")
+                    {
+                        _dbContext.UsersGates.Where(ug => ug.phoneNumber == userInfo.Number && ug.gateId == gateId).First().autoOpen = "n";
+                    }
+                    else
+                    {
+                        _dbContext.UsersGates.Where(ug => ug.phoneNumber == userInfo.Number && ug.gateId == gateId).First().autoOpen = "y";
+                    }
+
+                    await _dbContext.SaveChangesAsync();
+
+                    return Ok();
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+            }
+        }
+
+        [HttpPost]
+        [Route("/api/v1/gate/setgateaddress")]
+        public async Task<IActionResult> SetGateAddress()
+        {
+            using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                var requestBody = await reader.ReadToEndAsync();
+                if (requestBody == null)
+                {
+                    return BadRequest("Outer invalid request payload");
+                }
+
+                try
+                {
+                    string protectedPrivateKeyPem = _updater.GetSetting("privateKey");
+                    string privateKeyPem = _privateProtector.Unprotect(protectedPrivateKeyPem);
+
+                    bool outcome;
+                    string plaintext;
+                    CommonClasses.Identifier userInfo;
+                    (outcome, plaintext, userInfo) = CryptographyTools.TotalDecrypt(privateKeyPem, requestBody, _dbContext);
+                    if (!outcome || string.IsNullOrEmpty(plaintext) || userInfo == null)
+                    {
+                        return BadRequest("Invalid request payload");
+                    }
+
+                    var request = new
+                    {
+                        gateId = "",
+                        address = ""
+                    };
+                    request = JsonConvert.DeserializeAnonymousType(plaintext, request);
+
+                    if (string.IsNullOrEmpty(request.gateId) || string.IsNullOrEmpty(request.address))
+                    {
+                        
+                        return BadRequest("Invalid parameters");
+                    }
+
+                    await _dbContext.SaveChangesAsync();
+
+                    return Ok();
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+
             }
         }
     }

@@ -54,7 +54,8 @@ namespace Ring
             Environment.SetEnvironmentVariable("MQTT_SERVER", "vainnhomeserver.ddns.net");
 
             //Environment.SetEnvironmentVariable("API_SERVER", "https://10.20.100.50:7046");
-            Environment.SetEnvironmentVariable("API_SERVER", "https://192.168.111.150:7046");
+            Environment.SetEnvironmentVariable("API_SERVER", "https://192.168.1.47:7046");
+            //Environment.SetEnvironmentVariable("API_SERVER", "https://192.168.0.150:7046");
 
             return builder.Build();
         }

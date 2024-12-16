@@ -62,7 +62,7 @@ namespace RingServer.Controllers
             try
             {
                 // Prendo le chiavi dal formato PEM usando RSA
-                using RSA rsa = RSA.Create(2048);
+                using RSA rsa = RSA.Create(1024);
                 var publicKey = rsa.ExportRSAPublicKeyPem();
                 var privateKey = rsa.ExportRSAPrivateKeyPem();
 

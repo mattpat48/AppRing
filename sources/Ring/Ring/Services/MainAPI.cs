@@ -306,4 +306,131 @@ public class MainAPI
             }
         }
     }
+
+    public async Task<(string, string)> GetAutoOpen(string gateId)
+    {
+        var url = _server + "/api/v1/gate/getautoopen";
+
+        string? number = await SecureStorage.GetAsync("PhoneNumber");
+        string? id = await SecureStorage.GetAsync("DeviceId");
+        if (string.IsNullOrEmpty(number) || string.IsNullOrEmpty(id))
+        {
+            return ("Phone number or device id not found", null);
+        }
+
+        string? publicKey = await SecureStorage.GetAsync("ServerKey");
+        string? deviceKey = await SecureStorage.GetAsync("PrivateDeviceKey");
+        if (string.IsNullOrEmpty(publicKey) || string.IsNullOrEmpty(deviceKey))
+        {
+            return ("Server key or device key not found", null);
+        }
+
+        bool outcome;
+        StringContent stringContent;
+        (outcome, stringContent) = CryptographyTools.TotalEncrypt(deviceKey, publicKey, JsonConvert.SerializeObject(gateId), number, id);
+
+        if (!outcome)
+        {
+            return ("Error encrypting data", null);
+        }
+
+        HttpResponseMessage response = await _httpClient.PostAsync(url, stringContent);
+        var responseContent = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return (responseContent, null);
+        }
+        else
+        {
+            return ("success", responseContent);
+        }
+    }
+
+    public async Task<string> ToggleAutoOpen(string gateId)
+    {
+        var url = _server + "/api/v1/gate/toggleautoopen";
+
+        string? number = await SecureStorage.GetAsync("PhoneNumber");
+        string? id = await SecureStorage.GetAsync("DeviceId");
+        if (string.IsNullOrEmpty(number) || string.IsNullOrEmpty(id))
+        {
+            return "Phone number or device id not found";
+        }
+
+        string? publicKey = await SecureStorage.GetAsync("ServerKey");
+        string? deviceKey = await SecureStorage.GetAsync("PrivateDeviceKey");
+        if (string.IsNullOrEmpty(publicKey) || string.IsNullOrEmpty(deviceKey))
+        {
+            return "Server key or device key not found";
+        }
+
+        bool outcome;
+        StringContent stringContent;
+        (outcome, stringContent) = CryptographyTools.TotalEncrypt(deviceKey, publicKey, JsonConvert.SerializeObject(gateId), number, id);
+
+        if (!outcome)
+        {
+            return "Error encrypting data";
+        }
+
+        HttpResponseMessage response = await _httpClient.PostAsync(url, stringContent);
+        var responseContent = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return responseContent;
+        }
+        else
+        {
+            return "success";
+        }
+
+    }
+
+    public async Task<string> SetGateAddress(string gateId, string gateAddress)
+    {
+        var url = _server + "/api/v1/gate/setgateaddress";
+
+        string? number = await SecureStorage.GetAsync("PhoneNumber");
+        string? id = await SecureStorage.GetAsync("DeviceId");
+        if (string.IsNullOrEmpty(number) || string.IsNullOrEmpty(id))
+        {
+            return "Phone number or device id not found";
+        }
+
+        string? publicKey = await SecureStorage.GetAsync("ServerKey");
+        string? deviceKey = await SecureStorage.GetAsync("PrivateDeviceKey");
+        if (string.IsNullOrEmpty(publicKey) || string.IsNullOrEmpty(deviceKey))
+        {
+            return "Server key or device key not found";
+        }
+
+        var toSend = new
+        {
+            gateId = gateId,
+            address = gateAddress
+        };
+
+        bool outcome;
+        StringContent stringContent;
+        (outcome, stringContent) = CryptographyTools.TotalEncrypt(deviceKey, publicKey, JsonConvert.SerializeObject(toSend), number, id);
+
+        if (!outcome)
+        {
+            return "Error encrypting data";
+        }
+
+        HttpResponseMessage response = await _httpClient.PostAsync(url, stringContent);
+        var responseContent = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return responseContent;
+        }
+        else
+        {
+            return "success";
+        }
+    }
 }

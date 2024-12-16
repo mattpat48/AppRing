@@ -96,7 +96,7 @@ public partial class RegisterViewModel : ObservableObject
                     string? existingPrivateKey = await SecureStorage.GetAsync("PrivateDeviceKey");
                     if (string.IsNullOrEmpty(existingPublicKey) || string.IsNullOrEmpty(existingPrivateKey))
                     {
-                        using RSA rsa = RSA.Create(2048);
+                        using RSA rsa = RSA.Create(1024);
                         string publicKey = rsa.ExportRSAPublicKeyPem();
                         string privateKey = rsa.ExportRSAPrivateKeyPem();
 

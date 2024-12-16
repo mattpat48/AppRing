@@ -40,7 +40,6 @@ public class Gate
     public double latitude { get; set; }
     public double longitude { get; set; }
     public string? address { get; set; }
-    public string autoOpen { get; set; }
     public DateTime lastOpened { get; set; }
     public string publicKey { get; set; }
 }
@@ -51,6 +50,7 @@ public class UserGate
     public string phoneNumber { get; set; }
     public string gateId { get; set; }
     public string role { get; set; }
+    public string autoOpen { get; set; }
 }
 
 public class Log

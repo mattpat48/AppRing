@@ -72,4 +72,12 @@ public partial class MainPage : ContentPage
         }
     }
 
+    protected override async void OnDisappearing()
+    {
+        var viewModel = BindingContext as MainViewModel;
+        if (viewModel != null)
+        {
+            viewModel.resetShown();
+        }
+    }
 }

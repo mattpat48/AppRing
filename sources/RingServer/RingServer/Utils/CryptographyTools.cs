@@ -18,11 +18,12 @@ public class CryptographyTools
             byte[] encryptedAesIV;
 
             // Importo la chiave pubblica per cifrare i dati
-            using RSA rsa = RSA.Create(2048);
+            using RSA rsa = RSA.Create(1024);
             rsa.ImportFromPem(encryptKey.ToCharArray());
 
             // Genero una chiave simmetrica per AES
             using Aes aes = Aes.Create();
+            aes.KeySize = 128;
             aes.GenerateKey();
             aes.GenerateIV();
 
@@ -71,7 +72,7 @@ public class CryptographyTools
         {
             byte[] dataBytes = Encoding.UTF8.GetBytes(data);
 
-            using RSA rsa = RSA.Create(2048);
+            using RSA rsa = RSA.Create(1024);
             rsa.ImportFromPem(privateKeyPem.ToCharArray());
             byte[] signature = rsa.SignData(dataBytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
             return (true, Convert.ToBase64String(signature));
@@ -128,7 +129,7 @@ public class CryptographyTools
             }
 
             // Importo la chiave privata per decifrare i dati
-            using RSA rsa = RSA.Create(2048);
+            using RSA rsa = RSA.Create(1024);
             rsa.ImportFromPem(decryptKey.ToCharArray());
 
             // Decifro la chiave e l'IV
@@ -139,6 +140,7 @@ public class CryptographyTools
 
             // Decifro i dati usando AES
             using Aes aes = Aes.Create();
+            aes.KeySize = 128;
             aes.Key = key;
             aes.IV = iv;
 

@@ -48,10 +48,13 @@ public partial class MapPage : ContentPage
         c.TitleFontSize = 20;
         c.Title = pin.Label;
 
+        /*
         c.SubtitleFontSize = 15;
         c.SubtitleFontColor = Color.FromArgb("575757");
         c.SubtitleTextAlignment = TextAlignment.Center;
         c.Subtitle = pin.Address;
+        */
+        c.Subtitle = "";
 
         c.IsClosableByClick = true;
         c.ShadowWidth = 5;
@@ -116,7 +119,7 @@ public partial class MapPage : ContentPage
                     e.Pin.ShowCallout();
                     if (e.Pin.Label != null && e.Pin.Tag != null)
                     {
-                        viewModel.OnGateSelected(e.Pin.Label, e.Pin.Tag.ToString());
+                        viewModel.OnGateSelected(e.Pin.Label, e.Pin.Tag.ToString(), e.Pin.Address.ToString());
                     }
                 }
 
@@ -131,7 +134,7 @@ public partial class MapPage : ContentPage
                     e.SelectedPin.ShowCallout();
                     if (e.SelectedPin.Label != null && e.SelectedPin.Tag != null)
                     {
-                        viewModel.OnGateSelected(e.SelectedPin.Label, e.SelectedPin.Tag.ToString());
+                        viewModel.OnGateSelected(e.SelectedPin.Label, e.SelectedPin.Tag.ToString(), e.SelectedPin.Address.ToString());
                     }
                 }
                 foreach (var pin in mapView.Pins)
@@ -282,7 +285,7 @@ public partial class MapPage : ContentPage
         var viewModel = BindingContext as MapViewModel;
         if (viewModel != null)
         {
-            if (NetworkInterface.GetIsNetworkAvailable() || await IsGpsEnabledAsync() == false)
+            if (NetworkInterface.GetIsNetworkAvailable() && await IsGpsEnabledAsync() == true)
             {
                 await viewModel.OnAppearing();
                 await createMap();

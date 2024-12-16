@@ -11,7 +11,7 @@ class JsonQueue {
     int count = 0;
 
   public:
-    void push(const JsonDocument& doc);
+    void push(const JsonDocument doc);
     JsonDocument pop();
     JsonDocument first();
     JsonDocument last();

@@ -29,6 +29,10 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     string gateNameDisplay;
+    [ObservableProperty]
+    string gateAutoOpen;
+    [ObservableProperty]
+    bool autoOpen;
 
     [ObservableProperty]
     bool gateSelected;
@@ -45,6 +49,9 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     bool notConnected;
+
+    [ObservableProperty]
+    string toggleAutoOpenText;
 
     // server, client e opzioni per scambio mqtt
     private IMqttClient _mqttClient;
@@ -84,7 +91,7 @@ public partial class MainViewModel : ObservableObject
         NotConnected = false;
 
         Gates = new List<Gate>().ToObservableCollection();
-        selectedGate = new Gate(string.Empty, string.Empty, 0, 0, "n", DateTime.MinValue);
+        selectedGate = new Gate(string.Empty, string.Empty, 0, 0, DateTime.MinValue, "empty_key");
 
         Logs = new List<Log>().ToObservableCollection();
 
@@ -154,7 +161,7 @@ public partial class MainViewModel : ObservableObject
     public void resetShown()
     {
         GateSelected = false;
-        selectedGate = new Gate(string.Empty, string.Empty, 0, 0, "n", DateTime.MinValue);
+        selectedGate = new Gate(string.Empty, string.Empty, 0, 0, DateTime.MinValue, "empty_key");
         NoGates = false;
         HasGates = false;
         NoLogs = false;
@@ -182,7 +189,7 @@ public partial class MainViewModel : ObservableObject
 
             foreach (var gate in gatesReturned)
             {
-                gate.address = await AddressFromLocation(gate.latitude, gate.longitude);
+                gate.address = await AddressFromLocation(gate.gateId, gate.latitude, gate.longitude);
             }
             Gates = gatesReturned.ToObservableCollection();
 
@@ -214,7 +221,7 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    private async Task<string?> AddressFromLocation(double latitude, double longitude)
+    private async Task<string?> AddressFromLocation(string gateId, double latitude, double longitude)
     {
         IEnumerable<Placemark> placemarks = await Geocoding.Default.GetPlacemarksAsync(latitude, longitude);
 
@@ -222,8 +229,15 @@ public partial class MainViewModel : ObservableObject
 
         if (placemark != null)
         {
-            return
+            string address =
                 $"{placemark.Thoroughfare} {placemark.SubThoroughfare}, {placemark.Locality} {placemark.PostalCode}, {placemark.AdminArea}, {placemark.CountryName}";
+            string setGateAddressResponse = await _mainAPI.SetGateAddress(gateId, address);
+            if (setGateAddressResponse != "success")
+            {
+                handleError("Error while setting gate address on database.");
+                return address;
+            }
+            return address;
         }
         else
         {
@@ -324,6 +338,24 @@ public partial class MainViewModel : ObservableObject
         else
         {
             IsUsersEnabled = true;
+        }
+
+        (string isAutoOpen, GateAutoOpen) = await _mainAPI.GetAutoOpen(selected.gateId);
+        if (isAutoOpen != "success")
+        {
+            handleError("Error while checking auto-open status.");
+            resetShown();
+            return;
+        }
+        if (GateAutoOpen == "y")
+        {
+            AutoOpen = true;
+            ToggleAutoOpenText = "Disable auto-open";
+        }
+        else
+        {
+            AutoOpen = false;
+            ToggleAutoOpenText = "Enable auto-open";
         }
 
         IsOpenEnabled = true;
@@ -476,6 +508,28 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    [RelayCommand]
+    public async Task ToggleAutoOpen()
+    {
+        string response = await _mainAPI.ToggleAutoOpen(selectedGate.gateId);
+        if (response != "success")
+        {
+            handleError(response);
+            return;
+        }
+        if (AutoOpen)
+        {
+            AutoOpen = false;
+            ToggleAutoOpenText = "Enable auto-open";
+        }
+        else
+        {
+            AutoOpen = true;
+            ToggleAutoOpenText = "Disable auto-open";
+        }
+        return;
+    }
+
     public async Task ResetDefault()
     {
         if (_mqttClient != null && _mqttClient.IsConnected) await Disconnect();
@@ -484,7 +538,7 @@ public partial class MainViewModel : ObservableObject
             await writer.WriteAsync("{}");
         }
         Gates = new List<Gate>().ToObservableCollection();
-        selectedGate = new Gate(string.Empty, string.Empty, 0, 0, "n", DateTime.MinValue);
+        selectedGate = new Gate(string.Empty, string.Empty, 0, 0, DateTime.MinValue, "empty_key");
         GateNameDisplay = string.Empty;
         GateSelected = false;
         NoGates = false;
@@ -498,6 +552,7 @@ public partial class MainViewModel : ObservableObject
         try
         {
             IsContentVisible = false;
+            IsLoading = true;
             PermissionStatus locationStatus = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
             if (locationStatus != PermissionStatus.Granted)
             {
@@ -519,7 +574,6 @@ public partial class MainViewModel : ObservableObject
             {
                 await Permissions.RequestAsync<Permissions.PostNotifications>();
             }
-            IsLoading = true;
             await Check();
             IsLoading = false;
             IsContentVisible = true;

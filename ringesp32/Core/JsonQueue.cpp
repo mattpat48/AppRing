@@ -1,6 +1,6 @@
 #include "JsonQueue.h"
 
-void JsonQueue::push(const JsonDocument& doc) {
+void JsonQueue::push(const JsonDocument doc) {
   if (count >= 1) {
     for (int i = count-1; i >= 0; i--) {
       if (i != 0) 
@@ -18,6 +18,9 @@ void JsonQueue::push(const JsonDocument& doc) {
     count++;
 }
 
+
+
+
 JsonDocument JsonQueue::pop() {
   if (count <= 0) {
     static JsonDocument emptydoc;
@@ -34,6 +37,9 @@ JsonDocument JsonQueue::pop() {
   return toReturn;
 }
 
+
+
+
 JsonDocument JsonQueue::first() {
   if (count <= 0) {
     static JsonDocument emptyDoc;
@@ -41,6 +47,9 @@ JsonDocument JsonQueue::first() {
   }
   return queue[0];
 }
+
+
+
 
 JsonDocument JsonQueue::last() {
   if (count <= 0) {
@@ -50,13 +59,22 @@ JsonDocument JsonQueue::last() {
   return queue[count - 1];
 }
 
+
+
+
 bool JsonQueue::isEmpty() const {
   return count == 0;
 }
 
+
+
+
 bool JsonQueue::isFull() const {
   return count == MAX;
 }
+
+
+
 
 int JsonQueue::size() const {
   return count;

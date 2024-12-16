@@ -5,7 +5,7 @@ using RingServer.Utils;
 
 namespace RingServer
 {
-    public class Program
+    public class Programnan
     {
 
         public static void Main(string[] args)
@@ -39,7 +39,8 @@ namespace RingServer
 
             var app = builder.Build();
             //app.Urls.Add("https://10.20.100.50:7046");
-            app.Urls.Add("https://192.168.111.150" + ":7046");
+            app.Urls.Add("https://192.168.1.47:7046");
+            //app.Urls.Add("https://192.168.0.150:7046");
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -55,13 +56,13 @@ namespace RingServer
 
             if (!CheckForKeys())
             {
-                using RSA rsa = RSA.Create(2048);
+                using RSA rsa = RSA.Create(1024);
                 var publicKey = rsa.ExportRSAPublicKeyPem();
                 var privateKey = rsa.ExportRSAPrivateKeyPem();
                 SaveRSAKeys(app.Services, publicKey, privateKey);
             }
 
-            app.Run();
+             app.Run();
         }
 
         private static bool CheckForKeys()

@@ -125,40 +125,38 @@ namespace Ring.Shared
                     gate = selectedId,
                 };
 
-                // TEMP UNAVAIBLE
-                // prendere la chiave del gate, non del server, quindi criptare con la pubblica del gate
-                // e firmare con la privata del telefono
-                /*
+                string gatesPath = Path.Combine(FileSystem.AppDataDirectory, "gates.json");
+                string json = File.ReadAllText(gatesPath);
+                List<Gate> gates = JsonConvert.DeserializeObject<List<Gate>>(json);
+
                 string? privateDeviceKey = await SecureStorage.GetAsync("PrivateDeviceKey");
-                string? publicServerKey = await SecureStorage.GetAsync("ServerKey");
-                if (string.IsNullOrEmpty(privateDeviceKey) || string.IsNullOrEmpty(publicServerKey))
+                string? publicGateKey = gates.Find(gate => gate.gateId == selectedId).publicKey;
+                if (string.IsNullOrEmpty(privateDeviceKey) || string.IsNullOrEmpty(publicGateKey))
                 {
-                    handleError("Keys not found.");
-                    return;
+                    return "Keys not found.";
                 }
                 string? phoneNumber = await SecureStorage.GetAsync("PhoneNumber");
                 string? deviceId = await SecureStorage.GetAsync("DeviceId");
                 if (string.IsNullOrEmpty(phoneNumber) || string.IsNullOrEmpty(deviceId))
                 {
-                    handleError("Phone number or device id not found.");
-                    return;
+                    return "Phone number or device id not found.";
                 }
 
 
                 bool outcome;
                 StringContent encrypted;
-                (outcome, encrypted) = CryptographyTools.TotalEncrypt(privateDeviceKey, publicServerKey, JsonConvert.SerializeObject(package), phoneNumber, deviceId);
+                (outcome, encrypted) = CryptographyTools.TotalEncrypt(privateDeviceKey, publicGateKey, JsonConvert.SerializeObject(package), phoneNumber, deviceId);
 
                 if (!outcome)
                 {
-                    handleError("Error while encrypting data.");
-                    return;
+                    return "Error while encrypting data.";
                 }
-                */
+                
+                string toSend = await encrypted.ReadAsStringAsync();
 
                 var message = new MqttApplicationMessageBuilder()
                     .WithTopic("ringRequest/request")
-                    .WithPayload(JsonConvert.SerializeObject(package))
+                    .WithPayload(JsonConvert.SerializeObject(toSend))
                     .Build();
                 try
                 {

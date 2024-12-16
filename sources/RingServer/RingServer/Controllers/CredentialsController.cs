@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using RingServer.Utils;
 using Jose;
 using Microsoft.IdentityModel.Tokens;
+using System.Text.RegularExpressions;
 
 namespace RingServer.Controllers
 {
@@ -68,6 +69,58 @@ namespace RingServer.Controllers
             else
             {
                 return NotFound("Public key not found");
+            }
+        }
+
+        [HttpPost]
+        [Route("/api/v1/auth/postuserkey")]
+        public async Task<IActionResult> PostUserKey()
+        {
+            using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                var requestBody = await reader.ReadToEndAsync();
+                if (requestBody == null)
+                {
+                    return BadRequest("Outer invalid request payload");
+                }
+
+                try
+                {
+                    var postUserKeyRequest = new
+                    {
+                        PhoneNumber = "",
+                        Id = "",
+                        PKey = "",
+                    };
+                    requestBody = requestBody.Substring(1, requestBody.Length - 2);
+                    requestBody = Regex.Replace(requestBody, @"\\(?!n)", "");
+                    postUserKeyRequest = JsonConvert.DeserializeAnonymousType(requestBody, postUserKeyRequest);
+                    if (postUserKeyRequest != null &&
+                        postUserKeyRequest.PhoneNumber != null &&
+                        postUserKeyRequest.Id != null &&
+                        postUserKeyRequest.PKey != null)
+                    {
+                        _dbContext.Users.Where(u => u.phoneNumber == postUserKeyRequest.PhoneNumber && u.deviceId == postUserKeyRequest.Id).First().publicKey = postUserKeyRequest.PKey;
+
+                        try
+                        {
+                            await _dbContext.SaveChangesAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                            return StatusCode(500, "An error occurred while saving the user to the database: " + ex.Message);
+                        }
+                        return Ok();
+                    }
+                    else
+                    {
+                        return BadRequest("Invalid request payload");
+                    }
+                }
+                catch (Exception e)
+                {
+                    return BadRequest(e.Message);
+                }
             }
         }
 
@@ -529,5 +582,49 @@ namespace RingServer.Controllers
                 }
             }
         }
+
+        [HttpPost]
+        [Route("/api/v1/auth/getuserpublic")]
+        public async Task<IActionResult> GetUserPublic()
+        {
+            using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                string requestBody = await reader.ReadToEndAsync();
+                if (requestBody == null)
+                {
+                    return BadRequest("Invalid request payload");
+                }
+                else
+                {
+                    try
+                    {
+                        var userInfo = new
+                        {
+                            phoneNumber = "",
+                            id = ""
+                        };
+                        userInfo = JsonConvert.DeserializeAnonymousType(requestBody, userInfo);
+
+                        // Controllo se l'utente esiste
+                        if (_dbContext.Users.All(u => u.phoneNumber != userInfo.phoneNumber || u.deviceId != userInfo.id))
+                        {
+                            return BadRequest("User not found");
+                        }
+                        else
+                        {
+                            // Prendo la chiave pubblica dell'utente
+                            string publicKey = _dbContext.Users.Where(u => u.phoneNumber == userInfo.phoneNumber && u.deviceId == userInfo.id).Select(u => u.publicKey).First();
+                            return Ok(publicKey);
+                        }
+                    }
+
+                    catch (Exception e)
+                    {
+                        return BadRequest(e.Message);
+                    }
+                }
+            }
+        }
+
     }
 }

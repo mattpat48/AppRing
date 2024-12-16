@@ -29,6 +29,8 @@ public partial class MapViewModel : ObservableObject
     public string selectedGateName;
     [ObservableProperty]
     public string selectedGateId;
+    [ObservableProperty]
+    public string selectedGateAddress;
 
     private HttpClient _httpClient;
     private MainAPI _mainAPI;
@@ -97,13 +99,15 @@ public partial class MapViewModel : ObservableObject
         _options = sharedOptions;
     }
 
-    public void OnGateSelected(string name, string id)
+    public void OnGateSelected(string name, string id, string address)
     {
+        
         GateSelected = true;
         GateNotSelected = false;
 
         SelectedGateName = name;
         SelectedGateId = id;
+        SelectedGateAddress = address;
 
         return;
     }
@@ -136,7 +140,7 @@ public partial class MapViewModel : ObservableObject
         }
         IsOpenEnabled = false;
 
-        if (autoGate != null && autoGate.autoOpen == "n")
+        if (autoGate != null)
         {
             NotificationTools.makeToast("This gate is not set to auto-open");
             IsOpenEnabled = true;
@@ -171,9 +175,20 @@ public partial class MapViewModel : ObservableObject
         foreach (var gate in Gates)
         {
             double distance = CalculateDistance(lat, lon, gate.latitude, gate.longitude);
-            if (distance <= 15 && gate.autoOpen == "y")
+            if (distance <= 15)
             {
-                await OpenGate(autoGate: gate);
+                string autoOpenResponse;
+                string autoOpen;
+                (autoOpenResponse, autoOpen) = await _mainAPI.GetAutoOpen(gate.gateId);
+                if (autoOpenResponse != "success")
+                {
+                    NotificationTools.makeToast(autoOpenResponse);
+                    return;
+                }
+                if (autoOpen == "y")
+                {
+                    await OpenGate(autoGate: gate);
+                }
             }
         }
     }
@@ -185,6 +200,8 @@ public partial class MapViewModel : ObservableObject
 
         return sCoord.CalculateDistance(eCoord, DistanceUnits.Kilometers) * 1000;
     }
+
+    
 
     public async Task OnAppearing()
     {

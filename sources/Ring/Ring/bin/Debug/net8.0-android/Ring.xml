@@ -61,6 +61,7 @@
             <inheritdoc/>
             <inheritdoc/>
             <inheritdoc/>
+            <inheritdoc/>
         </member>
         <member name="P:Ring.ViewModel.MainViewModel.IsLoading">
             <inheritdoc cref="F:Ring.ViewModel.MainViewModel.isLoading"/>
@@ -79,6 +80,12 @@
         </member>
         <member name="P:Ring.ViewModel.MainViewModel.GateNameDisplay">
             <inheritdoc cref="F:Ring.ViewModel.MainViewModel.gateNameDisplay"/>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.GateAutoOpen">
+            <inheritdoc cref="F:Ring.ViewModel.MainViewModel.gateAutoOpen"/>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.AutoOpen">
+            <inheritdoc cref="F:Ring.ViewModel.MainViewModel.autoOpen"/>
         </member>
         <member name="P:Ring.ViewModel.MainViewModel.GateSelected">
             <inheritdoc cref="F:Ring.ViewModel.MainViewModel.gateSelected"/>
@@ -100,6 +107,9 @@
         </member>
         <member name="P:Ring.ViewModel.MainViewModel.NotConnected">
             <inheritdoc cref="F:Ring.ViewModel.MainViewModel.notConnected"/>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.ToggleAutoOpenText">
+            <inheritdoc cref="F:Ring.ViewModel.MainViewModel.toggleAutoOpenText"/>
         </member>
         <member name="P:Ring.ViewModel.MainViewModel.Gates">
             <inheritdoc cref="F:Ring.ViewModel.MainViewModel.gates"/>
@@ -137,6 +147,12 @@
         <member name="P:Ring.ViewModel.MainViewModel.OpenClickedCommand">
             <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.MainViewModel.OpenClicked"/>.</summary>
         </member>
+        <member name="F:Ring.ViewModel.MainViewModel.toggleAutoOpenCommand">
+            <summary>The backing field for <see cref="P:Ring.ViewModel.MainViewModel.ToggleAutoOpenCommand"/>.</summary>
+        </member>
+        <member name="P:Ring.ViewModel.MainViewModel.ToggleAutoOpenCommand">
+            <summary>Gets an <see cref="T:CommunityToolkit.Mvvm.Input.IAsyncRelayCommand"/> instance wrapping <see cref="M:Ring.ViewModel.MainViewModel.ToggleAutoOpen"/>.</summary>
+        </member>
         <member name="T:Ring.ViewModel.MapViewModel">
             <inheritdoc/>
             <inheritdoc/>
@@ -155,6 +171,9 @@
         </member>
         <member name="P:Ring.ViewModel.MapViewModel.SelectedGateId">
             <inheritdoc cref="F:Ring.ViewModel.MapViewModel.selectedGateId"/>
+        </member>
+        <member name="P:Ring.ViewModel.MapViewModel.SelectedGateAddress">
+            <inheritdoc cref="F:Ring.ViewModel.MapViewModel.selectedGateAddress"/>
         </member>
         <member name="F:Ring.ViewModel.MapViewModel.openGateCommand">
             <summary>The backing field for <see cref="P:Ring.ViewModel.MapViewModel.OpenGateCommand"/>.</summary>
@@ -372,6 +391,12 @@
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.GateNameDisplay">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "GateNameDisplay" generated properties.</summary>
         </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.GateAutoOpen">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "GateAutoOpen" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.AutoOpen">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "AutoOpen" generated properties.</summary>
+        </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.GateSelected">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "GateSelected" generated properties.</summary>
         </member>
@@ -393,6 +418,9 @@
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.NotConnected">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "NotConnected" generated properties.</summary>
         </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.ToggleAutoOpenText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "ToggleAutoOpenText" generated properties.</summary>
+        </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.Gates">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "Gates" generated properties.</summary>
         </member>
@@ -407,6 +435,9 @@
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.SelectedGateId">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "SelectedGateId" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.SelectedGateAddress">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "SelectedGateAddress" generated properties.</summary>
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangingArgs.DescriptionText">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangingEventArgs"/> instance for all "DescriptionText" generated properties.</summary>
@@ -498,6 +529,12 @@
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.GateNameDisplay">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "GateNameDisplay" generated properties.</summary>
         </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.GateAutoOpen">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "GateAutoOpen" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.AutoOpen">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "AutoOpen" generated properties.</summary>
+        </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.GateSelected">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "GateSelected" generated properties.</summary>
         </member>
@@ -519,6 +556,9 @@
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.NotConnected">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "NotConnected" generated properties.</summary>
         </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.ToggleAutoOpenText">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "ToggleAutoOpenText" generated properties.</summary>
+        </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.Gates">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "Gates" generated properties.</summary>
         </member>
@@ -533,6 +573,9 @@
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.SelectedGateId">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "SelectedGateId" generated properties.</summary>
+        </member>
+        <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.SelectedGateAddress">
+            <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "SelectedGateAddress" generated properties.</summary>
         </member>
         <member name="F:CommunityToolkit.Mvvm.ComponentModel.__Internals.__KnownINotifyPropertyChangedArgs.DescriptionText">
             <summary>The cached <see cref="T:System.ComponentModel.PropertyChangedEventArgs"/> instance for all "DescriptionText" generated properties.</summary>

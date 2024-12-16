@@ -36,7 +36,7 @@
             SemanticProperties.Hint="Activity indicator"/>
 
         <Grid
-            RowDefinitions="*, *, *, *, *, *"
+            RowDefinitions="*, *, *, *, *, *, *, *, *"
             x:Name="mapContainer">
             <Frame
                 IsVisible="True"
@@ -46,23 +46,30 @@
                 VerticalOptions="FillAndExpand"
                 HorizontalOptions="FillAndExpand"
                 HasShadow="True"
-                Grid.RowSpan="5">
+                Grid.RowSpan="7">
              
                 <mapsui:MapView x:Name="mapView"/>
             </Frame>
 
             <Grid
-                Grid.Row="5"
+                Grid.Row="7"
+                Grid.RowSpan="2"
+                RowDefinitions="*, *"
                 ColumnDefinitions="*, *"
                 ColumnSpacing="20">
                 <Label
+                    Grid.Row="0"
                     Grid.Column="0"
                     IsVisible="{Binding GateSelected}"
                     Text="{Binding SelectedGateName}"
+                    FontAttributes="Bold"
+                    FontSize="Large"
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center"
                     VerticalOptions="Center"
-                    HorizontalOptions="Center"
-                    FontSize="20"/>
+                    HorizontalOptions="Center"/>
                 <Button
+                    Grid.Row="0"
                     Grid.Column="1"
                     IsVisible="{Binding GateSelected}"
                     Text="Open"
@@ -70,6 +77,17 @@
                     VerticalOptions="Center"
                     HorizontalOptions="Center"/>
                 <Label
+                    Grid.Row="1"
+                    Grid.ColumnSpan="2"
+                    IsVisible="{Binding GateSelected}"
+                    Text="{Binding SelectedGateAddress}"
+                    VerticalTextAlignment="Center"
+                    HorizontalTextAlignment="Center"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Center"
+                    FontSize="17"/>
+                <Label
+                    Grid.RowSpan="2"
                     Grid.ColumnSpan="2"
                     IsVisible="{Binding GateNotSelected}"
                     Text="No gate selected"
